@@ -1,0 +1,1780 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" media="screen" href="/~d/styles/rss2full.xsl"?><?xml-stylesheet type="text/css" media="screen" href="http://feeds.feedburner.com/~d/styles/itemcontent.css"?>
+<rss xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+     xmlns:slash="http://purl.org/rss/1.0/modules/slash/" xmlns:feedburner="http://rssnamespace.org/feedburner/ext/1.0"
+     version="2.0">
+
+    <channel>
+        <title>Baeldung</title>
+
+        <link>https://www.baeldung.com</link>
+        <description>Java, Spring and Web Development tutorials</description>
+        <lastBuildDate>Tue, 13 Nov 2018 01:32:34 +0000</lastBuildDate>
+        <language>en-US</language>
+        <sy:updatePeriod>hourly</sy:updatePeriod>
+        <sy:updateFrequency>1</sy:updateFrequency>
+
+        <atom10:link xmlns:atom10="http://www.w3.org/2005/Atom" rel="self" type="application/rss+xml"
+                     href="http://feeds.feedburner.com/Baeldung"/>
+        <feedburner:info uri="baeldung"/>
+        <atom10:link xmlns:atom10="http://www.w3.org/2005/Atom" rel="hub" href="http://pubsubhubbub.appspot.com/"/>
+        <item>
+            <title>Persisting DDD Aggregates</title>
+            <link>http://feedproxy.google.com/~r/Baeldung/~3/oSGXQ0AeHl4/spring-persisting-ddd-aggregates</link>
+            <comments>https://www.baeldung.com/spring-persisting-ddd-aggregates#respond</comments>
+            <pubDate>Mon, 12 Nov 2018 19:22:14 +0000</pubDate>
+            <dc:creator><![CDATA[Mike Wojtyna]]></dc:creator>
+            <category><![CDATA[Persistence]]></category>
+            <category><![CDATA[Spring Data]]></category>
+
+            <guid isPermaLink="false">https://www.baeldung.com/?p=45262</guid>
+            <description><![CDATA[Learn how to persist DDD aggregates in Spring.]]></description>
+            <content:encoded><![CDATA[
+<h2 id="overview"><strong>1. Overview</strong></h2>
+<p>In this tutorial, we&#8217;ll explore the possibilities of persisting <a href="https://martinfowler.com/bliki/DDD_Aggregate.html" target="_blank" rel="noopener">DDD Aggregates</a> using different technologies.</p>
+<h2 id="introduction-to-aggregates"><strong>2. Introduction to Aggregates<br />
+</strong></h2>
+<p><strong>An aggregate is a group of business objects which always need to be consistent</strong>. Therefore, we save and update aggregates as a whole inside a transaction.</p>
+<p>Aggregate is an important tactical pattern in DDD, which helps to maintain the consistency of our business objects. However, the idea of aggregate is also useful outside of the DDD context.</p>
+<p>There are numerous business cases where this pattern can come in handy. <strong>As a rule of thumb, we should consider using aggregates when there are multiple objects changed as part of the same transaction</strong>.</p>
+<p>Let&#8217;s take a look at how we might apply this when modeling an order purchase.</p>
+<h3>2.1. Purchase Order Example</h3>
+<p>So, let&#8217;s assume we want to model a purchase order:</p>
+<pre class="brush: java; gutter: true">class Order {
+    private Collection&lt;OrderLine&gt; orderLines;
+    private Money totalCost;
+    // ...
+}</pre>
+<pre class="brush: java; gutter: true">class OrderLine {
+    private Product product;
+    private int quantity;
+    // ...
+}</pre>
+<pre class="brush: java; gutter: true">class Product {
+    private Money price;
+    // ...
+}</pre>
+<p><strong>These classes form a simple aggregate</strong>. Both <em>orderLines</em> and <em>totalCost</em> fields of the <em>Order</em> must be always consistent, that is <em>totalCost</em> should always have the value equal to the sum of all <em>orderLines</em>.</p>
+<p><strong>Now, we all might be tempted to turn all of these into fully-fledged POJOs.</strong> But, note that introducing simple getters and setters in <em>Order</em> could easily break the encapsulation of our model and violate business constraints.</p>
+<p>Let&#8217;s see what could go wrong.</p>
+<h3>2.2. Naive Aggregate Design</h3>
+<p>Let&#8217;s imagine what could happen if we decided to naively add getters and setters to all properties on the <em>Order</em> class, including <em>setOrderTotal</em>.</p>
+<p>There’s nothing that prohibits us from executing the following code:</p>
+<pre class="brush: java; gutter: true">Order order = new Order();
+order.setOrderLines(Arrays.asList(orderLine0, orderLine1));
+order.setTotalCost(Money.zero(CurrencyUnit.USD)); // this doesn&#039;t look good...</pre>
+<p>In this code, we manually set the <em>totalCost</em> property to zero, violating an important business rule. Definitely, the total cost should not be zero dollars!</p>
+<p><strong>We need a way to protect our business rules. Let&#8217;s look at how Aggregate Roots can help.</strong></p>
+<h3 id="section-3.3">2.3. Aggregate Root</h3>
+<p>An <em>aggregate root</em> is a class which works as an entry point to our aggregate. <strong>All business operations should go through the root.</strong> This way, the aggregate root can take care of keeping the aggregate in a consistent state.</p>
+<p><strong>The root is what takes cares of all our business invariants</strong>.</p>
+<p>And in our example, the <em>Order</em> class is the right candidate for the aggregate root. We just need to make some modifications to ensure the aggregate is always consistent:</p>
+<pre class="brush: java; gutter: true">class Order {
+    private final List&lt;OrderLine&gt; orderLines;
+    private Money totalCost;
+
+    Order(List&lt;OrderLine&gt; orderLines) {
+        checkNotNull(orderLines);
+        if (orderLines.isEmpty()) {
+            throw new IllegalArgumentException(&quot;Order must have at least one order line item&quot;);
+        }
+        this.orderLines = new ArrayList&lt;&gt;(orderLines);
+        totalCost = calculateTotalCost();
+    }
+
+    void addLineItem(OrderLine orderLine) {
+        checkNotNull(orderLine);
+        orderLines.add(orderLine);
+        totalCost = totalCost.plus(orderLine.cost());
+    }
+
+    void removeLineItem(int line) {
+        OrderLine removedLine = orderLines.remove(line);
+        totalCost = totalCost.minus(removedLine.cost());
+    }
+
+    Money totalCost() {
+        return totalCost;
+    }
+
+    // ...
+}</pre>
+<p>Using an aggregate root now allows us to more easily turn <em>Product</em> and <em>OrderLine</em> into immutable objects, where all the properties are final.</p>
+<p>As we can see, this is a pretty simple aggregate.</p>
+<p>And, we could&#8217;ve simply calculated the total cost each time without using a field.</p>
+<p>However, right now we are just talking about aggregate persistence, not aggregate design. Stay tuned, as this specific domain will come in handy in a moment.</p>
+<p>How well does this play with persistence technologies? Let&#8217;s take a look. <strong>Ultimately, this will help us to choose the right persistence tool for our next project</strong>.</p>
+<h2 id="jpa-and-hibernate">3. JPA and Hibernate</h2>
+<p>In this section, let&#8217;s try and persist our <em>Order</em> aggregate using JPA and Hibernate. We&#8217;ll use Spring Boot and <a href="https://search.maven.org/search?q=g:org.springframework.boot%20AND%20a:spring-boot-starter-data-jpa" target="_blank" rel="noopener">JPA</a> starter:</p>
+<pre class="brush: xml; gutter: true">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+<p>For most of us, this seems to be the most natural choice. After all, we&#8217;ve spent years working with relational systems, and we all know popular ORM frameworks.</p>
+<p><strong>Probably the biggest problem when working with ORM frameworks is the simplification of our model design</strong>. It&#8217;s also sometimes referred to as <a href="https://en.wikipedia.org/wiki/Object-relational_impedance_mismatch" target="_blank" rel="noopener">Object-relational impedance mismatch</a>. Let&#8217;s think about what would happen if we wanted to persist our <em>Order</em> aggregate:</p>
+<pre class="brush: java; gutter: true">@DisplayName(&quot;given order with two line items, when persist, then order is saved&quot;)
+@Test
+public void test() throws Exception {
+    // given
+    JpaOrder order = prepareTestOrderWithTwoLineItems();
+
+    // when
+    JpaOrder savedOrder = repository.save(order);
+
+    // then
+    JpaOrder foundOrder = repository.findById(savedOrder.getId())
+      .get();
+    assertThat(foundOrder.getOrderLines()).hasSize(2);
+}</pre>
+<p>At this point, this test would throw an exception: <em>java.lang.IllegalArgumentException: Unknown entity: com.baeldung.ddd.order.Order</em>. <strong>Obviously, we&#8217;re missing some of the JPA requirements:</strong></p>
+<ol>
+<li>Add mapping annotations</li>
+<li><em>OrderLine</em> and <em>Product</em> classes must be entities or <em>@Embeddable</em> classes, not simple value objects</li>
+<li>Add an empty constructor for each entity or <em>@Embeddable</em> class</li>
+<li>Replace <em>Money</em> properties with simple types</li>
+</ol>
+<p><strong>Hmm, we need to modify the design of <em>Order</em> aggregate to be able to use JPA. While adding annotations is not a big deal, the other requirements can introduce a lot of problems.</strong></p>
+<h3>3.1. Changes to the Value Objects</h3>
+<p>The first issue of trying to fit an aggregate into JPA is that we need to break the design of our value objects: Their properties can no longer be final, and we need to break encapsulation.</p>
+<p><strong>We need to add artificial ids to the <em>OrderLine</em> and <em>Product,</em> even if these classes were never designed to have identifiers</strong>. We wanted them to be simple value objects.</p>
+<p>It&#8217;s possible to use <em>@Embedded</em> and <em>@ElementCollection</em> annotations instead, but this approach can complicate things a lot when using a complex object graph (for example <em>@Embeddable</em> object having another <em>@Embedded</em> property etc.).</p>
+<p>Using <em>@Embedded</em> annotation simply adds flat properties to the parent table. Except that, basic properties (e.g. of <em>String</em> type) still require a setter method, which violates the desired value object design.</p>
+<p><strong>Empty constructor requirement forces the value object properties to not be final anymore, breaking an important aspect of our original design</strong>. Truth be told, Hibernate can use the private no-args constructor, which mitigates the problem a bit, but it&#8217;s still far from being perfect.</p>
+<p>Even when using a private default constructor, we either cannot mark our properties as final or we need to initialize them with default (often null) values inside the default constructor.</p>
+<p>However, if we want to be fully JPA-compliant, we must use at least protected visibility for the default constructor, which means other classes in the same package can create value objects without specifying values of their properties.</p>
+<h3>3.2. Complex Types</h3>
+<p><strong>Unfortunately, we cannot expect JPA to automatically map third-party complex types into tables. Just see how many changes we had to introduce in the previous section!</strong></p>
+<p>For example, when working with our <em>Order</em> aggregate, we&#8217;ll encounter difficulties persisting <em>Joda Money</em> fields.</p>
+<p>In such a case, we might end up with writing custom type <em>@Converter</em> available from JPA 2.1. That might require some additional work, though.</p>
+<p>Alternatively, we can also split the <em>Money</em> property into two basic properties. For example <em>String</em> for currency unit and <em>BigDecimal</em> for the actual value.</p>
+<p>While we can hide the implementation details and still use <em>Money</em> class through the public methods API, the practice shows most developers cannot justify the extra work and would simply degenerate the model to conform to the JPA specification instead.</p>
+<h3>3.3. Conclusion</h3>
+<p>While JPA is one of the most adopted specifications in the world, it might not be the best option for persisting our <em>Order</em> aggregate.</p>
+<p><strong>If we want our model to reflect the true business rules, we should design it to not be a simple 1:1 representation of the underlying tables.</strong></p>
+<p>Basically, we have three options here:</p>
+<ol>
+<li>Create a set of simple data classes and use them to persist and recreate the rich business model. Unfortunately, this might require a lot of extra work.</li>
+<li>Accept the limitations of JPA and choose the right compromise.</li>
+<li>Consider another technology.</li>
+</ol>
+<p>The first option has the biggest potential. In practice, most projects are developed using the second option.</p>
+<p>Now, let&#8217;s consider another technology to persist aggregates.</p>
+<h2 id="document-store">4. Document Store</h2>
+<p>A document store is an alternative way of storing data. Instead of using relations and tables, we save whole objects. <strong>This makes a document store a potentially perfect candidate for persisting aggregates</strong>.</p>
+<p>For the needs of this tutorial, we&#8217;ll focus on JSON-like documents.</p>
+<p>Let&#8217;s take a closer look at how our order persistence problem looks in a document store like MongoDB.</p>
+<h3>4.1. Persisting Aggregate Using MongoDB</h3>
+<p><strong>Now, there are quite a few databases which can store JSON data, one of the popular being MongoDB.</strong> MongoDB actually stores BSON, or JSON in binary form.</p>
+<p><strong>Thanks to MongoDB, we can store the <em>Order</em> example aggregate<em> as-is</em>.</strong></p>
+<p>Before we move on, let&#8217;s add the Spring Boot <a href="https://search.maven.org/search?q=g:org.springframework.boot%20AND%20a:spring-boot-starter-data-mongodb" target="_blank" rel="noopener">MongoDB</a> starter:</p>
+<pre class="brush: xml; gutter: true">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-data-mongodb&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+<p>Now we can run a similar test case like in the JPA example, but this time using MongoDB:</p>
+<pre class="brush: java; gutter: true">@DisplayName(&quot;given order with two line items, when persist using mongo repository, then order is saved&quot;)
+@Test
+void test() throws Exception {
+    // given
+    Order order = prepareTestOrderWithTwoLineItems();
+
+    // when
+    repo.save(order);
+
+    // then
+    List&lt;Order&gt; foundOrders = repo.findAll();
+    assertThat(foundOrders).hasSize(1);
+    List&lt;OrderLine&gt; foundOrderLines = foundOrders.iterator()
+      .next()
+      .getOrderLines();
+    assertThat(foundOrderLines).hasSize(2);
+    assertThat(foundOrderLines).containsOnlyElementsOf(order.getOrderLines());
+}</pre>
+<p><strong>What&#8217;s important &#8211; we didn&#8217;t change the original <em>Order</em> aggregate classes at all; </strong>no need to create default constructors, setters or custom converter for <em>Money</em> class.</p>
+<p>And here is what our <em>Order</em> aggregate appears in the store:</p>
+<pre class="brush: javascript; gutter: true">{
+  &quot;_id&quot;: ObjectId(&quot;5bd8535c81c04529f54acd14&quot;),
+  &quot;orderLines&quot;: [
+    {
+      &quot;product&quot;: {
+        &quot;price&quot;: {
+          &quot;money&quot;: {
+            &quot;currency&quot;: {
+              &quot;code&quot;: &quot;USD&quot;,
+              &quot;numericCode&quot;: 840,
+              &quot;decimalPlaces&quot;: 2
+            },
+            &quot;amount&quot;: &quot;10.00&quot;
+          }
+        }
+      },
+      &quot;quantity&quot;: 2
+    },
+    {
+      &quot;product&quot;: {
+        &quot;price&quot;: {
+          &quot;money&quot;: {
+            &quot;currency&quot;: {
+              &quot;code&quot;: &quot;USD&quot;,
+              &quot;numericCode&quot;: 840,
+              &quot;decimalPlaces&quot;: 2
+            },
+            &quot;amount&quot;: &quot;5.00&quot;
+          }
+        }
+      },
+      &quot;quantity&quot;: 10
+    }
+  ],
+  &quot;totalCost&quot;: {
+    &quot;money&quot;: {
+      &quot;currency&quot;: {
+        &quot;code&quot;: &quot;USD&quot;,
+        &quot;numericCode&quot;: 840,
+        &quot;decimalPlaces&quot;: 2
+      },
+      &quot;amount&quot;: &quot;70.00&quot;
+    }
+  },
+  &quot;_class&quot;: &quot;com.baeldung.ddd.order.mongo.Order&quot;
+}</pre>
+<p>This simple BSON document contains the whole <em>Order</em> aggregate in one piece, matching nicely with our original notion that all this should be jointly consistent.</p>
+<p>Note that complex objects in the BSON document are simply serialized as a set of regular JSON properties. Thanks to this, even third-party classes (like <em>Joda Money</em>) can be easily serialized without a need to simplify the model.</p>
+<h3>4.2. Conclusion</h3>
+<p>Persisting aggregates using MongoDB is simpler than using JPA.</p>
+<p><strong>This absolutely doesn&#8217;t mean MongoDB is superior to traditional databases.</strong> There are plenty of legitimate cases in which we should not even try to model our classes as aggregates and use a SQL database instead.</p>
+<p><strong>Still, when we&#8217;ve identified a group of objects which should be always consistent according to the complex requirements, then using a document store can be a very appealing option.</strong></p>
+<h2 id="conclusion"><strong>5. Conclusion</strong></h2>
+<p>In DDD, aggregates usually contain the most complex objects in the system. Working with them needs a very different approach than in most CRUD applications.</p>
+<p>Using popular ORM solutions might lead to a simplistic or over-exposed domain model, which is often unable to express or enforce intricate business rules.</p>
+<p><strong>Document stores can make it easier to persist aggregates without sacrificing model complexity.</strong></p>
+<p>The full source code of all the examples is available <a href="https://github.com/eugenp/tutorials/tree/master/ddd" target="_blank" rel="noopener">over on GitHub</a>.</p>
+<p><span style="font-weight: 400;"></span></p>
+<img src="http://feeds.feedburner.com/~r/Baeldung/~4/oSGXQ0AeHl4" height="1" width="1" alt=""/>]]></content:encoded>
+            <wfw:commentRss>https://www.baeldung.com/spring-persisting-ddd-aggregates/feed/</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+            <image>https://www.baeldung.com/social-on-spring-2/</image>
+            <feedburner:origLink>https://www.baeldung.com/spring-persisting-ddd-aggregates</feedburner:origLink>
+        </item>
+        <item>
+            <title>Intersection Between two Integer Arrays</title>
+            <link>http://feedproxy.google.com/~r/Baeldung/~3/1dM-sFPqn4s/java-array-intersection</link>
+            <comments>https://www.baeldung.com/java-array-intersection#respond</comments>
+            <pubDate>Sun, 11 Nov 2018 18:24:21 +0000</pubDate>
+            <dc:creator><![CDATA[Jan Hauer]]></dc:creator>
+            <category><![CDATA[Java]]></category>
+
+            <guid isPermaLink="false">https://www.baeldung.com/?p=45218</guid>
+            <description>
+                <![CDATA[Learn how to calculate the intersection of 2 arrays using the Java Stream API.]]></description>
+            <content:encoded><![CDATA[
+<h2 id="overview"><strong>1. Overview</strong></h2>
+<p>In this quick tutorial, we&#8217;ll have a look at how to <strong>compute the intersection between two Integer arrays </strong><em>&#8216;a&#8217;</em> and<em> &#8216;b&#8217;</em>.</p>
+<p>We&#8217;ll also focus on how to handle duplicate entries.</p>
+<p>For the implementation, we&#8217;ll use <em>Streams.</em></p>
+<h2 id="predicate"><strong>2. Membership Predicate for an Array</strong></h2>
+<p>The intersection of two sets is by definition a set with all values from one, which are also part of the second set.</p>
+<p>Therefore we need a <em>Function</em> or rather a <em>Predicate</em> to decide the membership in the second array. Since <em>List</em> provides such a method out of the box, we&#8217;ll transform this to a <em>List</em>:</p>
+<pre class="brush: java; gutter: true">Predicate isContainedInB = Arrays.asList(b)::contains;
+</pre>
+<h2 id="filter"><strong>3. Building the Intersection</strong></h2>
+<p>To build up the resulting array, we&#8217;ll consider the elements of the first set sequentially and verify if they&#8217;re also contained in the second array.<em> </em>Then we&#8217;ll create a new array based on this.</p>
+<p>The <em>Stream </em>API provides us with the needed methods. <strong>First, we&#8217;ll create a <em>Stream</em>, then filter with the membership-<em>Predicate</em> and finally we&#8217;ll create a new array:</strong></p>
+<pre class="brush: java; gutter: true">public static Integer[] intersectionSimple(Integer[] a, Integer[] b){
+    return Stream.of(a)
+      .filter(Arrays.asList(b)::contains)
+      .toArray(Integer[]::new);
+}</pre>
+<h2 id="duplicate"><strong>4. Duplicate Entries</strong></h2>
+<p>Since arrays in Java are no <em>Set</em> implementation, we face the issue of duplicate entries in the input and then in the result. Notice that the number of occurrences in the result depends on the occurrences in the first parameter.</p>
+<p>But for sets, elements must not occur multiple times. <strong>We can archive this by using the <em>distinct()</em> method:</strong></p>
+<pre class="brush: java; gutter: true">public static Integer[] intersectionSet(Integer[] a, Integer[] b){
+    return Stream.of(a)
+      .filter(Arrays.asList(b)::contain)
+      .distinct()
+      .toArray(Integer[]::new);
+}</pre>
+<p>So the length of the intersection no longer depends on the parameter order.</p>
+<p>However, the intersection of an array with itself may not be the array again since we remove double entries.</p>
+<h2 id="multiset"><strong>5. Multiset Intersection</strong></h2>
+<p>A more general notion, which allows multiple equal entries, are multisets. For them, the intersection is then defined by the minimal number of input occurrences. So our membership-<em>Predicate</em> must keep score how often we add an element to the result.</p>
+<p>The <em>remove()</em> method can be used for this, which returns the membership and consumes the elements. So after all equal elements in <em>&#8216;b&#8217;</em> are consumed, no more equal elements are added to the result:</p>
+<pre class="brush: java; gutter: true">public static Integer[] intersectionSet(Integer[] a, Integer[] b){
+    return Stream.of(a)
+      .filter(new LinkedList&lt;&gt;(Arrays.asList(b))::remove)
+      .toArray(Integer[]::new);
+}
+</pre>
+<p>Since the <em>Arrays </em>API only returns an immutable <em>List,</em> we have to generate a dedicate mutable one.</p>
+<h2 id="conclusion">6. Conclusion</h2>
+<p>In this article, we&#8217;ve seen how to use the <em>contains</em> and <em>remove </em>methods to implement an intersection for two arrays in Java.</p>
+<p>All the implementation, code snippets, and tests can be found in our <a href="https://github.com/eugenp/tutorials/tree/master/core-java-collections">Github repository</a> &#8211; this is a Maven-based project, so it should be easy to import and run as it is.</p>
+
+<img src="http://feeds.feedburner.com/~r/Baeldung/~4/1dM-sFPqn4s" height="1" width="1" alt=""/>]]></content:encoded>
+            <wfw:commentRss>https://www.baeldung.com/java-array-intersection/feed/</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+            <image>https://www.baeldung.com/social-java-on-baeldung-2/</image>
+            <feedburner:origLink>https://www.baeldung.com/java-array-intersection</feedburner:origLink>
+        </item>
+        <item>
+            <title>Calculate the Area of a Circle in Java</title>
+            <link>http://feedproxy.google.com/~r/Baeldung/~3/txWYFFyp3vc/java-calculate-circle-area</link>
+            <comments>https://www.baeldung.com/java-calculate-circle-area#respond</comments>
+            <pubDate>Sun, 11 Nov 2018 17:29:11 +0000</pubDate>
+            <dc:creator><![CDATA[baeldung]]></dc:creator>
+            <category><![CDATA[Algorithms]]></category>
+            <category><![CDATA[Java]]></category>
+
+            <guid isPermaLink="false">https://www.baeldung.com/?p=45216</guid>
+            <description>
+                <![CDATA[Explore different ways of calculating the area of a circle using Java.]]></description>
+            <content:encoded><![CDATA[
+<h2 id="overview"><strong>1. Overview</strong></h2>
+<p>In this quick tutorial, we&#8217;ll illustrate how to calculate the area of a circle in Java.</p>
+<p>We&#8217;ll be using the well-known math formula: <em>r^2 * PI</em>.</p>
+<h2 id="area-calculation-method">2. A Circle Area Calculation Method</h2>
+<p>Let&#8217;s first create a method that will perform the calculation:</p>
+<pre class="brush: java; gutter: true">private void calculateArea(double radius) {
+    double area = radius * radius * Math.PI;
+    System.out.println(&quot;The area of the circle [radius = &quot; + radius + &quot;]: &quot; + area);
+}</pre>
+<h3>2.1. Passing the Radius as a Command Line Argument</h3>
+<p>Now we can read the command line argument and calculate the area:</p>
+<pre class="brush: java; gutter: true">double radius = Double.parseDouble(args[0]);
+calculateArea(radius);</pre>
+<p>When we compile and run the program:</p>
+<pre class="brush: text; gutter: true">java CircleArea.java
+javac CircleArea 7</pre>
+<p>we&#8217;ll get the following output:</p>
+<pre class="brush: text; gutter: true">The area of the circle [radius = 7.0]: 153.93804002589985</pre>
+<h3>2.2. Reading the Radius from a Keyboard</h3>
+<p>Another way to get the radius value is to use input data from the user:</p>
+<pre class="brush: java; gutter: true">Scanner sc = new Scanner(System.in);
+System.out.println(&quot;Please enter radius value: &quot;);
+double radius = sc.nextDouble();
+calculateArea(radius);</pre>
+<p>The output is the same as in the previous example.</p>
+<h2 id="circle-class">3. A Circle Class</h2>
+<p>Besides calling a method to calculate the area as we saw in section 2, we can also create a class representing a circle:</p>
+<pre class="brush: java; gutter: true">public class Circle {
+
+    private double radius;
+
+    public Circle(double radius) {
+        this.radius = radius;
+    }
+
+    // standard getter and setter
+
+    private double calculateArea() {
+        return radius * radius * Math.PI;
+    }
+
+    public String toString() {
+        return &quot;The area of the circle [radius = &quot; + radius + &quot;]: &quot; + calculateArea();
+    }
+}</pre>
+<p>We should note a few things. First of all, we don&#8217;t save the area as a variable, since it is directly dependent on the radius, so we can calculate it easily. Secondly, the method that calculates the area is private since we use it in the <em>toString()</em> method. <strong>The <em>toString()</em> method shouldn&#8217;t call any of the public methods in the class since those methods could be overridden and their behavior would be different than the expected.</strong></p>
+<p>We can now instantiate our Circle object:</p>
+<pre class="brush: java; gutter: true">Circle circle = new Circle(7);</pre>
+<p>The output will be the, of course, the same as before.</p>
+<h2 id="conclusion">4. Conclusion</h2>
+<p>In this short and to-the-point article, we showed different ways of calculating the area of a circle using Java.</p>
+<p>As always, complete source code can be found <a href="https://github.com/eugenp/tutorials/tree/master/core-java">over on GitHub</a>.</p>
+
+<img src="http://feeds.feedburner.com/~r/Baeldung/~4/txWYFFyp3vc" height="1" width="1" alt=""/>]]></content:encoded>
+            <wfw:commentRss>https://www.baeldung.com/java-calculate-circle-area/feed/</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+            <image>https://www.baeldung.com/social-programming-1-k-featured/</image>
+            <feedburner:origLink>https://www.baeldung.com/java-calculate-circle-area</feedburner:origLink>
+        </item>
+        <item>
+            <title>ZonedDateTime with Spring Data MongoDB</title>
+            <link>http://feedproxy.google.com/~r/Baeldung/~3/Wzd49J335ko/spring-data-mongodb-zoneddatetime</link>
+            <comments>https://www.baeldung.com/spring-data-mongodb-zoneddatetime#respond</comments>
+            <pubDate>Sat, 10 Nov 2018 17:00:31 +0000</pubDate>
+            <dc:creator><![CDATA[baeldung]]></dc:creator>
+            <category><![CDATA[Spring Data]]></category>
+            <category><![CDATA[MongoDB]]></category>
+
+            <guid isPermaLink="false">https://www.baeldung.com/?p=45114</guid>
+            <description>
+                <![CDATA[Learn how to create MongoDB converters in order to handle Java ZonedDateTime objects.]]></description>
+            <content:encoded><![CDATA[
+<h2>1. Overview</h2>
+<p><a href="https://spring.io/projects/spring-data-mongodb">Spring Data MongoDB</a> module improves readability and usability when interacting with a MongoDB database in Spring projects.</p>
+<p><strong>In this tutorial, we&#8217;ll focus on how to handle the <em>ZonedDateTime</em> Java objects when reading and writing into a MongoDB database.</strong></p>
+<h2>2. Setup</h2>
+<p>To work with Spring Data MongoDB module, we need to add the following dependency:</p>
+<pre class="brush: xml; gutter: true">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.data&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-data-mongodb&lt;/artifactId&gt;
+    &lt;version&gt;2.1.2.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;</pre>
+<p>The latest version of the library can be found <a href="https://search.maven.org/classic/#search%7Cga%7C1%7Cg%3A%22org.springframework.data%22%20AND%20a%3A%22spring-data-mongodb%22">here</a>.</p>
+<p>Let&#8217;s define a model class called <em>Action</em> (with a <em>ZonedDateTime</em> attribute):</p>
+<pre class="brush: java; gutter: true">@Document
+public class Action {
+    @Id
+    private String id;
+
+    private String description;
+    private ZonedDateTime time;
+    
+    // constructor, getters and setters 
+}</pre>
+<p>To interact with the MongoDB, we&#8217;ll also create an interface that extends the <em>MongoRepository</em>:</p>
+<pre class="brush: java; gutter: true">public interface ActionRepository extends MongoRepository&lt;Action, String&gt; { }</pre>
+<p>Now we&#8217;ll define a test that will insert an <em>Action</em> object into a MongoDB and assert that it was stored with the correct time. In the assert evaluation, we&#8217;re removing the nanoseconds information since the MongoDB <em>Date</em> type has a precision of milliseconds:</p>
+<pre class="brush: java; gutter: true">@Test
+public void givenSavedAction_TimeIsRetrievedCorrectly() {
+    String id = &quot;testId&quot;;
+    ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+
+    actionRepository.save(new Action(id, &quot;click-action&quot;, now));
+    Action savedAction = actionRepository.findById(id).get();
+
+    Assert.assertEquals(now.withNano(0), savedAction.getTime().withNano(0)); 
+}</pre>
+<p>Out of the box, we will get the following error when running our test:</p>
+<pre class="brush: powershell; gutter: false">org.bson.codecs.configuration.CodecConfigurationException:
+  Can&#039;t find a codec for class java.time.ZonedDateTime</pre>
+<p><strong>Spring Data MongoDB has no <em>ZonedDateTime</em> converters defined.</strong> Let&#8217;s see how we can configure them.</p>
+<h2>3. The MongoDB Converters</h2>
+<p>We can handle <em>ZonedDateTime</em> objects (across all models) by defining a converter for reading from a MongoDB and one for writing into it.</p>
+<p>For reading, we&#8217;re converting from a <em>Date</em> object into a <em>ZonedDateTime</em> object. In the next example, we use the <em>ZoneOffset.UTC</em> since <em>Date</em> object does not store zone information:</p>
+<pre class="brush: java; gutter: true">public class ZonedDateTimeReadConverter implements Converter&lt;Date, ZonedDateTime&gt; {
+    @Override
+    public ZonedDateTime convert(Date date) {
+        return date.toInstant().atZone(ZoneOffset.UTC);
+    }
+}</pre>
+<p>Then, we&#8217;re converting from a <em>ZonedDateTime</em> object into a <em class="">Date</em> object. We can add the zone information to another field if needed:</p>
+<pre class="brush: java; gutter: true">public class ZonedDateTimeWriteConverter implements Converter&lt;ZonedDateTime, Date&gt; {
+    @Override
+    public Date convert(ZonedDateTime zonedDateTime) {
+        return Date.from(zonedDateTime.toInstant());
+    }
+}</pre>
+<p>Since <em>Date</em> objects do not store a zone offset, we use <em>UTC</em> in our examples. With the <em>ZonedDateTimeReadConverter </em>and the <em>ZonedDateTimeWriteConverter</em> added to the <em>MongoCustomConversions</em>, our test will now pass.</p>
+<p>A simple printing of the stored object will look like this:</p>
+<pre class="brush: powershell; gutter: true">Action{id=&#039;testId&#039;, description=&#039;click&#039;, time=2018-11-08T08:03:11.257Z}</pre>
+<p>To learn more about how to register MongoDB converters, we can refer to <a href="https://www.baeldung.com/spring-data-mongodb-index-annotations-converter">this tutorial</a>.</p>
+<h2>4. Conclusions</h2>
+<p>In this quick article, we saw how to create MongoDB converters in order to handle Java <em>ZonedDateTime</em> objects.</p>
+<p>The implementation of all of these snippets can be found <a href="https://github.com/eugenp/tutorials/tree/master/persistence-modules/spring-data-mongodb">over on GitHub</a>.</p>
+
+<img src="http://feeds.feedburner.com/~r/Baeldung/~4/Wzd49J335ko" height="1" width="1" alt=""/>]]></content:encoded>
+            <wfw:commentRss>https://www.baeldung.com/spring-data-mongodb-zoneddatetime/feed/</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+            <image>https://www.baeldung.com/social-persistence-on-baeldung-1/</image>
+            <feedburner:origLink>https://www.baeldung.com/spring-data-mongodb-zoneddatetime</feedburner:origLink>
+        </item>
+        <item>
+            <title>Limiting Query Results with JPA and Spring Data JPA</title>
+            <link>http://feedproxy.google.com/~r/Baeldung/~3/MfgyKwgd_gQ/jpa-limit-query-results</link>
+            <comments>https://www.baeldung.com/jpa-limit-query-results#respond</comments>
+            <pubDate>Sat, 10 Nov 2018 16:58:01 +0000</pubDate>
+            <dc:creator><![CDATA[baeldung]]></dc:creator>
+            <category><![CDATA[Spring Data]]></category>
+
+            <guid isPermaLink="false">https://www.baeldung.com/?p=45111</guid>
+            <description><![CDATA[Learn about limiting query results with JPA and Spring Data JPA.]]></description>
+            <content:encoded><![CDATA[
+<h2>1. Introduction</h2>
+<p>In this tutorial, we&#8217;re going to <strong>learn about limiting query results</strong> with <a href="https://en.wikipedia.org/wiki/Java_Persistence_API">JPA</a> and <a href="https://spring.io/projects/spring-data-jpa">Spring Data JPA</a>.</p>
+<p>First, we&#8217;ll take a look at the table we want to query as well as the SQL query we want to reproduce.</p>
+<p>Then we&#8217;ll dive right into how to achieve that with JPA and Spring Data JPA.</p>
+<p>Let&#8217;s get started!</p>
+<h2>2. The Test Data</h2>
+<p>Below we have the table that we&#8217;ll be querying throughout this article.</p>
+<p>The question we want to answer is, &#8220;What is the first occupied seat and who is occupying it?&#8221;.</p>
+<table style="width: 70%; border-collapse: collapse; border: 2px solid #63b175;">
+<tbody>
+<tr>
+<th style="text-align: left; padding: 5px 10px; border: 2px solid #63b175;">First Name</th>
+<th style="text-align: left; padding: 5px 10px; border: 2px solid #63b175;">Last Name</th>
+<th style="text-align: left; padding: 5px 10px; border: 2px solid #63b175;">Seat Number</th>
+</tr>
+<tr>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">Jill</td>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">Smith</td>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">50</td>
+</tr>
+<tr>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">Eve</td>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">Jackson</td>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">94</td>
+</tr>
+<tr>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">Fred</td>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">Bloggs</td>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">22</td>
+</tr>
+<tr>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">Ricki</td>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">Bobbie</td>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">36</td>
+</tr>
+<tr>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">Siya</td>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">Kolisi</td>
+<td style="padding: 5px 10px; border: 2px solid #63b175;">85</td>
+</tr>
+</tbody>
+</table>
+<h2>3. The SQL</h2>
+<p>With SQL we might write a query that looks something like this:</p>
+<pre class="brush: sql; gutter: true">SELECT firstName, lastName, seatNumber FROM passengers ORDER BY seatNumber LIMIT 1;</pre>
+<h2>4. JPA Setup</h2>
+<p>With JPA, we need an Entity first, to map our table:</p>
+<pre class="brush: java; gutter: true">@Entity
+class Passenger {
+
+    @Id
+    @GeneratedValue
+    @Column(nullable = false)
+    private Long id;
+
+    @Basic(optional = false)
+    @Column(nullable = false)
+    private String fistName;
+
+    @Basic(optional = false)
+    @Column(nullable = false)
+    private String lastName;
+
+    @Basic(optional = false)
+    @Column(nullable = false)
+    private int seatNumber;
+
+    // constructor, getters etc.
+}</pre>
+<p>Next we need a method which encapsulates our query code, implemented here as <em>PassengerRepositoryImpl#findOrderedBySeatNumberLimitedTo(int limit)</em>:</p>
+<pre class="brush: java; gutter: true">@Repository
+class PassengerRepositoryImpl {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Override
+    public List&lt;Passenger&gt; findOrderedBySeatNumberLimitedTo(int limit) {
+        return entityManager.createQuery(&quot;SELECT p FROM Passenger p ORDER BY p.seatNumber&quot;,
+          Passenger.class).setMaxResults(limit).getResultList();
+    }
+}</pre>
+<p>In our repository method, we use the <a href="https://docs.oracle.com/javaee/7/api/javax/persistence/EntityManager.html"><em>EntityManager</em></a> to create a <em><a href="https://docs.oracle.com/javaee/7/api/javax/persistence/Query.html">Query</a></em> on which we call the <em><a href="https://docs.oracle.com/javaee/7/api/javax/persistence/Query.html#setMaxResults-int-">setMaxResults()</a></em> method.</p>
+<p>This call to <a href="https://docs.oracle.com/javaee/7/api/javax/persistence/Query.html#setMaxResults-int-"><em>Query#setMaxResults</em></a> will eventually result in the limit statement appended to the generated SQL:</p>
+<pre class="brush: sql; gutter: true">select
+  passenger0_.id as id1_15_,
+  passenger0_.fist_name as fist_nam2_15_,
+  passenger0_.last_name as last_nam3_15_,
+  passenger0_.seat_number as seat_num4_15_
+from passenger passenger0_ order by passenger0_.seat_number limit ?</pre>
+<h2>5. With Spring Data JPA</h2>
+<p>We can also generate our SQL using Spring Data JPA.</p>
+<p>We can either use the method name derivation with the keywords <strong><em>first</em></strong> or <em><strong>top</strong>:</em></p>
+<pre class="brush: java; gutter: true">interface PassengerRepository extends JpaRepository&lt;Passenger, Long&gt; {
+    Passenger findFirstByOrderBySeatNumberAsc();
+}</pre>
+<p>Or we can use a <a href="https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/domain/Pageable.html"><em>Pageable</em></a> object:</p>
+<pre class="brush: java; gutter: true">Page&lt;Passenger&gt; page = repository.findAll(PageRequest.of(0, 1, Sort.by(Sort.Direction.ASC, &quot;seatNumber&quot;)));</pre>
+<p>If we take a look at the default implementation of <em><a href="https://docs.spring.io/spring-data/jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html">JpaRepository,</a></em> the <em><a href="https://docs.spring.io/spring-data/jpa/docs/current/api/org/springframework/data/jpa/repository/support/SimpleJpaRepository.html">SimpleJpaRepository</a>, </em>we can see that it also calls <em><a href="https://docs.oracle.com/javaee/7/api/javax/persistence/Query.html#setMaxResults-int-">Query#setMaxResults</a></em>:</p>
+<pre class="brush: java; gutter: true">protected &lt;S extends T &gt; Page &lt; S &gt; readPage(TypedQuery &lt; S &gt; query, 
+  Class &lt; S &gt; domainClass, Pageable pageable,
+  @Nullable Specification &lt; S &gt; spec) {
+    if (pageable.isPaged()) {
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+    }
+
+    return PageableExecutionUtils.getPage(query.getResultList(), pageable, () -&gt; {
+        return executeCountQuery(this.getCountQuery(spec, domainClass));
+    });
+}</pre>
+<p>Both of these alternatives will produce the SQL that we are after:</p>
+<pre class="brush: sql; gutter: true">select
+  passenger0_.id as id1_15_,
+  passenger0_.fist_name as fist_nam2_15_,
+  passenger0_.last_name as last_nam3_15_,
+  passenger0_.seat_number as seat_num4_15_ 
+from passenger passenger0_ order by passenger0_.seat_number asc limit ?</pre>
+<h2>6. Conclusion</h2>
+<p>Limiting query results in <a href="https://en.wikipedia.org/wiki/Java_Persistence_API">JPA</a> is slightly different to SQL &#8211; we don&#8217;t include the limit keyword directly into our <a href="https://en.wikipedia.org/wiki/Java_Persistence_Query_Language">JPQL</a>.</p>
+<p>Instead, we just make a single method call to <a href="https://docs.spring.io/spring-data/jpa/docs/current/api/org/springframework/data/jpa/repository/support/SimpleJpaRepository.html"><em>Query#maxResults</em></a> or include the keyword <em>first</em> or <em>top</em> in our <a href="https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#repositories.limit-query-result">Spring Data JPA</a> method name.</p>
+<p>As always, you can find the code <a href="https://github.com/eugenp/tutorials/tree/master/persistence-modules/spring-data-jpa">over on GitHub</a>.</p>
+
+<img src="http://feeds.feedburner.com/~r/Baeldung/~4/MfgyKwgd_gQ" height="1" width="1" alt=""/>]]></content:encoded>
+            <wfw:commentRss>https://www.baeldung.com/jpa-limit-query-results/feed/</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+            <image>https://www.baeldung.com/social-persistence-on-baeldung/</image>
+            <feedburner:origLink>https://www.baeldung.com/jpa-limit-query-results</feedburner:origLink>
+        </item>
+        <item>
+            <title>Java Weekly, Issue 254</title>
+            <link>http://feedproxy.google.com/~r/Baeldung/~3/nYU5ilYCa18/java-weekly-254</link>
+            <comments>https://www.baeldung.com/java-weekly-254#respond</comments>
+            <pubDate>Fri, 09 Nov 2018 03:30:59 +0000</pubDate>
+            <dc:creator><![CDATA[baeldung]]></dc:creator>
+            <category><![CDATA[Weekly Review]]></category>
+
+            <guid isPermaLink="false">https://www.baeldung.com/?p=44746</guid>
+            <description>
+                <![CDATA[A quick look at Spring Boot DevTools and how it can speed up development, plus a list of the top 100 Java libraries in 2018.]]></description>
+            <content:encoded><![CDATA[
+<p><strong>Here we go…</strong></p>
+<h2><strong>1. Spring and Java</strong></h2>
+<h4><a href="https://www.vojtechruzicka.com/spring-boot-devtools/" target="_blank" rel="noopener"><strong>&gt;&gt; Faster Development with Spring Boot DevTools</strong></a> [<span style="color: #993300;">vojtechruzicka.com</span>]</h4>
+<p>With <strong>time-saving features like automatic restart and live reload</strong>, this is a really good tool to have in your arsenal.</p>
+<h4><a href="https://blog.codefx.org/java/scripting-java-shebang/" target="_blank" rel="noopener"><strong>&gt;&gt; Scripting Java 11, Shebang And All</strong></a> [<span style="color: #993300;">blog.codefx.org</span>]</h4>
+<p>A quick overview of the <strong>scripting capabilities available in Java 11</strong>, and which use cases are a good fit.</p>
+<h4><a href="https://www.infoq.com/articles/spring-cloud-azure" target="_blank" rel="noopener"><strong>&gt;&gt; Decoupling in Cloud Era: Building Cloud Native Microservices with Spring Cloud Azure</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+<p>A solid write-up describing how Spring Cloud Azure can help you <strong>take full advantage of the cloud computing model</strong>, empowering you to build and run scalable applications.</p>
+<h4><a href="https://vladmihalcea.com/optimize-jpql-criteria-api-query-plans-hibernate-statistics/" target="_blank" rel="noopener"><strong>&gt;&gt; How to optimize JPQL and Criteria API query plans with Hibernate Statistics</strong></a> [<span style="color: #993300;">vladmihalcea.com</span>]</h4>
+<p>And a behind-the-scenes look at how Hibernate works, thanks to Query Plan Cache statistics, and <strong>how to improve performance of &#8220;IN&#8221; queries</strong>.</p>
+<h4><strong>Also worth reading:</strong></h4>
+<ul>
+<li>
+<h4><a href="https://rieckpil.de/review-whats-new-in-spring-boot-2-1/" target="_blank" rel="noopener"><strong>&gt;&gt; #REVIEW: What’s new in Spring Boot 2.1</strong></a> [<span style="color: #993300;">rieckpil.de</span>]</h4>
+</li>
+<li>
+<h4><a href="https://tryingthings.wordpress.com/2018/11/01/switch-off-spring-boot-security-for-good/" target="_blank" rel="noopener"><strong>&gt;&gt; Switch off Spring Boot security for good</strong></a> [<span style="color: #993300;">tryingthings.wordpress.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://niels.nu/blog/2018/spring-dynamodb-integration-testing.html" target="_blank" rel="noopener"><strong>&gt;&gt; Spring and DynamoDB Integration Testing</strong></a> [<span style="color: #993300;">niels.nu</span>]</h4>
+</li>
+<li>
+<h4><a href="https://info.michael-simons.eu/2018/11/02/modeling-a-domain-with-spring-data-neo4j-and-ogm/" target="_blank" rel="noopener"><strong>&gt;&gt; Modeling A Domain With Spring Data Neo4j And Ogm</strong></a> [<span style="color: #993300;">info.michael-simons.eu</span>]</h4>
+</li>
+<li>
+<h4><a href="https://blog.takipi.com/the-top-100-java-libraries-in-2018-based-on-277975-source-files/" target="_blank" rel="noopener"><strong>&gt;&gt; The Top 100 Java Libraries in 2018 &#8211; Based on 277,975 Source Files</strong></a> [<span style="color: #993300;">blog.takipi.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://spring.io/blog/2018/11/01/project-update-spring-cloud-data-flow-for-apache-mesos-and-apache-yarn" target="_blank" rel="noopener"><strong>&gt;&gt; Project Update: Spring Cloud Data Flow for Apache Mesos and Apache YARN</strong></a> [<span style="color: #993300;">spring.io</span>]</h4>
+</li>
+<li>
+<h4><a href="https://mjg123.github.io/2018/11/05/alpine-jdk11-images.html" target="_blank" rel="noopener"><strong>&gt;&gt; Java 11 in Alpine Linux containers</strong></a> [<span style="color: #993300;">mjg123.github.io</span>]</h4>
+</li>
+<li>
+<h4><a href="https://blog.frankel.ch/learning-clojure/5/" target="_blank" rel="noopener"><strong>&gt;&gt; Learning Clojure: comparing with Java streams</strong></a> [<span style="color: #993300;">blog.frankel.ch</span>]</h4>
+</li>
+</ul>
+<h4><strong>Webinars and presentations:</strong></h4>
+<ul>
+<li>
+<h4><a href="https://www.infoq.com/podcasts/engineering-culture-remote-teams" target="_blank" rel="noopener"><strong>&gt;&gt; Jim Rose on Building a Great Engineering Culture in a Remote Team</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.infoq.com/presentations/asynchronous-methods-task" target="_blank" rel="noopener"><strong>&gt;&gt; I&#8217;ll Get Back to You: Task, Await, and Asynchronous Methods</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.infoq.com/presentations/netty-spring-boot-2" target="_blank" rel="noopener"><strong>&gt;&gt; Reactor Netty, the Default Spring Boot 2.0 Runtime</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.infoq.com/podcasts/refactoring-evolutionary-architecture" target="_blank" rel="noopener"><strong>&gt;&gt; Martin Fowler Discusses New Edition of Refactoring, along with Thoughts on Evolutionary Architecture</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.infoq.com/presentations/database-encryption-detection-tools" target="_blank" rel="noopener"><strong>&gt;&gt; Making Security Usable: Product Engineer Perspective</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.infoq.com/presentations/security-data-breach" target="_blank" rel="noopener"><strong>&gt;&gt; Data Security Dreams and Nightmares</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.infoq.com/presentations/security-2018" target="_blank" rel="noopener"><strong>&gt;&gt; Seven Strategies for Scaling Product Security</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.infoq.com/presentations/defense-in-depth" target="_blank" rel="noopener"><strong>&gt;&gt; Defense in Depth: in Depth</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.infoq.com/presentations/spring-data-5-reactive-driver" target="_blank" rel="noopener"><strong>&gt;&gt; Under the Hood of Reactive Data Access</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.infoq.com/presentations/r2dbc"><strong>&gt;&gt; Reactive Relational Database Connectivity</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+</ul>
+<p><strong>Time to upgrade:</strong></p>
+<ul>
+<li>
+<h4><a href="https://spring.io/blog/2018/11/01/spring-tools-4-0-1-released" target="_blank" rel="noopener"><strong>&gt;&gt; Spring Tools 4.0.1 released</strong></a> [<span style="color: #993300;">spring.io</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.infoq.com/news/2018/11/digitalocean-managed-databases" target="_blank" rel="noopener"><strong>&gt;&gt; DigitalOcean Announces Managed Databases</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.jhipster.tech/2018/11/02/jhipster-release-5.6.0.html" target="_blank" rel="noopener"><strong>&gt;&gt; JHipster release v5.6.0</strong></a> [<span style="color: #993300;">jhipster.tech</span>]</h4>
+</li>
+</ul>
+<h2><strong>2. Technical and Musings</strong></h2>
+<h4><a href="https://advancedweb.hu/2018/11/06/cloudfront_signed_urls/" target="_blank" rel="noopener"><strong>&gt;&gt; How CloudFront signed URLs work</strong></a> [<span style="color: #993300;">advancedweb.hu</span>]</h4>
+<p>A nice write-up on <strong>controlling access to URLs delivered through the Amazon CloudFront CDN</strong>.</p>
+<h4><a href="https://medium.com/@NetflixTechBlog/scaling-time-series-data-storage-part-ii-d67939655586" target="_blank" rel="noopener"><strong>&gt;&gt; Scaling Time Series Data Storage — Part II</strong></a> [<span style="color: #993300;">medium.com</span>]</h4>
+<p>An in-depth look at <strong>how Netflix is evolving its architecture to accommodate an anticipated 5x growth rate</strong>.</p>
+<h4><a href="https://www.troyhunt.com/heres-why-insert-thing-here-is-not-a-password-killer/" target="_blank" rel="noopener"><strong>&gt;&gt; Here&#8217;s Why [Insert Thing Here] Is Not a Password Killer</strong></a> [<span style="color: #993300;">troyhunt.com</span>]</h4>
+<p>Despite their shortcomings, passwords are probably here to stay for a while.</p>
+<p><strong>Also worth reading:</strong></p>
+<ul>
+<li>
+<h4><a href="http://blog.tremblay.pro/2018/11/oke.html" target="_blank" rel="noopener"><strong>&gt;&gt; Oracle Kubernetes Cluster</strong></a> [<span style="color: #993300;">blog.tremblay.pro</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.infoq.com/articles/container-runtimes-kubernetes" target="_blank" rel="noopener"><strong>&gt;&gt; Who Is Running My Kubernetes Pod? The Past, Present, and Future of Container Runtimes</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+</ul>
+<ul>
+<li>
+<h4><a href="https://blog.code-cop.org/2018/11/what-is-ethical-coding.html" target="_blank" rel="noopener"><strong>&gt;&gt; What is Ethical Coding and how to get involved</strong></a> [<span style="color: #993300;">blog.code-cop.org</span>]</h4>
+</li>
+<li>
+<h4><a href="https://www.infoq.com/news/2018/11/kirkpatrick-self-management" target="_blank" rel="noopener"><strong>&gt;&gt; Doug Kirkpatrick on Self-Management</strong></a> [<span style="color: #993300;">infoq.com</span>]</h4>
+</li>
+<li>
+<h4><a href="https://blog.tfnico.com/2018/11/working-in-teams-over-working-as.html" target="_blank" rel="noopener"><strong>&gt;&gt; Working in Teams over Working as Individuals</strong></a> [<span style="color: #993300;">blog.tfnico.com</span>]</h4>
+</li>
+</ul>
+<h2><strong>3. Comics</strong></h2>
+<p>And my favorite Dilberts of the week:</p>
+<h4><a href="http://dilbert.com/strip/2018-11-07" target="_blank" rel="noopener"><strong>&gt;&gt; Tons of Experience</strong></a> [<span style="color: #993300;">dilbert.com</span>]</h4>
+<h4><a href="http://dilbert.com/strip/2018-11-06" target="_blank" rel="noopener"><strong>&gt;&gt; Speakerphones</strong></a> [<span style="color: #993300;">dilbert.com</span>]</h4>
+<h4><a href="http://dilbert.com/strip/2011-09-01" target="_blank" rel="noopener"><strong>&gt;&gt; Keep it Simple</strong></a> [<span style="color: #993300;">dilbert.com</span>]</h4>
+<h2><strong>4. Pick of the Week</strong></h2>
+<h4><a href="https://blog.doist.com/mental-health-and-remote-work-1b77616f6945">&gt;&gt; What Most Remote Companies Don’t Tell You About Remote Work</a> [<span style="color: #993300;">doist.com</span>]</h4>
+<p><span style="font-weight: 400;"></span></p>
+
+<img src="http://feeds.feedburner.com/~r/Baeldung/~4/nYU5ilYCa18" height="1" width="1" alt=""/>]]></content:encoded>
+            <wfw:commentRss>https://www.baeldung.com/java-weekly-254/feed/</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+            <image>https://www.baeldung.com/social-weekly-reviews-1/</image>
+            <feedburner:origLink>https://www.baeldung.com/java-weekly-254</feedburner:origLink>
+        </item>
+        <item>
+            <title>How to Replace Many if Statements in Java</title>
+            <link>http://feedproxy.google.com/~r/Baeldung/~3/CcSJ2gNm37w/java-replace-if-statements</link>
+            <comments>https://www.baeldung.com/java-replace-if-statements#comments</comments>
+            <pubDate>Thu, 08 Nov 2018 18:12:52 +0000</pubDate>
+            <dc:creator><![CDATA[baeldung]]></dc:creator>
+            <category><![CDATA[Java]]></category>
+
+            <guid isPermaLink="false">https://www.baeldung.com/?p=44935</guid>
+            <description><![CDATA[Learn various ways of replacing complex nested if statements]]></description>
+            <content:encoded><![CDATA[<p id="overview"><strong><span style="font-weight: 400;"></span></strong></p>
+<h2><strong>1. Overview</strong></h2>
+<p>Decision constructs are a vital part of any programming language. But we land up in coding a huge number of nested if statements which make our code more complex and difficult to maintain.</p>
+<p>In this tutorial, we&#8217;ll walk through the <strong>various ways of replacing nested if statements</strong>.</p>
+<p>Let&#8217;s explore different options how we can simplify the code.</p>
+<h2 id="case-study"><strong>2. Case Study</strong></h2>
+<p>Often we encounter a business logic which involves a lot of conditions, and each of them needs different processing. For the sake of a demo, let&#8217;s take the example of a <em>Calculator</em> class. We will have a method which takes two numbers and an operator as input and returns the result based on the operation:</p>
+<pre class="brush: java; gutter: true">public int calculate(int a, int b, String operator) {
+    int result = Integer.MIN_VALUE;
+
+    if (&quot;add&quot;.equals(operator)) {
+        result = a + b;
+    } else if (&quot;multiply&quot;.equals(operator)) {
+        result = a * b;
+    } else if (&quot;divide&quot;.equals(operator)) {
+        result = a / b;
+    } else if (&quot;subtract&quot;.equals(operator)) {
+        result = a - b;
+    }
+    return result;
+}</pre>
+<p>We can also implement this using <em>switch</em> statements<em>:</em></p>
+<pre class="brush: java; gutter: true">public int calculateUsingSwitch(int a, int b, String operator) {
+    switch (operator) {
+    case &quot;add&quot;:
+        result = a + b;
+        break;
+    // other cases    
+    }
+    return result;
+}</pre>
+<p>In typical development, <strong>the if statements may grow much bigger and more complex in nature</strong>. Also, <strong>the switch statements do not fit well when there are complex conditions</strong>.</p>
+<p>Another side effect of having nested decision constructs is they become unmanageable. For example, if we need to add a new operator, we have to add a new if statement and implement the operation.</p>
+<h2 id="refactoring"><strong>3. Refactoring</strong></h2>
+<p>Let&#8217;s explore the alternate options to replace the complex if statements above into much simpler and manageable code.</p>
+<h3 id="factory-class"><strong>3.1. Factory Class</strong></h3>
+<p>Many times we encounter decision constructs which end up doing the similar operation in each branch. This provides an opportunity to <strong>extract a factory method which returns an object of a given type and performs the operation based on the concrete object behavior</strong>.</p>
+<p>For our example, let&#8217;s define an <em>Operation</em> interface which has a single <em>apply</em> method:</p>
+<pre class="brush: java; gutter: true">public interface Operation {
+    int apply(int a, int b);
+}</pre>
+<p>The method takes two number as input and returns the result. Let&#8217;s define a class for performing additions:</p>
+<pre class="brush: java; gutter: true">public class Addition implements Operation {
+    @Override
+    public int apply(int a, int b) {
+        return a + b;
+    }
+}</pre>
+<p>We&#8217;ll now implement a factory class which returns instances of <em>Operation </em>based on the given operator:</p>
+<pre class="brush: java; gutter: true">public class OperatorFactory {
+    static Map&lt;String, Operation&gt; operationMap = new HashMap&lt;&gt;();
+    static {
+        operationMap.put(&quot;add&quot;, new Addition());
+        operationMap.put(&quot;divide&quot;, new Division());
+        // more operators
+    }
+
+    public static Optional&lt;Operation&gt; getOperation(String operator) {
+        return Optional.ofNullable(operationMap.get(operator));
+    }
+}</pre>
+<p>Now, in the <em>Calculator</em> class, we can query the factory to get the relevant operation and apply on the source numbers:</p>
+<pre class="brush: java; gutter: true">public int calculateUsingFactory(int a, int b, String operator) {
+    Operation targetOperation = OperatorFactory
+      .getOperation(operator)
+      .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid Operator&quot;));
+    return targetOperation.apply(a, b);
+}</pre>
+<p>In this example, we have seen how the responsibility is delegated to loosely coupled objects served by a factory class. But there could be chances where the nested if statements are simply shifted to the factory class which defeats our purpose.</p>
+<p>Alternatively, <strong>we can maintain a repository of objects in a <em>Map </em>which could be queried for a quick lookup</strong>. As we have seen <em>OperatorFactory#operationMap </em>serves our purpose. We can also initialize <em>Map</em> at runtime and configure them for lookup.</p>
+<h3 id="use-of-enums"><strong>3.2. Use of Enums</strong></h3>
+<p>In addition to the use of <em>Map, </em><strong>we can also use <em>Enum</em> to label particular business logic</strong>. After that, we can use them either in the nested <em>if statements</em> or <em>switch case</em> <em>statements</em>. Alternatively, we can also use them as a factory of objects and strategize them to perform the related business logic.</p>
+<p>That would reduce the number of nested if statements as well and delegate the responsibility to individual <em>Enum</em> values.</p>
+<p>Let&#8217;s see how we can achieve it. At first, we need to define our <em>Enum</em>:</p>
+<pre class="brush: java; gutter: true">public enum Operator {
+    ADD, MULTIPLY, SUBTRACT, DIVIDE
+}</pre>
+<p>As we can observe, the values are the labels of the different operators which will be used further for calculation. We always have an option to use the values as different conditions in nested if statements or switch cases, but let&#8217;s design an alternate way of delegating the logic to the <em>Enum</em> itself.</p>
+<p>We&#8217;ll define methods for each of the <em>Enum</em> values and do the calculation. For instance:</p>
+<pre class="brush: java; gutter: true">ADD {
+    @Override
+    public int apply(int a, int b) {
+        return a + b;
+    }
+},
+// other operators
+
+public abstract int apply(int a, int b);</pre>
+<p>And then in the <em>Calculator</em> class, we can define a method to perform the operation:</p>
+<pre class="brush: java; gutter: true">public int calculate(int a, int b, Operator operator) {
+    return operator.apply(a, b);
+}</pre>
+<p>Now, we can invoke the method by <strong>converting the <em>String </em>value to the <em>Operator </em>by using the <em>Operator#valueOf()</em> method</strong>:</p>
+<pre class="brush: actionscript3; gutter: true">@Test
+public void whenCalculateUsingEnumOperator_thenReturnCorrectResult() {
+    Calculator calculator = new Calculator();
+    int result = calculator.calculate(3, 4, Operator.valueOf(&quot;ADD&quot;));
+    assertEquals(7, result);
+}</pre>
+<h3 id="command-pattern"><strong>3.3. Command Pattern</strong></h3>
+<p>In the previous discussion, we have seen the use of factory class to return the instance of the correct business object for the given operator. Later, the business object is used to perform the calculation in the <em>Calculator</em>.</p>
+<p><strong>We can also design <em>a Calculator#calculate</em> method to accept a command which can be executed on the inputs</strong>. This will be another way of replacing nested <em>if statements</em>.</p>
+<p>We&#8217;ll first define our <em>Command</em> interface:</p>
+<pre class="brush: java; gutter: true">public interface Command {
+    Integer execute();
+}</pre>
+<p>Next, let&#8217;s implement an <em>AddCommand:</em></p>
+<pre class="brush: java; gutter: true">public class AddCommand implements Command {
+    // Instance variables
+
+    public AddCommand(int a, int b) {
+        this.a = a;
+        this.b = b;
+    }
+
+    @Override
+    public Integer execute() {
+        return a + b;
+    }
+}</pre>
+<p>Finally, let&#8217;s introduce a new method in the <em>Calculator </em>which accepts and execute the <em>Command</em>:</p>
+<pre class="brush: java; gutter: true">public int calculate(Command command) {
+    return command.execute();
+}</pre>
+<p>Next, we can invoke the calculation by instantiating an <em>AddCommand</em> and send it to the <em>Calculator#calculate</em> method:</p>
+<pre class="brush: java; gutter: true">@Test
+public void whenCalculateUsingCommand_thenReturnCorrectResult() {
+    Calculator calculator = new Calculator();
+    int result = calculator.calculate(new AddCommand(3, 7));
+    assertEquals(10, result);
+}</pre>
+<h3 id="rule-engine"><strong>3.4. Rule Engine</strong></h3>
+<p>When we end up writing a large number of nested if statements, each of the conditions depicts a business rule which has to be evaluated for the correct logic to be processed. A rule engine takes such complexity out of the main code. <strong>A <em>RuleEngine</em> evaluates the <em>Rules</em> and returns the result based on the input.</strong></p>
+<p>Let&#8217;s walk through an example by designing a simple <em>RuleEngine</em> which processes an <em>Expression</em> through a set of <em>Rules </em>and returns the result from the selected <em>Rule</em>. First, we&#8217;ll define a <em>Rule</em> interface:</p>
+<pre class="brush: java; gutter: true">public interface Rule {
+    boolean evaluate(Expression expression);
+    Result getResult();
+}</pre>
+<p>Second, let&#8217;s implement a <em>RuleEngine</em>:</p>
+<pre class="brush: java; gutter: true">public class RuleEngine {
+    private static List&lt;Rule&gt; rules = new ArrayList&lt;&gt;();
+
+    static {
+        rules.add(new AddRule());
+    }
+
+    public Result process(Expression expression) {
+        Rule rule = rules
+          .stream()
+          .filter(r -&gt; r.evaluate(expression))
+          .findFirst()
+          .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Expression does not matches any Rule&quot;));
+        return rule.getResult();
+    }
+}</pre>
+<p>The <em>RuleEngine </em>accepts an <em>Expression</em> object and returns the <em>Result</em>. Now<em>, </em>let&#8217;s design the <em>Expression</em> class as a group of two <em>Integer</em> objects with the <em>Operator</em> which will be applied:</p>
+<pre class="brush: java; gutter: true">public class Expression {
+    private Integer x;
+    private Integer y;
+    private Operator operator;        
+}</pre>
+<p>And finally let&#8217;s define a custom <em>AddRule</em> class which evaluates only when the <em>ADD Operation</em> is specified:</p>
+<pre class="brush: java; gutter: true">public class AddRule implements Rule {
+    @Override
+    public boolean evaluate(Expression expression) {
+        boolean evalResult = false;
+        if (expression.getOperator() == Operator.ADD) {
+            this.result = expression.getX() + expression.getY();
+            evalResult = true;
+        }
+        return evalResult;
+    }    
+}</pre>
+<p>We&#8217;ll now invoke the <em>RuleEngine</em> with an <em>Expression</em>:</p>
+<pre class="brush: java; gutter: true">@Test
+public void whenNumbersGivenToRuleEngine_thenReturnCorrectResult() {
+    Expression expression = new Expression(5, 5, Operator.ADD);
+    RuleEngine engine = new RuleEngine();
+    Result result = engine.process(expression);
+
+    assertNotNull(result);
+    assertEquals(10, result.getValue());
+}</pre>
+<h2 id="conclusion"><strong>4. Conclusion</strong></h2>
+<p>In this tutorial, we explored a number of different options to simplify complex code. We also learned how to replace nested if statements by the use of effective design patterns.</p>
+<p>As always, we can find the complete source code over the <a href="https://github.com/eugenp/tutorials/tree/master/core-java-8">GitHub repository</a>.</p>
+<p><strong><span style="font-weight: 400;"></span></strong></p>
+<img src="http://feeds.feedburner.com/~r/Baeldung/~4/CcSJ2gNm37w" height="1" width="1" alt=""/>]]></content:encoded>
+            <wfw:commentRss>https://www.baeldung.com/java-replace-if-statements/feed/</wfw:commentRss>
+            <slash:comments>6</slash:comments>
+            <image>https://www.baeldung.com/social-core-java-1/</image>
+            <feedburner:origLink>https://www.baeldung.com/java-replace-if-statements</feedburner:origLink>
+        </item>
+        <item>
+            <title>Deep Dive Into the New Java JIT Compiler – Graal</title>
+            <link>http://feedproxy.google.com/~r/Baeldung/~3/gJ_CI-2pyao/graal-java-jit-compiler</link>
+            <comments>https://www.baeldung.com/graal-java-jit-compiler#respond</comments>
+            <pubDate>Thu, 08 Nov 2018 18:10:50 +0000</pubDate>
+            <dc:creator><![CDATA[baeldung]]></dc:creator>
+            <category><![CDATA[Java]]></category>
+            <category><![CDATA[JVM]]></category>
+
+            <guid isPermaLink="false">https://www.baeldung.com/?p=44934</guid>
+            <description><![CDATA[Explore the functionalities of the new Java JIT compiler - Graal.]]></description>
+            <content:encoded><![CDATA[
+<h2 id="overview"><strong>1. Overview</strong></h2>
+<p>In this tutorial, we&#8217;ll take a deeper look at the new Java Just-In-Time (JIT) compiler, called Graal.</p>
+<p>We&#8217;ll see what the project <a href="https://github.com/oracle/graal">Graal</a> is and describe one of its parts, a high-performance dynamic JIT compiler.</p>
+<h2 id="jit-compiler">2. What is a JIT Compiler</h2>
+<p>Let&#8217;s first explain what JIT compiler does.</p>
+<p><strong>When we compile our Java program (e.g., using the <em>javac</em> command), we&#8217;ll end up with our source code compiled into the binary representation of our code &#8211; a JVM bytecode</strong>. This bytecode is simpler and more compact than our source code, but conventional processors in our computers cannot execute it.</p>
+<p><strong>To be able to run a Java program, the JVM interprets the bytecode</strong>. Since interpreters are usually a lot slower than native code executing on a real processor, the <strong>JVM can run another compiler which will now compile our bytecode into the machine code that can be run by the processor</strong>. This so-called just-in-time compiler is much more sophisticated than the <em>javac</em> compiler, and it runs complex optimizations to generate high-quality machine code.</p>
+<h2 id="detailed-jit">3. More Detailed Look into the JIT Compiler</h2>
+<p>The JDK implementation by Oracle is based on the open-source OpenJDK project. This includes the <strong>HotSpot virtual machine</strong>, available since Java version 1.3. It <strong>contains two conventional JIT-compilers: the client compiler, also called C1 and the server compiler, called opto or C2</strong>.</p>
+<p>C1 is designed to run faster and produce less optimized code, while C2, on the other hand, takes a little more time to run but produces a better-optimized code. The client compiler is a better fit for desktop applications since we don&#8217;t want to have long pauses for the JIT-compilation. The server compiler is better for long-running server applications that can spend more time on the compilation.</p>
+<h3>3.1. Tiered Compilation</h3>
+<p>Today, Java installation uses both JIT compilers during the normal program execution.</p>
+<p>As we mentioned in the previous section, our Java program, compiled by <em>javac</em>, starts its execution in an interpreted mode. The JVM tracks each frequently called method and compiles them. In order to do that, it uses C1 for the compilation. But, the HotSpot still keeps an eye on the future calls of those methods. If the number of calls increases, the JVM will recompile these methods once more, but this time using C2.</p>
+<p>This is the default strategy used by the HotSpot, called<strong> tiered compilation</strong>.</p>
+<h3>3.2. The Server Compiler</h3>
+<p>Let&#8217;s now focus for a bit on C2, since it is the most complex of the two. C2 has been extremely optimized and produces code that can compete with C++ or be even faster. The server compiler itself is written in a specific dialect of C++.</p>
+<p>However, it comes with some issues. Due to possible segmentation faults in C++, it can cause the VM to crash. Also, no major improvements have been implemented in the compiler over the last several years. The code in C2 has become difficult to maintain, so we couldn&#8217;t expect new major enhancements with the current design. With that in mind, the new JIT compiler is being created in the project named GraalVM.</p>
+<h2 id="project-graal">4. Project GraalVM</h2>
+<p>Project <a href="https://www.graalvm.org/">GraalVM</a> is a research project created by Oracle with the goal to replace the HotSpot entirely. We can look at Graal as several connected projects: a new JIT compiler for the HotSpot and a new polyglot virtual machine. It offers a comprehensive ecosystem supporting a large set of languages (Java and other JVM-based languages; JavaScript, Ruby, Python, R,  C/C++, and other LLVM-based languages).</p>
+<p>We&#8217;ll of course focus on Java.</p>
+<h3>4.1. Graal &#8211; a JIT Compiler Written in Java</h3>
+<p><strong>Graal is a high-performance JIT compiler. </strong>It accepts the JVM bytecode and produces the machine code.</p>
+<p>There are several key advantages of writing a compiler in Java. First of all, safety, meaning no crashes but exceptions instead and no real memory leaks. Furthermore, we&#8217;ll have a good IDE support and we&#8217;ll be able to use debuggers or profilers or other convenient tools. Also, the compiler can be independent of the HotSpot and it would be able to produce a faster JIT-compiled version of itself.</p>
+<p>The Graal compiler was created with those advantages in mind. <strong>It uses the new JVM Compiler Interface &#8211; JVMCI to communicate with the VM</strong>. To enable the use of the new JIT compiler, we need to set the following options when running Java from the command line:</p>
+<pre class="brush: text; gutter: true">-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI -XX:+UseJVMCICompiler</pre>
+<p>What this means is that <strong>we can run a simple program in three different ways: with the regular tiered compilers, with the JVMCI version of Graal on Java 10 or with the GraalVM itself</strong>.</p>
+<h3>4.2. JVM Compiler Interface</h3>
+<p>The JVMCI is part of the OpenJDK since JDK 9, so we can use any standard OpenJDK or Oracle JDK to run Graal.</p>
+<p><strong>What JVMCI actually allows us to do is to exclude the standard tiered compilation and plug in our brand new compiler (i.e. Graal) without the need of changing anything in the JVM.</strong></p>
+<p>The interface is quite simple. When Graal is compiling a method, it&#8217;ll pass the bytecode of that method as the input to the JVMCI&#8217;. As an output, we&#8217;ll get the compiled machine code. Both the input and the output are just byte arrays:</p>
+<pre class="brush: text; gutter: true">interface JVMCICompiler {
+    byte[] compileMethod(byte[] bytecode);
+}</pre>
+<p>In real-life scenarios, we&#8217;ll usually need some more information like the number of local variables, the stack size, and the information collected from profiling in the interpreter so that we know how the code is running in practice.</p>
+<p>Essentially, when calling the <em>compileMethod</em>() of the <em><a href="https://github.com/md-5/OpenJDK/blob/master/src/jdk.internal.vm.ci/share/classes/jdk.vm.ci.runtime/src/jdk/vm/ci/runtime/JVMCICompiler.java">JVMCICompiler</a></em> interface, we&#8217;ll need to pass a <em>CompilationRequest</em> object. It&#8217;ll then return the Java method we want to compile, and in that method, we&#8217;ll find all the information we need.</p>
+<h3>4.3. Graal in Action</h3>
+<p>Graal itself is executed by the VM, so it&#8217;ll first be interpreted and JIT-compiled when it becomes hot. Let&#8217;s check out an example, which can be also found on the <a href="https://www.graalvm.org/docs/examples/java-performance-examples/">GraalVM&#8217;s official site</a>:</p>
+<pre class="brush: java; gutter: true">public class CountUppercase {
+    static final int ITERATIONS = Math.max(Integer.getInteger(&quot;iterations&quot;, 1), 1);
+
+    public static void main(String[] args) {
+        String sentence = String.join(&quot; &quot;, args);
+        for (int iter = 0; iter &lt; ITERATIONS; iter++) {
+            if (ITERATIONS != 1) {
+                System.out.println(&quot;-- iteration &quot; + (iter + 1) + &quot; --&quot;);
+            }
+            long total = 0, start = System.currentTimeMillis(), last = start;
+            for (int i = 1; i &lt; 10_000_000; i++) {
+                total += sentence
+                  .chars()
+                  .filter(Character::isUpperCase)
+                  .count();
+                if (i % 1_000_000 == 0) {
+                    long now = System.currentTimeMillis();
+                    System.out.printf(&quot;%d (%d ms)%n&quot;, i / 1_000_000, now - last);
+                    last = now;
+                }
+            }
+            System.out.printf(&quot;total: %d (%d ms)%n&quot;, total, System.currentTimeMillis() - start);
+        }
+    }
+}</pre>
+<p>Now, we&#8217;ll compile it and run it:</p>
+<pre class="brush: text; gutter: true">javac CountUppercase.java
+java -XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI -XX:+UseJVMCICompiler</pre>
+<p>This will result in the output similar to the following:</p>
+<pre class="brush: text; gutter: true">1 (1581 ms)
+2 (480 ms)
+3 (364 ms)
+4 (231 ms)
+5 (196 ms)
+6 (121 ms)
+7 (116 ms)
+8 (116 ms)
+9 (116 ms)
+total: 59999994 (3436 ms)</pre>
+<p>We can see that <strong>it takes more time in the beginning</strong>. That warm-up time depends on various factors, such as the amount of multi-threaded code in the application or the number of threads the VM uses. If there are fewer cores, the warm-up time could be longer.</p>
+<p>If we want to see the statistics of Graal compilations we need to add the following flag when executing our program:</p>
+<pre class="brush: text; gutter: true">-Dgraal.PrintCompilation=true</pre>
+<p>This will show the data related to the compiled method, the time taken, the bytecodes processed (which includes inlined methods as well), the size of the machine code produced, and the amount of memory allocated during compilation. The output of the execution takes quite a lot of space, so we won&#8217;t show it here.</p>
+<h3>4.4. Comparing with the Top Tier Compiler</h3>
+<p>Let&#8217;s now compare the above results with the execution of the same program compiled with the top tier compiler instead. To do that, we need to tell the VM to not use the JVMCI compiler:</p>
+<pre class="brush: text; gutter: true">java -XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI -XX:-UseJVMCICompiler 
+1 (510 ms)
+2 (375 ms)
+3 (365 ms)
+4 (368 ms)
+5 (348 ms)
+6 (370 ms)
+7 (353 ms)
+8 (348 ms)
+9 (369 ms)
+total: 59999994 (4004 ms)</pre>
+<p>We can see that there is a smaller difference between the individual times. It also results in a briefer initial time.</p>
+<h3>4.5. The Data Structure Behind Graal</h3>
+<p>As we said earlier, Graal basically turns a byte array into another byte array. In this section, we&#8217;ll focus on what&#8217;s behind this process. The following examples are relying on <a href="https://chrisseaton.com/truffleruby/jokerconf17/">Chris Seaton&#8217;s talk at JokerConf 2017</a>.</p>
+<p>Basic compiler&#8217;s job, in general, is to act upon our program. This means that it must symbolize it with an appropriate data structure. <strong>Graal uses a graph for such a purpose, the so-called program-dependence-graph</strong>.</p>
+<p>In a simple scenario, where we want to add two local variables, i.e., <em>x + y</em>, <strong>we would have one node for loading each variable and another node for adding them</strong>. Beside it, <strong>we&#8217;d also have two edges representing the data flow</strong>:</p>
+<a href="https://www.baeldung.com/wp-content/uploads/2018/11/data-graph-x-p-y.png"><img class="aligncenter wp-image-44939 size-large" src="https://www.baeldung.com/wp-content/uploads/2018/11/data-graph-x-p-y-1024x355.png" alt="" width="580" height="201" srcset="https://www.baeldung.com/wp-content/uploads/2018/11/data-graph-x-p-y-1024x355.png 1024w, https://www.baeldung.com/wp-content/uploads/2018/11/data-graph-x-p-y-300x104.png 300w, https://www.baeldung.com/wp-content/uploads/2018/11/data-graph-x-p-y-768x267.png 768w, https://www.baeldung.com/wp-content/uploads/2018/11/data-graph-x-p-y-100x35.png 100w" sizes="(max-width: 580px) 100vw, 580px" /></a>
+<p><strong>The data flow edges are displayed in blue</strong>. They&#8217;re pointing out that when the local variables are loaded, the result goes into the addition operation.</p>
+<p>Let&#8217;s now introduce <strong>another type of edges, the ones that describe the control flow</strong>. To do so, we&#8217;ll extend our example by calling methods to retrieve our variables instead of reading them directly. When we do that, we need to keep track of the methods calling order. We&#8217;ll represent this order with the red arrows:</p>
+<a href="https://www.baeldung.com/wp-content/uploads/2018/11/control-graph-getx-p-gety.png"><img class="aligncenter wp-image-44938 size-large" src="https://www.baeldung.com/wp-content/uploads/2018/11/control-graph-getx-p-gety-1024x461.png" alt="" width="580" height="261" srcset="https://www.baeldung.com/wp-content/uploads/2018/11/control-graph-getx-p-gety-1024x461.png 1024w, https://www.baeldung.com/wp-content/uploads/2018/11/control-graph-getx-p-gety-300x135.png 300w, https://www.baeldung.com/wp-content/uploads/2018/11/control-graph-getx-p-gety-768x346.png 768w, https://www.baeldung.com/wp-content/uploads/2018/11/control-graph-getx-p-gety-100x45.png 100w" sizes="(max-width: 580px) 100vw, 580px" /></a>
+<p>Here, we can see that the nodes didn&#8217;t change actually, but we have the control flow edges added.</p>
+<h3>4.6. Actual Graphs</h3>
+<p>We can examine the real Graal graphs with the <a href="http://ssw.jku.at/General/Staff/TW/igv.html">IdealGraphVisualiser</a>. To run it, we use the <em>mx igv </em>command. We also need to configure the JVM by setting the <em>-Dgraal.Dump</em> flag.</p>
+<p>Let&#8217;s check out a simple example:</p>
+<pre class="brush: java; gutter: true">int average(int a, int b) {
+    return (a + b) / 2;
+}</pre>
+<p>This has a very simple data flow:</p>
+<a href="https://www.baeldung.com/wp-content/uploads/2018/11/graph-average.png"><img class="aligncenter wp-image-44937 size-medium" src="https://www.baeldung.com/wp-content/uploads/2018/11/graph-average-276x300.png" alt="" width="276" height="300" srcset="https://www.baeldung.com/wp-content/uploads/2018/11/graph-average-276x300.png 276w, https://www.baeldung.com/wp-content/uploads/2018/11/graph-average-768x834.png 768w, https://www.baeldung.com/wp-content/uploads/2018/11/graph-average-100x109.png 100w, https://www.baeldung.com/wp-content/uploads/2018/11/graph-average.png 783w" sizes="(max-width: 276px) 100vw, 276px" /></a>
+<p>In the graph above, we can see a clear representation of our method. Parameters P(0) and P(1) flow into the add operation which enters the divide operation with the constant C(2). Finally, the result is returned.</p>
+<p>We&#8217;ll now change the previous example to be applicable to an array of numbers:</p>
+<pre class="brush: java; gutter: true">int average(int[] values) {
+    int sum = 0;
+    for (int n = 0; n &lt; values.length; n++) {
+        sum += values[n];
+    }
+    return sum / values.length;
+}</pre>
+<p>We can see that adding a loop led us to the much more complex graph:</p>
+<a href="https://www.baeldung.com/wp-content/uploads/2018/11/average-loop-detail.png"><img class="aligncenter wp-image-44936 size-large" src="https://www.baeldung.com/wp-content/uploads/2018/11/average-loop-detail-640x1024.png" alt="" width="580" height="928" srcset="https://www.baeldung.com/wp-content/uploads/2018/11/average-loop-detail-640x1024.png 640w, https://www.baeldung.com/wp-content/uploads/2018/11/average-loop-detail-187x300.png 187w, https://www.baeldung.com/wp-content/uploads/2018/11/average-loop-detail-768x1229.png 768w, https://www.baeldung.com/wp-content/uploads/2018/11/average-loop-detail-100x160.png 100w, https://www.baeldung.com/wp-content/uploads/2018/11/average-loop-detail.png 896w" sizes="(max-width: 580px) 100vw, 580px" /></a>
+<p>What we can notice <strong>here are:</strong></p>
+<ul>
+<li>the begin and the end loop nodes</li>
+<li>the nodes representing the array reading and the array length reading</li>
+<li>data and control flow edges, just as before.</li>
+</ul>
+<p><strong>This data structure is sometimes called a sea-of-nodes, or a soup-of-nodes</strong>. We need to mention that the C2 compiler uses a similar data structure, so it&#8217;s not something new, innovated exclusively for Graal.</p>
+<p>It is noteworthy remember that Graal optimizes and compiles our program by modifying the above-mentioned data structure. We can see why it was an actually good choice to write the Graal JIT compiler in Java: <strong>a graph is nothing more than a set of objects with references connecting them as the edges. That structure is perfectly compatible with the object-oriented language, which in this case is Java</strong>.</p>
+<h3><strong>4.7. Ahead-of-Time Compiler Mode</strong></h3>
+<p>It is also important to mention that <strong>we can also use the Graal compiler in the Ahead-of-Time compiler mode in Java 10</strong>. As we said already, the Graal compiler has been written from scratch. It conforms to a new clean interface, the JVMCI, which enables us to integrate it with the HotSpot. That doesn&#8217;t mean that the compiler is bound to it though.</p>
+<p>One way of using the compiler is to use a profile-driven approach to compile only the hot methods, but <strong>we can also make use of Graal to do a total compilation of all methods in an offline mode without executing the code</strong>. This is a so-called &#8220;Ahead-of-Time Compilation&#8221;, <a href="http://openjdk.java.net/jeps/295">JEP 295,</a> but we&#8217;ll not go deep into the AOT compilation technology here.</p>
+<p>The main reason why we would use Graal in this manner is to speed up startup time until the regular Tiered Compilation approach in the HotSpot can take over.</p>
+<h2 id="conclusion">5. Conclusion</h2>
+<p>In this article, we explored the functionalities of the new Java JIT compiler as the part of the project Graal.</p>
+<p>We first described traditional JIT compilers and then discuss new features of the Graal, especially the new JVM Compiler interface. Then, we illustrated how both compilers work and compared their performances.</p>
+<p>After that, we&#8217;ve talked about the data structure that Graal uses to manipulate our program and, finally, about the AOT compiler mode as another way to use Graal.</p>
+<p>As always, the source code can be found <a href="https://github.com/eugenp/tutorials/tree/master/core-java-10">over on GitHub</a>. Remember that the JVM needs to be configured with the specific flags &#8211; which were described here.</p>
+
+<img src="http://feeds.feedburner.com/~r/Baeldung/~4/gJ_CI-2pyao" height="1" width="1" alt=""/>]]></content:encoded>
+            <wfw:commentRss>https://www.baeldung.com/graal-java-jit-compiler/feed/</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+            <image>https://www.baeldung.com/java-eclipse-equals-and-hashcode/social-core-java-4/</image>
+            <feedburner:origLink>https://www.baeldung.com/graal-java-jit-compiler</feedburner:origLink>
+        </item>
+        <item>
+            <title>Working with Dates in Kotlin</title>
+            <link>http://feedproxy.google.com/~r/Baeldung/~3/6TTbWYnyprY/kotlin-dates</link>
+            <comments>https://www.baeldung.com/kotlin-dates#respond</comments>
+            <pubDate>Wed, 07 Nov 2018 20:16:43 +0000</pubDate>
+            <dc:creator><![CDATA[Dhawal Kapil]]></dc:creator>
+            <category><![CDATA[Kotlin]]></category>
+
+            <guid isPermaLink="false">https://www.baeldung.com/?p=44900</guid>
+            <description><![CDATA[Learn how to handle dates in Kotlin]]></description>
+            <content:encoded><![CDATA[
+<h2><strong>1. Introduction </strong></h2>
+<p>In this quick tutorial, we&#8217;ll learn about working with dates in Kotlin.</p>
+<p>We&#8217;ll be looking into <em>Date-</em>related operations such as creating, formatting and manipulating dates.</p>
+<h2><strong>2. Creating a Date</strong></h2>
+<p><strong>The quickest way to create a <em>Date</em> object is using <em>LocalDate</em>&#8216;s<em> parse()</em> method:</strong></p>
+<pre class="brush: java; gutter: true">var date = LocalDate.parse(&quot;2018-12-12&quot;)</pre>
+<p>The <em>parse() </em>method by default uses the <a href="https://en.wikipedia.org/wiki/ISO_8601">standard date format</a> <em>yyyy-MM-dd</em>.</p>
+<p><strong>We can also pass our own format to parse a date String:</strong></p>
+<pre class="brush: java; gutter: true">var formatter = DateTimeFormatter.ofPattern(&quot;dd-MM-yyyy&quot;)
+var date = LocalDate.parse(&quot;31-12-2018&quot;, formatter)</pre>
+<p>And, if we need more control we can <strong>explicitly specify the <em>year</em>, <em>day</em> and <em>month </em>using <em>LocalDate</em>&#8216;s <em>of() </em>method<em>:</em></strong></p>
+<pre class="brush: java; gutter: true">var date = LocalDate.of(2018, 12, 31)</pre>
+<h2><strong>3. Formatting a Date</strong></h2>
+<p>Next, let&#8217;s look into how we can format our date objects back to <em>Strings</em>.</p>
+<p><strong>The default way of formatting Date using default format in <em>Kotlin </em>is invoking the <em>toString() method</em>.</strong></p>
+<p>Let&#8217;s create a date</p>
+<pre class="brush: java; gutter: true">var date = LocalDate.parse(&quot;2018-12-31&quot;)</pre>
+<p>and look at the default output of using <em>toString</em>:</p>
+<pre class="brush: java; gutter: true">assertThat(date.toString()).isEqualTo(&quot;2018-12-31&quot;)</pre>
+<p>This looks readable as the output format is <em>yyyy-MM-dd</em>, but again, we may need to format the date to custom formats depending on our use-cases.</p>
+<p><strong>To format our date to different formats we can use <em>LocalDate</em>&#8216;s <em>format() </em>method</strong> and supply to it our custom format using <em>DateTimeFormatter</em>:</p>
+<pre class="brush: java; gutter: true">var formatter = DateTimeFormatter.ofPattern(&quot;dd-MMMM-yyyy&quot;)
+var formattedDate = date.format(formatter)</pre>
+<p>This outputs a nicely formatted date:</p>
+<pre class="brush: java; gutter: true">assertThat(formattedDate).isEqualTo(&quot;31-December-2018&quot;)</pre>
+<h2><strong>4. Extracting Date Components</strong></h2>
+<p><strong><em>LocalDate </em>provides many methods that we can use to extract specific components from <em>Date.</em></strong></p>
+<p>Some of these are quite trivial such as extracting the year, month or day from a <em>Date</em>:</p>
+<pre class="brush: java; gutter: true">var date = LocalDate.parse(&quot;2018-12-31&quot;)
+assertThat(date.year).isEqualTo(2018)
+assertThat(date.month).isEqualTo(Month.DECEMBER)
+assertThat(date.dayOfMonth).isEqualTo(31)</pre>
+<p><strong>We can also extract other information like e<em>ra</em>, d<em>ayOfTheWeek</em> or d<em>ayOfTheMonth</em>:</strong></p>
+<pre class="brush: java; gutter: true">assertThat(date.era.toString()).isEqualTo(&quot;CE&quot;)        
+assertThat(date.dayOfWeek).isEqualTo(DayOfWeek.MONDAY)
+assertThat(date.dayOfYear).isEqualTo(365)</pre>
+<h2><strong>5. Working with <em>Period</em></strong></h2>
+<p>Finally, let&#8217;s look into working with <em>Periods</em> in Kotlin.</p>
+<p><strong>Periods represent a distance on the timeline. We can create a <em>Period</em> using <em>Period</em>&#8216;s class factory method:</strong></p>
+<pre class="brush: java; gutter: true">var period = Period.of(1, 2, 3)</pre>
+<p>This creates a <em>Period</em> of 1 year, 2 months and 3 days.</p>
+<p>To add this <em>Period</em> to an existing date, we use the <em>LocalDate</em>&#8216;s  <em>plus() </em>method:</p>
+<pre class="brush: java; gutter: true">var date = LocalDate.of(2018, 6, 25)
+var modifiedDate = date.plus(period)</pre>
+<p>This will add 1 year, 2 months and 3 days to the given date and produce the modified date:</p>
+<pre class="brush: java; gutter: true">assertThat(modifiedDate).isEqualTo(&quot;2019-08-28&quot;)</pre>
+<p>Similarly, we can subtract a <em>Period </em>from a given date:</p>
+<pre class="brush: java; gutter: true">var date = LocalDate.of(2018, 6, 25)
+var modifiedDate = date.minus(period)</pre>
+<p>And as expected, the modified date will be:</p>
+<pre class="brush: java; gutter: true">assertThat(modifiedDate).isEqualTo(&quot;2017-04-22&quot;)</pre>
+<p>Also, we can use Periods to represent the distance between two dates.</p>
+<p>Let&#8217;s suppose we have two dates, exactly 6 months apart from each other:</p>
+<pre class="brush: java; gutter: true">var date1 = LocalDate.parse(&quot;2018-06-25&quot;)
+var date2 = LocalDate.parse(&quot;2018-12-25&quot;)</pre>
+<p>Now, we can represent the distance between these two dates using Period&#8217;s <em>between </em>method:</p>
+<pre class="brush: java; gutter: true">var period = Period.between(date1, date2)</pre>
+<p>The <em>period </em>variable will produce the following<em>:</em></p>
+<pre class="brush: java; gutter: true">assertThat(period.toString()).isEqualTo(&quot;P6M&quot;)</pre>
+<p><em>P </em>stands for <em>Period</em> and <em>6M </em>means 6 months.</p>
+<h2><strong>6. Conclusion</strong></h2>
+<p>In this article, we have learned the basics of how to work with Dates in Kotlin.</p>
+<p>We have looked into how to create date instances using various methods and how to format date objects back into readable texts.</p>
+<p>Furthermore, we looked into extracting components from <em>Date </em>objects and finally how to work with <em>Periods</em> in Kotlin.</p>
+<p>The code used in this tutorial is available <a href="https://github.com/eugenp/tutorials/tree/master/kotlin-libraries">over on Github</a>.</p>
+
+<img src="http://feeds.feedburner.com/~r/Baeldung/~4/6TTbWYnyprY" height="1" width="1" alt=""/>]]></content:encoded>
+            <wfw:commentRss>https://www.baeldung.com/kotlin-dates/feed/</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+            <image>https://www.baeldung.com/junit-5-parameters/kotlin-2/</image>
+            <feedburner:origLink>https://www.baeldung.com/kotlin-dates</feedburner:origLink>
+        </item>
+        <item>
+            <title>Installing Java on Ubuntu</title>
+            <link>http://feedproxy.google.com/~r/Baeldung/~3/Pftgp3la5og/ubuntu-install-jdk</link>
+            <comments>https://www.baeldung.com/ubuntu-install-jdk#respond</comments>
+            <pubDate>Wed, 07 Nov 2018 15:12:29 +0000</pubDate>
+            <dc:creator><![CDATA[baeldung]]></dc:creator>
+            <category><![CDATA[DevOps]]></category>
+            <category><![CDATA[Java]]></category>
+
+            <guid isPermaLink="false">https://www.baeldung.com/?p=44860</guid>
+            <description>
+                <![CDATA[Learn how to install OpenJDK and Oracle JDK versions 8 through 11 on Ubuntu systems.]]></description>
+            <content:encoded><![CDATA[
+<h2 id="overview"><strong>1. Overview</strong></h2>
+<p>In this tutorial, we&#8217;ll introduce <strong>different methods for installing a JDK on Ubuntu</strong>. Then, we&#8217;ll briefly compare the methods. Finally, we&#8217;ll show how to manage multiple Java installations on an Ubuntu system.</p>
+<p>As a prerequisite to each method, we need</p>
+<ul>
+<li>an Ubuntu system</li>
+<li>to be logged in as a non-root user with <em>sudo</em> privileges</li>
+</ul>
+<p>The instructions described below have been tested on Ubuntu 18.10, 18.04 LTS, 16.04 LTS, and 14.04 LTS. For Ubuntu 14.04 LTS, there&#8217;re some differences, which are mentioned in the text.</p>
+<p>Please note that both the packages you can download from OpenJDK and Oracle and the packages available in repositories are updated regularly. The exact package names will probably change within some months, but the basic methods of installation will remain the same.</p>
+<h2 id="jdk-11"><strong>2. Installing JDK 11</strong></h2>
+<p>If we want to use the latest and greatest version of JDK, often manual installation is the way to go. This means downloading a package from the OpenJDK or the Oracle site and setting it up so that it adheres to the conventions of how <em>apt</em> sets up the JDK packages.</p>
+<h3><strong>2.1. Installing OpenJDK 11 Manually</strong></h3>
+<p>First of all, let&#8217;s download the <em>tar</em> archive of the recently released OpenJDK 11:</p>
+<pre class="brush: bash; gutter: false">$ wget https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz</pre>
+<p>And we compare the <em>sha256</em> sum of the downloaded package with <a href="https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz.sha256">the one provided on the OpenJDK site</a>:</p>
+<pre class="brush: bash; gutter: false">$ sha256sum openjdk-11_linux-x64_bin.tar.gz</pre>
+<p>Let&#8217;s extract the <em>tar</em> archive:</p>
+<pre class="brush: bash; gutter: false">$ tar xzvf openjdk-11_linux-x64_bin.tar.gz</pre>
+<p>Next, let&#8217;s move the <em>jdk-11</em> directory we&#8217;ve just extracted into a subdirectory of <em>/usr/lib/jvm</em>. The <em>apt</em> packages described in the next section also put their JDKs into this directory:</p>
+<pre class="brush: bash; gutter: false">$ sudo mkdir /usr/lib/jvm
+$ sudo mv jdk-11 /usr/lib/jvm/openjdk-11-manual-installation/
+</pre>
+<p>Now, we want to <strong>make the <em>java</em> and <em>javac</em> commands available</strong>. One possibility would be to create symbolic links for them, for example, in the <em>/usr/bin</em> directory. But instead, we&#8217;ll install an alternative for both of them. This way, if we ever wish to install additional versions of JDK, they will play nicely together:</p>
+<pre class="brush: bash; gutter: false">$ sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/openjdk-11-manual-installation/bin/java 1
+$ sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/openjdk-11-manual-installation/bin/javac 1</pre>
+<p>Let&#8217;s verify the installation:</p>
+<pre class="brush: bash; gutter: false">$ java -version</pre>
+<p>As we can see from the output, we&#8217;ve indeed installed the latest version of the OpenJDK JRE and JVM:</p>
+<pre class="brush: bash; gutter: false">openjdk version &quot;11&quot; 2018-09-25
+OpenJDK Runtime Environment 18.9 (build 11+28)
+OpenJDK 64-Bit Server VM 18.9 (build 11+28, mixed mode)
+</pre>
+<p>Let&#8217;s have a look at the compiler version also:</p>
+<pre class="brush: bash; gutter: false">$ javac -version</pre>
+<pre class="brush: bash; gutter: false">javac 11</pre>
+<h3><strong>2.2. Installing Oracle JDK 11 Manually</strong></h3>
+<p>If we want to make sure to use the newest version of Oracle JDK, we can follow a similar manual installation workflow, as for OpenJDK. In order to download the <em>tar</em> archive for JDK 11 from the <a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html" target="_blank" rel="noopener">Oracle website</a>, <strong>we must accept a license agreement first</strong>. For this reason, downloading via <em>wget</em> is a bit more complicated than for OpenJDK:</p>
+<pre class="brush: bash; gutter: false">$ wget -c --header &quot;Cookie: oraclelicense=accept-securebackup-cookie&quot; \
+http://download.oracle.com/otn-pub/java/jdk/11.0.1+13/90cf5d8f270a4347a95050320eef3fb7/jdk-11.0.1_linux-x64_bin.tar.gz</pre>
+<p>The example above downloads the package for 11.0.1 The exact download link changes for each minor version.</p>
+<p>The following steps are the same as for OpenJDK:</p>
+<pre class="brush: bash; gutter: false">$ sha256sum jdk-11.0.1_linux-x64_bin.tar.gz
+$ tar xzvf jdk-11.0.1_linux-x64_bin.tar.gz
+$ sudo mkdir /usr/lib/jvm
+$ sudo mv jdk-11.0.1 /usr/lib/jvm/oracle-jdk-11-manual-installation/
+$ sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/oracle-jdk-11-manual-installation/bin/java 1
+$ sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/oracle-jdk-11-manual-installation/bin/javac 1</pre>
+<p>The verification is also the same. But the output shows that this time, we&#8217;ve installed not OpenJDK but Java(TM):</p>
+<pre class="brush: bash; gutter: false">$ java -version</pre>
+<pre class="brush: bash; gutter: false">java version &quot;11.0.1&quot; 2018-10-16 LTS
+Java(TM) SE Runtime Environment 18.9 (build 11.0.1+13-LTS)
+Java HotSpot(TM) 64-Bit Server VM 18.9 (build 11.0.1+13-LTS, mixed mode)</pre>
+<p>And for the compiler:</p>
+<pre class="brush: bash; gutter: false">$ javac -version</pre>
+<pre class="brush: bash; gutter: false">javac 11.0.1</pre>
+<h3><strong>2.3. Installing Oracle JDK 11 from a PPA</strong></h3>
+<p>Currently, Oracle JDK 11 is also available in a PPA (personal package archive). This installation involves 2 steps: adding the repository to our system and installing the package from the repository via <em>apt:</em></p>
+<pre class="brush: bash; gutter: false">$ sudo add-apt-repository ppa:linuxuprising/java
+$ sudo apt update
+$ sudo apt install oracle-java11-installer</pre>
+<p>The verifying steps should show the same result as after the manual installation in section 2.2.1.:</p>
+<pre class="brush: bash; gutter: false">$ java -version</pre>
+<pre class="brush: bash; gutter: false">java version &quot;11.0.1&quot; 2018-10-16 LTS
+Java(TM) SE Runtime Environment 18.9 (build 11.0.1+13-LTS)
+Java HotSpot(TM) 64-Bit Server VM 18.9 (build 11.0.1+13-LTS, mixed mode)</pre>
+<p>And for the compiler:</p>
+<pre class="brush: bash; gutter: false">$ javac -version</pre>
+<pre class="brush: bash; gutter: false">javac 11.0.1</pre>
+<p>On Ubuntu 14.04 LTS the <em>add-apt-repository</em> command isn&#8217;t available by default. In order to add a repository, first we need to install the <em>software-properties-common</em> package.</p>
+<pre class="brush: bash; gutter: false">$ sudo apt update
+$ sudo apt install software-properties-common</pre>
+<p>Afterward, we can continue with <em>add-apt-repository, apt update </em>and <em>apt install</em> as shown above.</p>
+<h2 id="jdk-8"><strong>3. Installing JDK 8</strong></h2>
+<h3 id="default-jdk"><strong>3.1. Installing OpenJDK 8 on Ubuntu 16.04 LTS and Newer</strong></h3>
+<p>JDK 8 is an LTS version that has been around for a while. For this reason, we can find an up-to-date version of OpenJDK 8 in the &#8220;Main&#8221; repository on most of the supported Ubuntu versions. Of course, we can also head to the OpenJDK website, grab a package there, and install it the same way we&#8217;ve seen in the previous section.</p>
+<p>But using the <em>apt</em> tooling and the &#8220;Main&#8221; repository provides some benefits. The &#8220;Main&#8221; repository is available by default on all Ubuntu systems. It&#8217;s supported by Canonical — the same company that maintains Ubuntu itself.</p>
+<p>Let&#8217;s install OpenJDK 8 from the &#8220;Main&#8221; repository with <em>apt</em>:</p>
+<pre class="brush: bash; gutter: false">$ sudo apt update
+$ sudo apt install openjdk-8-jdk</pre>
+<p>Now, let&#8217;s verify the installation:</p>
+<pre class="brush: bash; gutter: false">$ java -version</pre>
+<p class="brush: bash; gutter: false">The result should list a Runtime Environment and a JVM:</p>
+<pre class="brush: bash; gutter: false">openjdk version &quot;1.8.0_181&quot;
+OpenJDK Runtime Environment (build 1.8.0_181-8u181-b13-0ubuntu0.18.04.1-b13)
+OpenJDK 64-Bit Server VM (build 25.181-b13, mixed mode)</pre>
+<p>Let&#8217;s check that the <em>javac</em> executable is available as well:</p>
+<pre class="brush: bash; gutter: false">$ javac -version</pre>
+<p>Now we should see the same version number as shown above:</p>
+<pre class="brush: bash; gutter: false">javac 1.8.0_181</pre>
+<h3><strong>3.2. Installing OpenJDK 8 on Ubuntu 14.04 LTS</strong></h3>
+<p>On Ubuntu 14.04 LTS, the OpenJDK packages aren&#8217;t available in the &#8220;Main&#8221; repository, so we&#8217;ll install them from the <em>openjdk-r</em> PPA. As we&#8217;ve seen in section 2.3 above, the <em>add-apt-repository</em> command isn&#8217;t available by default. We need the <em>software-properties-common</em> package for it:</p>
+<pre class="brush: bash; gutter: false">$ sudo apt update
+$ sudo apt install software-properties-common
+$ sudo add-apt-repository ppa:openjdk-r/ppa
+$ sudo apt update
+$ sudo apt install openjdk-8-jdk</pre>
+<h3 id="default-jdk"><strong>3.3. Installing Oracle JDK 8 from a PPA</strong></h3>
+<p>The &#8220;Main&#8221; repository does not contain any proprietary software. <strong>If we want to install Oracle Java with <em>apt</em>, we&#8217;ll have to use a package from a PPA</strong>. We&#8217;ve already seen how to install Oracle JDK 11 from the <em>linuxuprising</em> PPA. For Java 8, we can find the packages in the <em>webupd8team</em> PPA.</p>
+<p>First, we need to add the PPA <em>apt</em> repository to our system:</p>
+<pre class="brush: bash; gutter: false">$ sudo add-apt-repository ppa:webupd8team/java</pre>
+<p>Then we can install the package the usual way:</p>
+<pre class="brush: bash; gutter: false">$ sudo apt update
+$ sudo apt install oracle-java8-installer</pre>
+<p>During the installation, we have to accept Oracle&#8217;s license agreement. Let&#8217;s verify the installation:</p>
+<pre class="brush: bash; gutter: false">$ java -version</pre>
+<p>The output shows a Java(TM) JRE and JVM:</p>
+<pre class="brush: bash; gutter: false">java version &quot;1.8.0_181&quot;
+Java(TM) SE Runtime Environment (build 1.8.0_181-b13)
+Java HotSpot(TM) 64-Bit Server VM (build 25.181-b13, mixed mode)</pre>
+<p>We can also verify that the compiler has been installed:</p>
+<pre class="brush: bash; gutter: false">$ javac -version</pre>
+<pre class="brush: bash; gutter: false">javac 1.8.0_181</pre>
+<pre class="brush: bash; gutter: false"></pre>
+<h2 id="jdk-10">4. Installing JDK 10</h2>
+<p>The versions Java 10 and Java 9 aren&#8217;t supported anymore. You can install them manually, following similar steps as in section 2. You can grab the packages from:</p>
+<ul>
+<li><a href="https://jdk.java.net/archive/">https://jdk.java.net/archive/</a></li>
+<li><a href="https://www.oracle.com/technetwork/java/javase/archive-139210.html">https://www.oracle.com/technetwork/java/javase/archive-139210.html</a></li>
+</ul>
+<p>Both sites contain the same warning:</p>
+<blockquote><p>
+These older versions of the JDK are provided to help developers debug issues in older systems. <span class="warning">They are not updated with the latest security patches and are not recommended for use in production.</span>
+</p></blockquote>
+<h3><strong>4.1.  Installing OpenJDK 10 Manually</strong></h3>
+<p>Let&#8217;s see how to install OpenJDK 10.0.1:</p>
+<pre class="brush: bash; gutter: false">$ wget https://download.java.net/java/GA/jdk10/10.0.1/fb4372174a714e6b8c52526dc134031e/10/openjdk-10.0.1_linux-x64_bin.tar.gz
+$ sha256sum openjdk-10.0.1_linux-x64_bin.tar.gz
+$ tar xzvf openjdk-10.0.1_linux-x64_bin.tar.gz
+$ sudo mkdir /usr/lib/jvm
+$ sudo mv jdk-10.0.1 /usr/lib/jvm/openjdk-10-manual-installation/
+$ sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/openjdk-10-manual-installation/bin/java 1
+$ sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/openjdk-10-manual-installation/bin/javac 1
+$ java -version
+$ javac -version</pre>
+<h3><strong>4.2. Installing Oracle JDK 10 Manually</strong></h3>
+<p>As we&#8217;ve seen in section 2.2., in order to download a package from the Oracle website, <strong>we must accept a license agreement first</strong>. Contrary to the supported versions, we can&#8217;t download the older Oracle JDKs via <em>wget</em> and a cookie. We need to head to <a href="https://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase10-4425482.html">https://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase10-4425482.html</a> and download the <em>tar.gz</em> file. Afterward, we follow the familiar steps:</p>
+<pre class="brush: bash; gutter: false">$ sha256sum jdk-10.0.2_linux-x64_bin.tar.gz
+$ tar xzvf jdk-10.0.2_linux-x64_bin.tar.gz
+$ sudo mkdir /usr/lib/jvm
+$ sudo mv jdk-10.0.2 /usr/lib/jvm/oracle-jdk-10-manual-installation/
+$ sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/oracle-jdk-10-manual-installation/bin/java 1
+$ sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/oracle-jdk-10-manual-installation/bin/javac 1
+$ java -version
+$ javac -version</pre>
+<h2 id="jdk-9">5. Installing JDK 9</h2>
+<h3>5.1. Installing OpenJDK 9 Manually</h3>
+<p>Just like we saw above with OpenJDK 10.0.1, we download the OpenJDK 9 package via <em>wget</em> and set it up according to the conventions:</p>
+<pre class="brush: bash; gutter: false">$ wget https://download.java.net/java/GA/jdk9/9.0.4/binaries/openjdk-9.0.4_linux-x64_bin.tar.gz
+$ sha256sum openjdk-9.0.4_linux-x64_bin.tar.gz
+$ tar xzvf openjdk-9.0.4_linux-x64_bin.tar.gz
+$ sudo mkdir /usr/lib/jvm
+$ sudo mv jdk-9.0.4 /usr/lib/jvm/openjdk-9-manual-installation/
+$ sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/openjdk-9-manual-installation/bin/java 1
+$ sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/openjdk-9-manual-installation/bin/javac 1
+$ java -version
+$ javac -version</pre>
+<h3>5.2. Installing Oracle JDK 9 Manually</h3>
+<p>Once again, we use the same method as for JDK 10. We need to head to <a href="https://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase9-3934878.html">https://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase9-3934878.html</a> and download the <em>tar.gz</em> file. Afterward, we follow the familiar steps:</p>
+<pre class="brush: bash; gutter: false">$ sha256sum jdk-9.0.4_linux-x64_bin.tar.gz
+$ tar xzvf jdk-9.0.4_linux-x64_bin.tar.gz
+$ sudo mkdir /usr/lib/jvm
+$ sudo mv jdk-9.0.4 /usr/lib/jvm/oracle-jdk-9-manual-installation/
+$ sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/oracle-jdk-9-manual-installation/bin/java 1
+$ sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/oracle-jdk-9-manual-installation/bin/javac 1
+$ java -version
+$ javac -version</pre>
+<h2 id="comparison"><strong>6. Comparison</strong></h2>
+<p>We&#8217;ve seen three different ways of installing a JDK on Ubuntu. Let&#8217;s have a quick overview of each of them, pointing out the advantages and disadvantages.</p>
+<h3><strong>6.1. &#8220;Main&#8221; Repository</strong></h3>
+<p>This is the <strong>&#8220;Ubuntu native&#8221; way of installation</strong>. A big advantage is that we update the packages via the &#8220;usual <em>apt</em> workflow&#8221; with <em>apt update</em> and <em>apt upgrade</em>.</p>
+<p>Furthermore, the &#8220;Main&#8221; repository is maintained by Canonical, which <strong>provides reasonably fast (if not immediate) updates</strong>. For example, OpenJDK versions 10.0.1 and 10.0.2 were both synced within a month of release.</p>
+<h3><strong>6.2. PPA</strong></h3>
+<p>PPAs are small repositories <strong>maintained by an individual developer or a group</strong>. This also means that the update frequency depends on the maintainer.</p>
+<p>Packages from PPAs are considered <strong>riskier than the packages in the &#8220;Main&#8221; repository</strong>. First, we have to add the PPA explicitly to the system&#8217;s repository list, indicating that we trust it. Afterward, we can manage the packages via the usual <em>apt</em> tooling (<em>apt update</em> and <em>apt upgrade</em>).</p>
+<h3><strong>6.3. Manual Installation</strong></h3>
+<p>We download the package directly from the OpenJDK or Oracle site. <strong>Although this method offers a great deal of flexibility, updates are our responsibility.</strong> If we want to have the latest and greatest JDK, this is the way to go.</p>
+<h2 id="other-openjdk"><strong>7. Exploring Other Versions of JDKs</strong></h2>
+<p>The examples in sections 2 and 3 reflect the current status on Ubuntu 18.04 LTS. Keep in mind that the JDKs and the corresponding packages are updated regularly. Thus it&#8217;s useful to know how to <strong>explore our current possibilities</strong>.</p>
+<p>In this section, we&#8217;ll focus on surveying the OpenJDK packages in the &#8220;Main&#8221; repository. If we&#8217;ve already added a PPA with <em>add-apt-repository</em>, we can explore it in a similar manner with <em>apt list</em> and <em>apt show</em>.</p>
+<p>To discover which PPAs are available, we can head to <a href="https://launchpad.net/">https://launchpad.net/</a>. If we don&#8217;t find what we&#8217;re looking for in the &#8220;Main&#8221; repository and in the PPAs, we&#8217;ll have to fall back to manual installation.</p>
+<p>If we&#8217;d like to use an unsupported version, even that can be difficult. As of this writing, we didn&#8217;t find any packages for Java 9 or Java 10 on the OpenJDK and Oracle websites.</p>
+<p>Let&#8217;s see which other JDK packages exist in the &#8220;Main&#8221; repository:</p>
+<pre class="brush: bash; gutter: false">$ apt list openjdk*jdk</pre>
+<p>On Ubuntu 18.04 LTS, we can choose between the two current LTS Java versions:</p>
+<pre class="brush: bash; gutter: false">Listing... Done
+openjdk-11-jdk/bionic-updates,bionic-security,now 10.0.2+13-1ubuntu0.18.04.2 amd64 [installed,automatic]
+openjdk-8-jdk/bionic-updates,bionic-security 8u181-b13-0ubuntu0.18.04.1 amd64</pre>
+<p class="brush: bash; gutter: false">It&#8217;s also worth noting that although the package is called <em>openjdk-11-jdk</em>, as of this writing, it actually installs version 10.0.2. This is likely to change soon. We can see that if we inspect the package:</p>
+<pre class="brush: bash; gutter: false">$ apt show openjdk-11-jdk</pre>
+<p>Let&#8217;s have a look at the &#8220;Depends&#8221; section of the output. Note that these packages (e.g. a JRE) also get installed alongside <em>openjdk-11-jdk</em>:</p>
+<pre class="brush: bash; gutter: false">Depends: openjdk-11-jre (= 10.0.2+13-1ubuntu0.18.04.2),
+openjdk-11-jdk-headless (= 10.0.2+13-1ubuntu0.18.04.2),
+libc6 (&gt;= 2.2.5)</pre>
+<p class="brush: bash; gutter: false">Let&#8217;s explore which other packages we have at our disposal besides the default jdk package:</p>
+<pre class="brush: bash; gutter: false">$ apt list openjdk-11*</pre>
+<pre class="brush: bash; gutter: false">Listing... Done
+openjdk-11-dbg/bionic-updates,bionic-security 10.0.2+13-1ubuntu0.18.04.2 amd64
+openjdk-11-demo/bionic-updates,bionic-security 10.0.2+13-1ubuntu0.18.04.2 amd64
+openjdk-11-doc/bionic-updates,bionic-updates,bionic-security,bionic-security 10.0.2+13-1ubuntu0.18.04.2 all
+openjdk-11-jdk/bionic-updates,bionic-security 10.0.2+13-1ubuntu0.18.04.2 amd64
+openjdk-11-jdk-headless/bionic-updates,bionic-security 10.0.2+13-1ubuntu0.18.04.2 amd64
+openjdk-11-jre/bionic-updates,bionic-security,now 10.0.2+13-1ubuntu0.18.04.2 amd64 [installed,automatic]
+openjdk-11-jre-headless/bionic-updates,bionic-security,now 10.0.2+13-1ubuntu0.18.04.2 amd64 [installed,automatic]
+openjdk-11-jre-zero/bionic-updates,bionic-security 10.0.2+13-1ubuntu0.18.04.2 amd64
+openjdk-11-source/bionic-updates,bionic-updates,bionic-security,bionic-security 10.0.2+13-1ubuntu0.18.04.2 all</pre>
+<pre class="brush: bash; gutter: false"></pre>
+<p>We may find some of these packages useful. For example, <em>openjdk-11-source</em> contains source files for the classes of the Java core API, while <em>openjdk-11-dbg</em> contains the debugging symbols.</p>
+<p>Besides the <em>openjdk-*</em> family, there&#8217;s the <em style="font-size: 16px;">default-jdk</em><span style="font-size: 16px;"> package, that is worth exploring:</span></p>
+<pre class="brush: bash; gutter: false">$ apt show default-jdk</pre>
+<p>At the end of the output, the description says:</p>
+<blockquote><p>&#8220;This dependency package points to the Java runtime, or Java compatible development kit recommended for this architecture&#8230;&#8221;</p></blockquote>
+<p>In the case of Ubuntu 18.04 LTS, it&#8217;s the package <em>openjdk-11-jdk</em> at the moment.</p>
+<h2 id="versions-table" class="brush: bash; gutter: false"><strong>8. Overview: Java Versions and Packages</strong></h2>
+<p>Now, let&#8217;s have a look at how different versions of Java could be installed on Ubuntu 18.04 LTS as of this writing:</p>
+<table border="1">
+<thead>
+<tr>
+<td style="text-align: center; padding: 1em;">Version</td>
+<td style="text-align: center; padding: 1em;">OpenJDK</td>
+<td style="text-align: center; padding: 1em;">Oracle Java</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center; padding: 1em;">11</td>
+<td style="padding: 1em;">manual installation</td>
+<td style="padding: 1em;">manual installation<br />
+<em>oracle-java11-installer</em> in the <em>linuxuprising</em> PPA</td>
+</tr>
+<tr>
+<td style="text-align: center; padding: 1em;">10</td>
+<td style="padding: 1em;">manual installation &#8211; not supported</td>
+<td style="padding: 1em;">manual installation &#8211; not supported</td>
+</tr>
+<tr>
+<td style="text-align: center; padding: 1em;">9</td>
+<td style="padding: 1em;">manual installation &#8211; not supported</td>
+<td style="padding: 1em;">manual installation &#8211; not supported</td>
+</tr>
+<tr>
+<td style="text-align: center; padding: 1em;">8</td>
+<td style="padding: 1em;"><em>openjdk-8-jdk</em> in the &#8220;Main&#8221; repository</td>
+<td style="padding: 1em;"><em>oracle-java8-installer</em> in the <em>webupd8team</em> PPA</td>
+</tr>
+</tbody>
+</table>
+<h2 id="multiple-versions"><strong>9. Multiple Java Versions on an Ubuntu System</strong></h2>
+<p>The standard way for managing multiple versions of the same software on Ubuntu is via the Debian Alternatives System. Most of the time we create, maintain and display alternatives via the <em>update-alternatives</em> program.</p>
+<p><strong>When <em>apt</em> installs a JDK package, it automatically adds the entries for the alternatives.</strong> In the case of manual installation, we&#8217;ve seen how to add the alternatives for <em>java</em> and <em>javac</em> respectively.</p>
+<p>Let&#8217;s have a look at our alternatives:</p>
+<pre class="brush: bash; gutter: false">$ update-alternatives --display java</pre>
+<p>On our test system, where we&#8217;ve installed two different versions of OpenJDK, the output lists both alternatives with their respective priorities:</p>
+<pre class="brush: bash; gutter: false">java - auto mode
+link best version is /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+link currently points to /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+link java is /usr/bin/java
+slave java.1.gz is /usr/share/man/man1/java.1.gz
+/usr/lib/jvm/java-11-openjdk-amd64/bin/java - priority 1101
+slave java.1.gz: /usr/lib/jvm/java-11-openjdk-amd64/man/man1/java.1.gz
+/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java - priority 1081
+slave java.1.gz: /usr/lib/jvm/java-8-openjdk-amd64/jre/man/man1/java.1.gz</pre>
+<p>Now that we&#8217;ve seen our alternatives, <strong>we can also switch between them:</strong></p>
+<pre class="brush: bash; gutter: false">$ sudo update-alternatives --config java</pre>
+<p>Additionally, we get an interactive output, where we can switch between the alternatives via the keyboard:</p>
+<pre class="brush: bash; gutter: false">There are 2 choices for the alternative java (providing /usr/bin/java).
+
+Selection Path Priority Status
+------------------------------------------------------------
+* 0 /usr/lib/jvm/java-11-openjdk-amd64/bin/java 1101 auto mode
+1 /usr/lib/jvm/java-11-openjdk-amd64/bin/java 1101 manual mode
+2 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java 1081 manual mode
+
+Press &lt;enter&gt; to keep the current choice[*], or type selection number:</pre>
+<p>If we&#8217;re working on multiple applications written in different versions of Java, chances are we&#8217;ll also need different versions of other software (e.g. Maven, some application server). In that case, we may want to consider using greater abstractions such as Docker containers.</p>
+<h2 id="conclusion"><strong>10. Conclusion</strong></h2>
+<p>To summarize, in this article, we&#8217;ve seen examples of installing a JDK from the &#8220;Main&#8221; repository, from a PPA, and manually. We&#8217;ve briefly compared these three installation methods.</p>
+<p>And finally, we&#8217;ve seen how to manage multiple Java installations on Ubuntu system with <em>update-alternatives</em>.</p>
+<p>As a next step, it may be useful to <a href="https://www.baeldung.com/java-home-on-windows-7-8-10-mac-os-x-linux">set the <em>JAVA_HOME</em> environment variable</a>.</p>
+
+<img src="http://feeds.feedburner.com/~r/Baeldung/~4/Pftgp3la5og" height="1" width="1" alt=""/>]]></content:encoded>
+            <wfw:commentRss>https://www.baeldung.com/ubuntu-install-jdk/feed/</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+            <image>https://www.baeldung.com/java-on-baeldung-2/</image>
+            <feedburner:origLink>https://www.baeldung.com/ubuntu-install-jdk</feedburner:origLink>
+        </item>
+        <item>
+            <title>Generate a Secure Random Password in Java</title>
+            <link>http://feedproxy.google.com/~r/Baeldung/~3/QxfyXMMPp3w/java-generate-secure-password</link>
+            <comments>https://www.baeldung.com/java-generate-secure-password#respond</comments>
+            <pubDate>Wed, 07 Nov 2018 15:05:54 +0000</pubDate>
+            <dc:creator><![CDATA[baeldung]]></dc:creator>
+            <category><![CDATA[Java]]></category>
+            <category><![CDATA[Security]]></category>
+
+            <guid isPermaLink="false">https://www.baeldung.com/?p=44858</guid>
+            <description><![CDATA[Learn several methods for generating secure random passwords in Java.]]></description>
+            <content:encoded><![CDATA[
+<h2 id="intro"><strong>1. Introduction</strong></h2>
+<p>In this tutorial, we&#8217;ll look at various methods we can use to generate a secure random password in Java.</p>
+<p>In our examples, we&#8217;ll be generating ten-character passwords, each with a minimum of two lower case characters, two uppercase characters, two digits, and two special characters.</p>
+<h2 id="using-passay">2. Using Passay</h2>
+<p><a href="http://www.passay.org/">Passay</a> is a password policy enforcement library. Notably, we can make use of the library to generate the password using a configurable ruleset.</p>
+<p>With the help of the default <em>CharacterData</em> implementations, we can formulate the rules required for the password. Furthermore, we can <strong>formulate custom <em>CharacterData</em> implementations to suit our requirements</strong>:<strong><br />
+</strong></p>
+<pre class="brush: java; gutter: true">public String generatePassayPassword() {
+    PasswordGenerator gen = new PasswordGenerator();
+    CharacterData lowerCaseChars = EnglishCharacterData.LowerCase;
+    CharacterRule lowerCaseRule = new CharacterRule(lowerCaseChars);
+    lowerCaseRule.setNumberOfCharacters(2);
+
+    CharacterData upperCaseChars = EnglishCharacterData.UpperCase;
+    CharacterRule upperCaseRule = new CharacterRule(upperCaseChars);
+    upperCaseRule.setNumberOfCharacters(2);
+
+    CharacterData digitChars = EnglishCharacterData.Digit;
+    CharacterRule digitRule = new CharacterRule(digitChars);
+    digitRule.setNumberOfCharacters(2);
+
+    CharacterData specialChars = new CharacterData() {
+        public String getErrorCode() {
+            return ERROR_CODE;
+        }
+
+        public String getCharacters() {
+            return &quot;!@#$%^&amp;*()_+&quot;;
+        }
+    };
+    CharacterRule splCharRule = new CharacterRule(specialChars);
+    splCharRule.setNumberOfCharacters(2);
+
+    String password = gen.generatePassword(10, splCharRule, lowerCaseRule, 
+      upperCaseRule, digitRule);
+    return password;
+}</pre>
+<p>Here, we&#8217;ve created a custom <em>CharacterData</em> implementation for special characters. This allows us to restrict the set of valid characters allowed.</p>
+<p>Apart from that, we&#8217;re making use of default implementations of <em>CharacterData</em> for our other rules.</p>
+<p>Now, let&#8217;s check our generator against a unit test. For instance, we can check the presence of two special characters:</p>
+<pre class="brush: java; gutter: true">@Test
+public void whenPasswordGeneratedUsingPassay_thenSuccessful() {
+    RandomPasswordGenerator passGen = new RandomPasswordGenerator();
+    String password = passGen.generatePassayPassword();
+    int specialCharCount = 0;
+    for (char c : password.toCharArray()) {
+        if (c &gt;= 33 || c &lt;= 47) {
+            specialCharCount++;
+        }
+    }
+    assertTrue(&quot;Password validation failed in Passay&quot;, specialCharCount &gt;= 2);
+}</pre>
+<p>It&#8217;s worth noting that <strong>although Passay is open source, it is dual licensed under both LGPL and Apache 2</strong>. As with any third-party software, we must be sure to comply with these licenses when we use it in our products. The GNU website has more information about <a href="https://www.gnu.org/licenses/lgpl-java.en.html" target="_blank" rel="noopener">the LGPL and Java</a>.</p>
+<h2 id="using-common-text">3. Using <em>RandomStringGenerator</em></h2>
+<p>Next, let&#8217;s look at the <em>RandomStringGenerator </em>in <a href="https://commons.apache.org/proper/commons-text/">Apache Commons Text</a>. With <em>RandomStringGenerator,</em> we can generate Unicode strings containing the specified number of code points.</p>
+<p>Now, we&#8217;ll create an instance of the generator by using the <em>RandomStringGenerator.Builder</em> class. Of course, we can also further manipulate the properties of the generator.</p>
+<p>With the help of the builder, we can easily change the default implementation of randomness. Moreover, we can also define the characters that are allowed in the string:</p>
+<pre class="brush: java; gutter: true">public String generateRandomSpecialCharacters(int length) {
+    RandomStringGenerator pwdGenerator = new RandomStringGenerator.Builder().withinRange(33, 45)
+        .build();
+    return pwdGenerator.generate(length);
+}
+</pre>
+<p>Now, one limitation of using <em>RandomStringGenerator</em> is that it <strong>lacks the ability to specify the number of characters in each set, like in Passay.</strong> However, we can circumvent that by merging the results of multiple sets:</p>
+<pre class="brush: java; gutter: true">public String generateCommonTextPassword() {
+    String pwString = generateRandomSpecialCharacters(2).concat(generateRandomNumbers(2))
+      .concat(generateRandomAlphabet(2, true))
+      .concat(generateRandomAlphabet(2, false))
+      .concat(generateRandomCharacters(2));
+    List&lt;Character&gt; pwChars = pwString.chars()
+      .mapToObj(data -&gt; (char) data)
+      .collect(Collectors.toList());
+    Collections.shuffle(pwChars);
+    String password = pwChars.stream()
+      .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+      .toString();
+    return password;
+}</pre>
+<p>Next, let&#8217;s validate the generated password by verifying the lowercase letters:</p>
+<pre class="brush: java; gutter: true">@Test
+public void whenPasswordGeneratedUsingCommonsText_thenSuccessful() {
+    RandomPasswordGenerator passGen = new RandomPasswordGenerator();
+    String password = passGen.generateCommonTextPassword();
+    int lowerCaseCount = 0;
+    for (char c : password.toCharArray()) {
+        if (c &gt;= 97 || c &lt;= 122) {
+            lowerCaseCount++;
+        }
+    }
+    assertTrue(&quot;Password validation failed in commons-text &quot;, lowerCaseCount &gt;= 2);
+}</pre>
+<p>By default, <em>RandomStringGenerator</em> makes use of <em>ThreadLocalRandom</em> for randomness. Now, it&#8217;s important to mention <strong>that this does not ensure cryptographic security</strong>.</p>
+<p>However, we can set the source of randomness using <em>usingRandom(TextRandomProvider). </em>For instance, we can make use of <em><a href="https://syncope.apache.org/apidocs/2.0/org/apache/syncope/common/lib/SecureTextRandomProvider.html">SecureTextRandomProvider</a></em> for cryptographic security:</p>
+<pre class="brush: java; gutter: true">public String generateRandomSpecialCharacters(int length) {
+    SecureTextRandomProvider stp = new SecureTextRandomProvider();
+    RandomStringGenerator pwdGenerator = new RandomStringGenerator.Builder()
+      .withinRange(33, 45)
+      .usingRandom(stp)
+      .build();
+    return pwdGenerator.generate(length);
+}</pre>
+<h2 id="using-common-lang3">4. Using <em>RandomStringUtils</em></h2>
+<p>Another option that we could employ is the <em>RandomStringUtils</em> class in the <a href="http://commons.apache.org/proper/commons-lang/">Apache Commons Lang Library</a>. This class exposes several static methods that we can use for our problem statement.</p>
+<p>Let&#8217;s see how we can provide the range of code points that are acceptable for the password:</p>
+<pre class="brush: java; gutter: true"> public String generateCommonLangPassword() {
+    String upperCaseLetters = RandomStringUtils.random(2, 65, 90, true, true);
+    String lowerCaseLetters = RandomStringUtils.random(2, 97, 122, true, true);
+    String numbers = RandomStringUtils.randomNumeric(2);
+    String specialChar = RandomStringUtils.random(2, 33, 47, false, false);
+    String totalChars = RandomStringUtils.randomAlphanumeric(2);
+    String combinedChars = upperCaseLetters.concat(lowerCaseLetters)
+      .concat(numbers)
+      .concat(specialChar)
+      .concat(totalChars);
+    List&lt;Character&gt; pwdChars = combinedChars.chars()
+      .mapToObj(c -&gt; (char) c)
+      .collect(Collectors.toList());
+    Collections.shuffle(pwdChars);
+    String password = pwdChars.stream()
+      .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+      .toString();
+    return password;
+}</pre>
+<p>To validate the generated password, let&#8217;s verify the number of numeric characters:</p>
+<pre class="brush: java; gutter: true">@Test
+public void whenPasswordGeneratedUsingCommonsLang3_thenSuccessful() {
+    RandomPasswordGenerator passGen = new RandomPasswordGenerator();
+    String password = passGen.generateCommonsLang3Password();
+    int numCount = 0;
+    for (char c : password.toCharArray()) {
+        if (c &gt;= 48 || c &lt;= 57) {
+            numCount++;
+        }
+    }
+    assertTrue(&quot;Password validation failed in commons-lang3&quot;, numCount &gt;= 2);
+}</pre>
+<p>Here, <em>RandomStringUtils</em> makes use of <em><a href="https://docs.oracle.com/javase/6/docs/api/java/util/Random.html?is-external=true">Random</a></em> by default as the source of randomness. However, there is a method within the library that lets us specify the source of randomness:</p>
+<pre class="brush: java; gutter: true">String lowerCaseLetters = RandomStringUtils.
+  random(2, 97, 122, true, true, null, new SecureRandom());</pre>
+<p>Now, we could ensure cryptographic security using an instance of <em>SecureRandom</em>. However, this functionality cannot be extended to other methods in the library. On a side note, <strong>Apache advocates the usage of <em>RandomStringUtils</em> for simple use cases only.</strong></p>
+<h2 id="using-custom-utility">5. Using a Custom Utility Method</h2>
+<p>We can also make use of the <em>SecureRandom</em> class to create a custom utility class for our scenario. For starters, let&#8217;s generate a string of special characters of length two:</p>
+<pre class="brush: java; gutter: true">public Stream&lt;Character&gt; getRandomSpecialChars(int count) {
+    Random random = new SecureRandom();
+    IntStream specialChars = random.ints(count, 33, 45);
+    return specialChars.mapToObj(data -&gt; (char) data);
+}</pre>
+<p>Also, notice that <em>33</em> and <em>45</em> denote the range of Unicode characters. Now, we can generate multiple streams as per our requirements. Then we can merge the result sets to generate the required password:</p>
+<pre class="brush: java; gutter: true">public String generateSecureRandomPassword() {
+    Stream&lt;Character&gt; pwdStream = Stream.concat(getRandomNumbers(2), 
+      Stream.concat(getRandomSpecialChars(2), 
+      Stream.concat(getRandomAlphabets(2, true), getRandomAlphabets(4, false))));
+    List&lt;Character&gt; charList = pwdStream.collect(Collectors.toList());
+    Collections.shuffle(charList);
+    String password = charList.stream()
+        .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+        .toString();
+    return password;
+}
+</pre>
+<p>Now, let&#8217;s validate the generated password for the number of special characters:</p>
+<pre class="brush: java; gutter: true">@Test
+public void whenPasswordGeneratedUsingSecureRandom_thenSuccessful() {
+    RandomPasswordGenerator passGen = new RandomPasswordGenerator();
+    String password = passGen.generateSecureRandomPassword();
+    int specialCharCount = 0;
+    for (char c : password.toCharArray()) {
+        if (c &gt;= 33 || c &lt;= 47) {
+            specialCharCount++;
+        }
+    }
+    assertTrue(&quot;Password validation failed in Secure Random&quot;, specialCharCount &gt;= 2);
+}</pre>
+<h2 id="conclusion">6. Conclusion</h2>
+<p>In this tutorial, we were able to generate passwords, conforming to our requirements, using different libraries.</p>
+<p>As always, the code samples used in the article are available <a href="https://github.com/eugenp/tutorials/tree/master/java-strings">over on Github</a>.</p>
+
+<img src="http://feeds.feedburner.com/~r/Baeldung/~4/QxfyXMMPp3w" height="1" width="1" alt=""/>]]></content:encoded>
+            <wfw:commentRss>https://www.baeldung.com/java-generate-secure-password/feed/</wfw:commentRss>
+            <slash:comments>0</slash:comments>
+            <image>https://www.baeldung.com/junit-5-parameters/on-baeldung-2/</image>
+            <feedburner:origLink>https://www.baeldung.com/java-generate-secure-password</feedburner:origLink>
+        </item>
+        <item>
+            <title>Convert Latitude and Longitude to a 2D Point in Java</title>
+            <link>http://feedproxy.google.com/~r/Baeldung/~3/9uo1TB965BQ/java-convert-latitude-longitude</link>
+            <comments>https://www.baeldung.com/java-convert-latitude-longitude#comments</comments>
+            <pubDate>Wed, 07 Nov 2018 07:31:52 +0000</pubDate>
+            <dc:creator><![CDATA[Grigorios Dimopoulos]]></dc:creator>
+            <category><![CDATA[Algorithms]]></category>
+            <category><![CDATA[Java]]></category>
+
+            <guid isPermaLink="false">https://www.baeldung.com/?p=44855</guid>
+            <description>
+                <![CDATA[Learn how to use the Mercator projection to convert latitude and longitude coordinates onto a 2D surface]]></description>
+            <content:encoded><![CDATA[<p><strong><span style="font-weight: 400;"></span></strong></p>
+<h2><strong>1. Overview</strong></h2>
+<p>When implementing applications that use maps, we will typically run into the problem of coordinate conversion. Most of the time, we need to<strong> convert latitude and longitude to a 2D point to display</strong>. Fortunately, to solve this problem, we can utilize the formulas of the Mercator projection.</p>
+<p>In this tutorial, we&#8217;ll cover the Mercator Projection and will learn how to implement its two variants.</p>
+<h2><b>2. Mercator Projection </b></h2>
+<p>The <a href="https://en.wikipedia.org/wiki/Mercator_projection">Mercator projection</a> is a map projection introduced by the Flemish cartographer Gerardus Mercator in 1569. A map projection converts latitude and longitude coordinates on the Earth to a point on a flat surface. In other words, <strong>it translates a point on the surface of the earth to a point on a flat map</strong>.</p>
+<p>There are two ways of implementing the Mercator projection. <strong>The pseudo Mercator projection treats the Earth as a sphere. The true Mercator projection models the Earth as an ellipsoid</strong>. We will implement both versions.</p>
+<p>Let&#8217;s start with a base class for both Mercator projection implementations:</p>
+<pre class="brush: java; gutter: true">abstract class Mercator {
+    final static double RADIUS_MAJOR = 6378137.0;
+    final static double RADIUS_MINOR = 6356752.3142;
+
+    abstract double yAxisProjection(double input);
+    abstract double xAxisProjection(double input);
+}</pre>
+<p>This class also provides the major and the minor radius of Earth measured in meters. It is well known that Earth is not exactly a sphere. For that reason, we need two radiuses. Firstly, the <strong>major radius is the distance from the center of the earth to the equator</strong>. Secondly, the <strong>minor radius is the distance from the center of the earth to the north and south poles</strong>.</p>
+<h3><strong>2.1. Spherical Mercator Projection</strong></h3>
+<p>The pseudo-projection model treats the earth as a sphere. In contrast to the elliptical projection where the Earth would be projected on a more accurate shape. This approach allows us a <strong>quick estimation</strong> to the more precise, but computational heavier <span style="float: none; background-color: transparent; color: #333333; cursor: text; font-family: Georgia,'Times New Roman','Bitstream Charter',Times,serif; font-size: 16px; font-style: normal; font-variant: normal; font-weight: 400; letter-spacing: normal; text-align: left; text-decoration: none; text-indent: 0px;">elliptical </span>projection. As a result of that, the direct <strong>measurements of distances</strong> in this projection will be approximate.</p>
+<p>Furthermore, the proportions of the shapes on the map will marginally alter. As a result of that <span style="float: none; background-color: transparent; color: #333333; cursor: text; font-family: Georgia,'Times New Roman','Bitstream Charter',Times,serif; font-size: 16px; font-style: normal; font-variant: normal; font-weight: 400; letter-spacing: normal; text-align: left; text-decoration: none; text-indent: 0px;">latitude </span>and ratios of shapes of objects on the map like countries, lakes, rivers, etc. are not <b>precisely preserved</b>.</p>
+<p>This is also called the <a href="https://en.wikipedia.org/wiki/Web_Mercator_projection">Web Mercator</a> projection &#8211; commonly used in web applications including Google Maps.</p>
+<p>Let&#8217;s implement this approach:</p>
+<pre class="brush: java; gutter: true">public class SphericalMercator extends Mercator {
+
+    @Override
+    double xAxisProjection(double input) {
+        return Math.toRadians(input) * RADIUS_MAJOR;
+    }
+
+    @Override
+    double yAxisProjection(double input) {
+        return Math.log(Math.tan(Math.PI / 4 + Math.toRadians(input) / 2)) * RADIUS_MAJOR;
+    }
+}</pre>
+<p>The first thing to note on this approach is the fact that this approach represents the <strong>radius</strong> of the earth by <strong>one constant</strong> and not two as it really is.  Secondly, we can see that we have implemented two functions to use for converting to <strong>x-axis projection</strong> and <strong>y-axis projection</strong>. In the class above we have used <em>Math</em> library provided by java to help us make our code simpler.</p>
+<p>Let&#8217;s test a simple conversion:</p>
+<pre class="brush: java; gutter: true">Assert.assertEquals(2449028.7974520186, sphericalMercator.xAxisProjection(22));
+Assert.assertEquals(5465442.183322753, sphericalMercator.yAxisProjection(44));</pre>
+<p>It is worth noting that this projection will map points into a bounding box (left, bottom, right, top) of (-20037508.34, -23810769.32, 20037508.34, 23810769.32).</p>
+<h3>2<b>.2. Elliptical Mercator Projection</b></h3>
+<p>The true projection models the earth as an ellipsoid. <strong>This projection gives</strong> <strong>accurate ratios</strong> <strong>for objects anywhere on Earth</strong>. Certainly,<strong> it respects objects on the map but</strong> <strong>not 100% accurate</strong>. However, this approach is not the most frequently used because it is computationally complex.</p>
+<p>Let&#8217;s implement this approach:</p>
+<pre class="brush: java; gutter: true">class EllipticalMercator extends Mercator {
+    @Override
+    double yAxisProjection(double input) {
+
+        input = Math.min(Math.max(input, -89.5), 89.5);
+        double earthDimensionalRateNormalized = 1.0 - Math.pow(RADIUS_MINOR / RADIUS_MAJOR, 2);
+
+        double inputOnEarthProj = Math.sqrt(earthDimensionalRateNormalized) * 
+          Math.sin( Math.toRadians(input));
+
+        inputOnEarthProj = Math.pow(((1.0 - inputOnEarthProj) / (1.0+inputOnEarthProj)), 
+          0.5 * Math.sqrt(earthDimensionalRateNormalized));
+        
+        double inputOnEarthProjNormalized = 
+          Math.tan(0.5 * ((Math.PI * 0.5) - Math.toRadians(input))) / inputOnEarthProj;
+        
+        return (-1) * RADIUS_MAJOR * Math.log(inputOnEarthProjNormalized);
+    }
+
+    @Override
+    double xAxisProjection(double input) {
+        return RADIUS_MAJOR * Math.toRadians(input);
+    }
+}</pre>
+<p>Above we can see how complex this approach is regarding the projection on the y-axis. This is because it should take into consideration the non-round earth shape. Although the true Mercator approach seems complex, is more accurate than the spherical approach as it uses to radius for representing earth one minor and one major.</p>
+<p>Let&#8217;s test a simple conversion:</p>
+<pre class="brush: java; gutter: true">Assert.assertEquals(2449028.7974520186, ellipticalMercator.xAxisProjection(22));
+Assert.assertEquals(5435749.887511954, ellipticalMercator.yAxisProjection(44));</pre>
+<p>This projection will map points into a bounding box of (-20037508.34, -34619289.37, 20037508.34, 34619289.37).</p>
+<h2>3<b>. Conclusion</b></h2>
+<p>If we need to convert latitude and longitude coordinates onto a 2D surface, we can use the Mercator projection. Depending on the accuracy we need for our implementation, we can use the spherical or elliptical approach.</p>
+<p>As always, we can find the code of this article <a href="https://github.com/eugenp/tutorials/tree/master/algorithms-miscellaneous-2">over on GitHub</a>.</p>
+<p><strong><span style="font-weight: 400;"></span></strong></p>
+<img src="http://feeds.feedburner.com/~r/Baeldung/~4/9uo1TB965BQ" height="1" width="1" alt=""/>]]></content:encoded>
+            <wfw:commentRss>https://www.baeldung.com/java-convert-latitude-longitude/feed/</wfw:commentRss>
+            <slash:comments>2</slash:comments>
+            <image>https://www.baeldung.com/java-on-baeldung-2/</image>
+            <feedburner:origLink>https://www.baeldung.com/java-convert-latitude-longitude</feedburner:origLink>
+        </item>
+    </channel>
+</rss>
