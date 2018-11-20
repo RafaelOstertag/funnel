@@ -1,27 +1,34 @@
 package ch.guengel.funnel.domain
 
-class FeedItems {
-    private val internalItems: MutableSet<FeedItem> = HashSet()
+import java.util.*
+
+class FeedItems(val maxItems: Int = 20) {
+    private val internalItems: MutableSet<FeedItem> = TreeSet()
     val size: Int get() = internalItems.size
     val items: Set<FeedItem> get() = internalItems
-    var latest: FeedItem = FeedItem.empty()
-        private set
+    val latest: FeedItem
+        get() {
+            return if (internalItems.isEmpty())
+                FeedItem.empty()
+            else
+                internalItems.last()
+        }
 
     fun add(item: FeedItem) {
-        if (internalItems.add(item)) {
-            updateLatest(item)
-        }
-    }
-
-    private fun updateLatest(item: FeedItem) {
-        if (latest.created.isBefore(item.created)) {
-            latest = item
-        }
+        internalItems.add(item)
+        trimToMaxItems()
     }
 
     fun hasItem(item: FeedItem): Boolean = internalItems.contains(item)
 
     fun mergeWith(feedItems: FeedItems) {
-        feedItems.internalItems.forEach(::add)
+        internalItems.addAll(feedItems.internalItems)
+        trimToMaxItems()
+    }
+
+    private fun trimToMaxItems() {
+        while (internalItems.size > maxItems) {
+            internalItems.remove(internalItems.first())
+        }
     }
 }

@@ -46,4 +46,15 @@ class FeedItemsTest {
         assertEquals(4, newsItems1.size)
         assertEquals(item4, newsItems2.latest)
     }
+
+    @Test
+    fun `should handle max items`() {
+        val newsItems = FeedItems(2)
+        for (i in 1..9) {
+            newsItems.add(makeItem(i))
+        }
+
+        assertEquals(2, newsItems.size)
+        assertEquals(makeItem(9), newsItems.latest)
+    }
 }
