@@ -4,13 +4,13 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 
-class NewsItemsTest {
+class FeedItemsTest {
 
     @Test
     fun `empty NewsItems`() {
-        val empty = NewsItems()
+        val empty = FeedItems()
 
-        assertEquals(NewsItem.empty(), empty.latest)
+        assertEquals(FeedItem.empty(), empty.latest)
     }
 
     @Test
@@ -18,7 +18,7 @@ class NewsItemsTest {
         val item1 = makeItem(1)
         val item2 = makeItem(2)
 
-        val newsItems = NewsItems()
+        val newsItems = FeedItems()
         newsItems.add(item1)
         newsItems.add(item2)
 
@@ -30,14 +30,14 @@ class NewsItemsTest {
         val item1 = makeItem(1)
         val item2 = makeItem(2)
 
-        val newsItems1 = NewsItems()
+        val newsItems1 = FeedItems()
         newsItems1.add(item1)
         newsItems1.add(item2)
 
         val item3 = makeItem(3)
         val item4 = makeItem(4)
 
-        val newsItems2 = NewsItems()
+        val newsItems2 = FeedItems()
         newsItems2.add(item3)
         newsItems2.add(item4)
 

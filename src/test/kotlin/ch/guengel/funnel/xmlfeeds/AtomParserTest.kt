@@ -1,6 +1,6 @@
 package ch.guengel.funnel.xmlfeeds
 
-import ch.guengel.funnel.domain.NewsItem
+import ch.guengel.funnel.domain.FeedItem
 import org.junit.Test
 
 import java.io.File
@@ -19,13 +19,13 @@ class AtomParserTest {
         assertEquals("urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6", feed.id)
         assertEquals(ZonedDateTime.parse("2003-12-13T18:30:02Z"), feed.lastUpdated)
         assertEquals("Example Feed", feed.title)
-        assertEquals(1, feed.newsItems.size)
+        assertEquals(1, feed.feedItems.size)
 
-        val expectedNewsItem = NewsItem("urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a", "Atom-Powered Robots Run Amok", ZonedDateTime.parse("2003-12-13T18:30:02Z"))
+        val expectedNewsItem = FeedItem("urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a", "Atom-Powered Robots Run Amok", ZonedDateTime.parse("2003-12-13T18:30:02Z"))
 
-        assertEquals(expectedNewsItem, feed.newsItems.latest)
+        assertEquals(expectedNewsItem, feed.feedItems.latest)
 
-        assertTrue(feed.newsItems.hasItem(expectedNewsItem))
+        assertTrue(feed.feedItems.hasItem(expectedNewsItem))
     }
 
     @Test
@@ -33,7 +33,7 @@ class AtomParserTest {
         val xml = File("src/test/resources/atom-feed.xml").readText(Charsets.UTF_8)
         val atomParser = AtomParser()
         val feed = atomParser.parse(xml, ZonedDateTime.parse("2003-12-13T18:30:02Z"))
-        assertTrue(feed.newsItems.size == 0)
+        assertTrue(feed.feedItems.size == 0)
 
     }
 }

@@ -2,16 +2,30 @@ package ch.guengel.funnel.domain
 
 import java.time.ZonedDateTime
 
-class Feed(val id: String, val title: String, val newsItems: NewsItems) {
-    val lastUpdated: ZonedDateTime get() = newsItems.latest.created
+class Feed(val id: String, val title: String, val feedItems: FeedItems) {
+    val lastUpdated: ZonedDateTime get() = feedItems.latest.created
 
     fun mergeWith(feed: Feed) {
-        if (!id.equals(feed.id)) {
-            throw CannotMergeFeeds("Destination id '$id' does not match source id '$id'")
-        }
+        feedItems.mergeWith(feed.feedItems)
+    }
 
-        newsItems.mergeWith(feed.newsItems)
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Feed
+
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
+
+    companion object {
+        fun empty() = Feed("", "", FeedItems())
     }
 }
-
-class CannotMergeFeeds(message: String) : Exception(message)

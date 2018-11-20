@@ -2,16 +2,16 @@ package ch.guengel.funnel.domain
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.junit.jupiter.api.assertThrows
+import java.time.ZonedDateTime
 
 class FeedTest {
 
     @Test
     fun `keep track of last updated of news items`() {
-        val newsItems = NewsItems()
+        val newsItems = FeedItems()
         val feed = Feed("id", "title", newsItems)
 
-        assertEquals(NewsItem.emptyCreated, feed.lastUpdated)
+        assertEquals(FeedItem.emptyCreated, feed.lastUpdated)
 
         val newsItem = makeItem(1)
         newsItems.add(newsItem)
@@ -24,7 +24,7 @@ class FeedTest {
     fun `should merge`() {
         val item1 = makeItem(1)
         val item2 = makeItem(2)
-        val newsItems1 = NewsItems()
+        val newsItems1 = FeedItems()
         newsItems1.add(item1)
         newsItems1.add(item2)
 
@@ -32,22 +32,22 @@ class FeedTest {
 
         val item3 = makeItem(3)
         val item4 = makeItem(4)
-        val newsItems2 = NewsItems()
+        val newsItems2 = FeedItems()
         newsItems2.add(item3)
         newsItems2.add(item4)
 
         val feed2 = Feed("id", "title", newsItems2)
 
         feed1.mergeWith(feed2)
-        assertEquals(4, feed1.newsItems.size)
+        assertEquals(4, feed1.feedItems.size)
         assertEquals(item4.created, feed1.lastUpdated)
     }
 
     @Test
-    fun `should not merge with different id`() {
-        val feed1 = Feed("id1", "title", NewsItems())
-        val feed2 = Feed("id2", "title", NewsItems())
+    fun `should return fresh empty feed`() {
+        val empty1 = Feed.empty()
+        empty1.feedItems.add(FeedItem("id", "title", ZonedDateTime.parse("2018-01-01T00:00:00Z")))
 
-        assertThrows<CannotMergeFeeds> { feed1.mergeWith(feed2) }
+        assertEquals(0, Feed.empty().feedItems.size)
     }
 }

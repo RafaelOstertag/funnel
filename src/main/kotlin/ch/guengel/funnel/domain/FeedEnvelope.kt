@@ -1,19 +1,21 @@
 package ch.guengel.funnel.domain
 
-data class Source(val name: String, val address: String) {
+data class FeedEnvelope(val source: Source, val feed: Feed) {
+    val name = source.name
+    val lastUpdated get() = feed.lastUpdated
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Source
+        other as FeedEnvelope
 
-        if (name != other.name) return false
+        if (source != other.source) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        return name.hashCode()
+        return source.hashCode()
     }
-
 }

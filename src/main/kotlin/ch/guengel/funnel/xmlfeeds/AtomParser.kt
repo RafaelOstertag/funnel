@@ -1,8 +1,8 @@
 package ch.guengel.funnel.xmlfeeds
 
 import ch.guengel.funnel.domain.Feed
-import ch.guengel.funnel.domain.NewsItem
-import ch.guengel.funnel.domain.NewsItems
+import ch.guengel.funnel.domain.FeedItem
+import ch.guengel.funnel.domain.FeedItems
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -54,8 +54,8 @@ internal class AtomParser : FeedParser {
             .asSequence()
             .filter { it.updated.isAfter(ignoreItemsBefore) }
             .map {
-                NewsItem(it.id, it.title, it.updated)
-            }.fold(NewsItems()) { acc, newsItem ->
+                FeedItem(it.id, it.title, it.updated)
+            }.fold(FeedItems()) { acc, newsItem ->
                 acc.add(newsItem)
                 acc
             }

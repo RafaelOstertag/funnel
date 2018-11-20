@@ -11,5 +11,4 @@ internal val xmlParser by lazy {
             .registerModule(JavaTimeModule())
             .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-
 }

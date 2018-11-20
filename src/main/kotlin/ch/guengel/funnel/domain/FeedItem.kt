@@ -5,9 +5,9 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
-data class NewsItem(val id: String,
+data class FeedItem(val id: String,
                     val title: String,
-                    val created: ZonedDateTime = emptyCreated) : Comparable<NewsItem> {
+                    val created: ZonedDateTime = emptyCreated) : Comparable<FeedItem> {
 
 
     companion object {
@@ -15,7 +15,7 @@ data class NewsItem(val id: String,
                 ZonedDateTime.of(
                         LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC),
                         ZoneId.of("UTC"))
-        private val emptyItem = NewsItem("", "", emptyCreated)
+        private val emptyItem = FeedItem("", "", emptyCreated)
         fun empty() = emptyItem
     }
 
@@ -23,7 +23,7 @@ data class NewsItem(val id: String,
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as NewsItem
+        other as FeedItem
 
         if (id != other.id) return false
         if (created != other.created) return false
@@ -37,7 +37,7 @@ data class NewsItem(val id: String,
         return result
     }
 
-    override fun compareTo(other: NewsItem): Int {
+    override fun compareTo(other: FeedItem): Int {
         if (equals(other)) {
             return 0
         }

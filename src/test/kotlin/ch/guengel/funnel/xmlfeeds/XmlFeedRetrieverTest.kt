@@ -1,6 +1,6 @@
 package ch.guengel.funnel.xmlfeeds
 
-import ch.guengel.funnel.domain.NewsItem
+import ch.guengel.funnel.domain.FeedItem
 import ch.guengel.funnel.domain.Source
 import ch.guengel.funnel.xmlfeeds.network.HttpError
 import ch.guengel.funnel.xmlfeeds.network.HttpTransport
@@ -57,13 +57,13 @@ class XmlFeedRetrieverTest {
         val createdDateTime = ZonedDateTime.parse("2003-12-13T18:30:02Z")
         assertEquals(createdDateTime, result.lastUpdated)
 
-        assertEquals(1, result.newsItems.size)
+        assertEquals(1, result.feedItems.size)
 
-        val expectedLastUpdated = NewsItem(
+        val expectedLastUpdated = FeedItem(
                 "urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a",
                 "Atom-Powered Robots Run Amok",
                 createdDateTime)
-        assertTrue(result.newsItems.hasItem(expectedLastUpdated))
+        assertTrue(result.feedItems.hasItem(expectedLastUpdated))
     }
 
     @Test
@@ -84,7 +84,7 @@ class XmlFeedRetrieverTest {
         val createdDateTime = ZonedDateTime.parse("2003-06-03T09:39:21Z")
         assertEquals(createdDateTime, result.lastUpdated)
 
-        assertEquals(4, result.newsItems.size)
+        assertEquals(4, result.feedItems.size)
     }
 
     @Test
