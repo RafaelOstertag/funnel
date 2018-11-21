@@ -28,7 +28,7 @@ class HttpTransport(private val source: Source) {
             result.fold({ data ->
                 val contentType = getContentTypeFromResponse(response)
 
-                Pair(contentType, result.get())
+                Pair(contentType, data)
             }, { error ->
                 throw HttpError("Error retrieving ${source.name} from ${source.address}", error.exception)
             })
