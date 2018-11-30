@@ -26,14 +26,14 @@ data class FeedItem(val id: String,
         other as FeedItem
 
         if (id != other.id) return false
-        if (created != other.created) return false
+        if (created.toEpochSecond() != other.created.toEpochSecond()) return false
 
         return true
     }
 
     override fun hashCode(): Int {
         var result = id.hashCode()
-        result = 31 * result + created.hashCode()
+        result = 31 * result + created.toEpochSecond().hashCode()
         return result
     }
 
@@ -42,6 +42,14 @@ data class FeedItem(val id: String,
             return 0
         }
 
-        return created.compareTo(other.created)
+        val delta = created.toEpochSecond() - other.created.toEpochSecond()
+
+        return if (delta > 0) {
+            1
+        } else if (delta < 0) {
+            -1
+        } else {
+            0
+        }
     }
 }

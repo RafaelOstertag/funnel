@@ -1,9 +1,9 @@
 package ch.guengel.funnel.domain
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class FeedItemTest {
@@ -35,7 +35,7 @@ class FeedItemTest {
 
     @Test
     fun `compareTo handles equality properly`() {
-        val item1 = FeedItem("id", "title", ZonedDateTime.parse("2018-10-10T13:00:00+02:00"))
+        val item1 = FeedItem("id", "title", ZonedDateTime.parse("2018-10-10T11:00:00Z"))
         val item2 = FeedItem("id", "title2", ZonedDateTime.parse("2018-10-10T13:00:00+02:00"))
 
         assertEquals(item1.compareTo(item2), 0)

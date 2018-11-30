@@ -1,12 +1,12 @@
 package ch.guengel.funnel.xmlfeeds
 
 import ch.guengel.funnel.domain.FeedItem
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.io.File
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class RssParserTest {
 

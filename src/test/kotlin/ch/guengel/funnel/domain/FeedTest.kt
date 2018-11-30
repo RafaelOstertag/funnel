@@ -1,8 +1,9 @@
 package ch.guengel.funnel.domain
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import ch.guengel.funnel.makeItem
+import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
+import kotlin.test.assertEquals
 
 class FeedTest {
 

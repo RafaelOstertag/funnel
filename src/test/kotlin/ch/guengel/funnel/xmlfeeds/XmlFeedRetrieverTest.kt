@@ -4,9 +4,9 @@ import ch.guengel.funnel.domain.FeedItem
 import ch.guengel.funnel.domain.Source
 import ch.guengel.funnel.xmlfeeds.network.HttpError
 import ch.guengel.funnel.xmlfeeds.network.HttpTransport
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.HttpRequest.request
@@ -29,12 +29,12 @@ class XmlFeedRetrieverTest {
         File("src/test/resources/sample-rss-2.xml").readText(Charsets.UTF_8)
     }
 
-    @Before
+    @BeforeEach
     fun startMockServer() {
         mockServer = ClientAndServer.startClientAndServer(1080)
     }
 
-    @After
+    @AfterEach
     fun stopMockServer() {
         mockServer?.stop()
     }

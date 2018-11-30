@@ -1,6 +1,6 @@
 package ch.guengel.funnel.xmlfeeds
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
 
 class ParserFactoryKtTest {

@@ -2,7 +2,7 @@ package ch.guengel.funnel.xmlfeeds
 
 import ch.guengel.funnel.domain.Source
 import ch.guengel.funnel.xmlfeeds.network.HttpTransport
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
 
 

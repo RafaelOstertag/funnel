@@ -1,6 +1,8 @@
 package ch.guengel.funnel.domain
 
-import org.junit.Test
+import ch.guengel.funnel.makeFeedItems
+import ch.guengel.funnel.makeItem
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 
@@ -56,5 +58,12 @@ class FeedItemsTest {
 
         assertEquals(2, newsItems.size)
         assertEquals(makeItem(9), newsItems.latest)
+    }
+
+    @Test
+    fun `has item`() {
+        val feedItems = makeFeedItems(2)
+        val feedItem = makeItem(1)
+        assertEquals(true, feedItems.hasItem(feedItem))
     }
 }
