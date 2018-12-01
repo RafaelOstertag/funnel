@@ -3,11 +3,11 @@ package ch.guengel.funnel.xmlfeeds
 import ch.guengel.funnel.domain.Feed
 import ch.guengel.funnel.domain.FeedItem
 import ch.guengel.funnel.domain.FeedItems
+import com.fasterxml.jackson.annotation.JsonRootName
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.ZonedDateTime
-import javax.xml.bind.annotation.XmlRootElement
 
 
 private data class AtomLink(
@@ -23,7 +23,7 @@ private data class AtomEntry(
 
 private data class Author(var name: String)
 
-@XmlRootElement(name = "feed")
+@JsonRootName(value = "feed")
 private data class AtomFeedElement(
         var title: String,
         var link: AtomLink,
