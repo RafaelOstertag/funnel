@@ -6,7 +6,8 @@ import com.mongodb.client.model.IndexOptions
 import com.mongodb.client.model.UpdateOptions
 import org.litote.kmongo.*
 
-class MongoFeedEnvelopeRepository(connection: String, databaseName: String) : FeedEnvelopeRepository {
+class MongoFeedEnvelopeRepository(connection: String, databaseName: String) :
+    FeedEnvelopeRepository {
     private val client = KMongo.createClient(ConnectionString(connection))
     private val database = client.getDatabase(databaseName)
 

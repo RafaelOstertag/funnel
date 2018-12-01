@@ -4,10 +4,6 @@ import assertk.assert
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import assertk.assertions.isNullOrEmpty
-import ch.guengel.funnel.makeFeed
-import ch.guengel.funnel.makeFeedEnvelope
-import ch.guengel.funnel.makeItem
-import ch.guengel.funnel.makeSource
 import de.flapdoodle.embed.mongo.MongodExecutable
 import de.flapdoodle.embed.mongo.MongodProcess
 import de.flapdoodle.embed.mongo.MongodStarter
