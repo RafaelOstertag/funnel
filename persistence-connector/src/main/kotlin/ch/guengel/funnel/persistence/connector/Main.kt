@@ -15,7 +15,7 @@ fun main(args: Array<String>) {
     val mongo =
         MongoFeedEnvelopeRepository(configuration[Configuration.mongoDbURL], configuration[Configuration.mongoDb])
 
-    consumer.start { topic, key, data ->
+    consumer.start { _, _, data ->
         mongo.save(deserialize(data))
     }
 
