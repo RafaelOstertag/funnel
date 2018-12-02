@@ -57,7 +57,7 @@ class HttpTransport(private val source: Source) {
 
     private companion object {
         val httpClient = HttpClient(CIO)
-        val logger = LoggerFactory.getLogger(HttpTransport.javaClass)
+        val logger = LoggerFactory.getLogger(HttpTransport::class.java)
     }
 }
 
