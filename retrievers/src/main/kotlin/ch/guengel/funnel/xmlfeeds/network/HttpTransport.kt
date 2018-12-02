@@ -1,48 +1,56 @@
 package ch.guengel.funnel.xmlfeeds.network
 
-import awaitStringResponse
 import ch.guengel.funnel.domain.Source
-import com.github.kittinunf.fuel.core.Response
-import com.github.kittinunf.fuel.httpGet
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.runBlocking
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.request.get
+import io.ktor.client.response.HttpResponse
+import io.ktor.client.response.readText
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 
 class HttpTransport(private val source: Source) {
     private var contentFetched: Boolean = false
     private var contentType: String = ""
-    private var response: String = ""
-    private val defaultHeaders = mapOf<String, String>(
-            "Accept" to "*/*",
-            "User-Agent" to "Funnel/1.0"
-    )
-
+    private var content: String = ""
+  
     private fun fetchResource() {
         if (contentFetched) {
             return
         }
-        val result = runBlocking(Dispatchers.IO) {
-            val (_, response, result) = source.address.httpGet()
-                    .header(defaultHeaders)
-                    .awaitStringResponse()
 
-            result.fold({ data ->
-                val contentType = getContentTypeFromResponse(response)
+        val response = httpGet()
 
-                Pair(contentType, data)
-            }, { error ->
-                throw HttpError("Error retrieving ${source.name} from ${source.address}", error.exception)
-            })
+        if (response.status != HttpStatusCode.OK) {
+            throw HttpError("Error fetching '${source.name}' from '${source.address}': ${response.status.description}")
         }
 
-        contentType = result.first
-        response = result.second
+        content = runBlocking(Dispatchers.IO) {
+            response.readText()
+        }
+
         contentFetched = true
     }
 
-    private fun getContentTypeFromResponse(response: Response): String {
-        val contentTypeList = response.headers["Content-Type"].orEmpty()
+    private fun httpGet(): HttpResponse {
+        try {
+            return runBlocking(Dispatchers.IO) {
+                val response = httpClient.get<HttpResponse>(source.address)
+                contentType = getContentTypeFromResponse(response)
 
-        return if (contentTypeList.isEmpty()) "text/plain" else contentTypeList.get(0)
+                response
+            }
+        } catch (e: Throwable) {
+            throw HttpError("HTTP Error", e)
+        }
+    }
+
+    private fun getContentTypeFromResponse(response: HttpResponse): String {
+        val contentType = response.contentType() ?: return "text/plain"
+
+        return contentType.contentType + "/" + contentType.contentSubtype
     }
 
     fun contentType(): String {
@@ -52,8 +60,12 @@ class HttpTransport(private val source: Source) {
 
     fun response(): String {
         fetchResource()
-        return response
+        return content
+    }
+
+    private companion object {
+        val httpClient = HttpClient(CIO)
     }
 }
 
-class HttpError(message: String, cause: Throwable) : Exception(message, cause)
+class HttpError(message: String, cause: Throwable? = null) : Exception(message, cause)
