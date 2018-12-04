@@ -1,11 +1,14 @@
 package ch.guengel.funnel.domain
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.*
 
 class FeedItems(val maxItems: Int = 20) {
     private val internalItems: MutableSet<FeedItem> = TreeSet()
+    @get:JsonIgnore
     val size: Int get() = internalItems.size
     val items: Set<FeedItem> get() = internalItems
+    @get:JsonIgnore
     val latest: FeedItem
         get() {
             return if (internalItems.isEmpty())
