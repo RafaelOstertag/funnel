@@ -1,4 +1,4 @@
-package ch.guengel.funnel.persistence.connector
+package ch.guengel.funnel.kafka
 
 
 import kotlinx.coroutines.*
@@ -8,7 +8,7 @@ import java.time.Duration
 import java.util.*
 
 
-class PersistenceConsumer(private val server: String, private val topic: String) {
+class Consumer(private val server: String, private val topics: List<String>) {
     var job: Job? = null
 
     private fun makeKafkaConfiguration(): Properties {
@@ -27,9 +27,10 @@ class PersistenceConsumer(private val server: String, private val topic: String)
     fun start(handler: (topic: String, key: String, data: String) -> Unit) {
         job = CoroutineScope(Dispatchers.IO).launch {
             val consumer = KafkaConsumer<String, String>(makeKafkaConfiguration())
-            consumer.subscribe(listOf(topic))
+            consumer.subscribe(topics)
 
-            logger.info("Subscribed to Kafka topic '${topic}'")
+            logSubscription()
+
 
             try {
                 while (isActive) {
@@ -39,8 +40,20 @@ class PersistenceConsumer(private val server: String, private val topic: String)
                 }
             } finally {
                 consumer.close()
-                logger.info("Close consumer for Kafka topic '${topic}'")
+                logClose()
             }
+        }
+    }
+
+    private fun logClose() {
+        topics.forEach {
+            logger.info("Close consumer for Kafka topic '$it'")
+        }
+    }
+
+    private fun logSubscription() {
+        topics.forEach {
+            logger.info("Subscribed to Kafka topic '$it'")
         }
     }
 
@@ -49,6 +62,6 @@ class PersistenceConsumer(private val server: String, private val topic: String)
     }
 
     companion object {
-        val logger = LoggerFactory.getLogger(PersistenceConsumer::class.java)
+        val logger = LoggerFactory.getLogger(Consumer::class.java)
     }
 }

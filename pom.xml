@@ -19,6 +19,7 @@
         <funnel.persistence.version>1.0.0-SNAPSHOT</funnel.persistence.version>
         <funnel.persistence-connector.version>1.0.0-SNAPSHOT</funnel.persistence-connector.version>
         <funnel.config.version>1.0.0-SNAPSHOT</funnel.config.version>
+        <funnel.kafka.version>1.0.0-SNAPSHOT</funnel.kafka.version>
 
         <kotlin.version>1.3.10</kotlin.version>
         <kotlin.coroutines.version>1.0.1</kotlin.coroutines.version>
@@ -47,6 +48,7 @@
         <module>persistence</module>
         <module>persistence-connector</module>
         <module>retriever-connector</module>
+        <module>kafka</module>
     </modules>
 
     <dependencyManagement>
