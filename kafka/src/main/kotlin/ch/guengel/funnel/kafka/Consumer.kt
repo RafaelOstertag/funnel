@@ -8,13 +8,13 @@ import java.time.Duration
 import java.util.*
 
 
-class Consumer(private val server: String, private val topics: List<String>) {
+class Consumer(private val server: String, private val groupId: String, private val topics: List<String>) {
     var job: Job? = null
 
     private fun makeKafkaConfiguration(): Properties {
         val props = Properties()
         props.put("bootstrap.servers", server)
-        props.put("group.id", "funnel.persistence")
+        props.put("group.id", groupId)
         props.put("enable.auto.commit", "true")
         props.put("auto.commit.interval.ms", "1000")
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
@@ -31,10 +31,10 @@ class Consumer(private val server: String, private val topics: List<String>) {
 
             logSubscription()
 
-
             try {
                 while (isActive) {
                     consumer.poll(Duration.ofMillis(100)).forEach {
+                        logger.info("Call handler for topic '${it.topic()}'")
                         handler(it.topic(), it.key() ?: "", it.value())
                     }
                 }
