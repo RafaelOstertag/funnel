@@ -1,4 +1,4 @@
-package ch.guengel.funnel.xmlfeeds
+package ch.guengel.funnel.xmlretriever
 
 enum class FeedType {
     RSS,

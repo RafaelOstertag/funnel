@@ -1,4 +1,4 @@
-package ch.guengel.funnel.xmlfeeds
+package ch.guengel.funnel.xmlretriever
 
 import ch.guengel.funnel.domain.Feed
 import ch.guengel.funnel.domain.FeedItem

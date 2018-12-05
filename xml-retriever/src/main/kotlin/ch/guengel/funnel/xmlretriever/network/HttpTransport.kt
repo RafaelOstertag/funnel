@@ -1,4 +1,4 @@
-package ch.guengel.funnel.xmlfeeds.network
+package ch.guengel.funnel.xmlretriever.network
 
 import ch.guengel.funnel.domain.Source
 import io.ktor.client.HttpClient

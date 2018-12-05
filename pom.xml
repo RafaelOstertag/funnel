@@ -44,7 +44,7 @@
     <modules>
         <module>funnel-config</module>
         <module>domain</module>
-        <module>retrievers</module>
+        <module>xml-retriever</module>
         <module>persistence</module>
         <module>persistence-connector</module>
         <module>retriever-connector</module>

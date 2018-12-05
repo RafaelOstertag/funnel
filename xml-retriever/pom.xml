@@ -13,7 +13,7 @@
     <version>${funnel.retrievers.version}</version>
     <packaging>jar</packaging>
 
-    <name>Funnel Retrievers</name>
+    <name>Funnel XML Retriever</name>
 
     <dependencies>
         <dependency>

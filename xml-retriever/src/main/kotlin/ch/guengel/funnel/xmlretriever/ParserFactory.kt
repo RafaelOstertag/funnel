@@ -1,4 +1,4 @@
-package ch.guengel.funnel.xmlfeeds
+package ch.guengel.funnel.xmlretriever
 
 internal fun makeFeedParser(feedType: FeedType): FeedParser {
     return when (feedType) {

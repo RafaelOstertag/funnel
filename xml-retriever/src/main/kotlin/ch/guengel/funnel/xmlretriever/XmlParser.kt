@@ -1,4 +1,4 @@
-package ch.guengel.funnel.xmlfeeds
+package ch.guengel.funnel.xmlretriever
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.dataformat.xml.XmlMapper

@@ -1,9 +1,9 @@
-package ch.guengel.funnel.xmlfeeds
+package ch.guengel.funnel.xmlretriever
 
 import ch.guengel.funnel.domain.FeedItem
 import ch.guengel.funnel.domain.Source
-import ch.guengel.funnel.xmlfeeds.network.HttpError
-import ch.guengel.funnel.xmlfeeds.network.HttpTransport
+import ch.guengel.funnel.xmlretriever.network.HttpError
+import ch.guengel.funnel.xmlretriever.network.HttpTransport
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

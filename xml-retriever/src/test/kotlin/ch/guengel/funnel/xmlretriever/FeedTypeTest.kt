@@ -1,4 +1,4 @@
-package ch.guengel.funnel.xmlfeeds
+package ch.guengel.funnel.xmlretriever
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
