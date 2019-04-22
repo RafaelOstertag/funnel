@@ -20,7 +20,7 @@ class XmlFeedRetrieverIT {
 
     @Test
     fun `retrieve baeldung`() {
-        val source = Source("fowler", "https://www.baeldung.com/feed/")
+        val source = Source("baeldung", "https://www.baeldung.com/feed/")
         val httpTransport = HttpTransport(source)
         val xmlFeedRetriever = XmlFeedRetriever(httpTransport)
         runBlocking {
