@@ -1,4 +1,4 @@
-package ch.guengel.funnel.persistence.connector
+package ch.guengel.funnel.kafka
 
 object Topics {
     val saveSingle = "funnel.persistence.save.single"

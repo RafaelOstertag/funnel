@@ -7,6 +7,7 @@ import ch.guengel.funnel.common.serialize
 import ch.guengel.funnel.domain.FeedEnvelope
 import ch.guengel.funnel.kafka.Consumer
 import ch.guengel.funnel.kafka.Producer
+import ch.guengel.funnel.kafka.Topics
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import makeFeed

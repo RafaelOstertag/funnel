@@ -1,6 +1,7 @@
 package ch.guengel.funnel.persistence.connector
 
 import ch.guengel.funnel.kafka.Consumer
+import ch.guengel.funnel.kafka.Topics
 import ch.guengel.funnel.readConfiguration
 import com.uchuhimo.konf.Config
 import kotlinx.coroutines.delay
