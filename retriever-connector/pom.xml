@@ -14,13 +14,11 @@
     <packaging>jar</packaging>
     <name>Funnel Retriever Connector</name>
 
-    <dependencies>
-        <dependency>
-            <groupId>ch.guengel.funnel</groupId>
-            <artifactId>persistence</artifactId>
-            <version>${funnel.persistence.version}</version>
-        </dependency>
+    <properties>
+        <main.class>ch.guengel.funnel.retriever.connector.MainKt</main.class>
+    </properties>
 
+    <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>domain</artifactId>
@@ -34,9 +32,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>${kafka.version}</version>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>kafka</artifactId>
+            <version>${funnel.kafka.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>xml-retriever</artifactId>
+            <version>${funnel.xml-retriever.version}</version>
         </dependency>
 
         <dependency>
@@ -51,12 +55,43 @@
             <version>${jackson-module-kotlin.version}</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>common</artifactId>
+            <version>${funnel.common.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>${main.class}</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
 

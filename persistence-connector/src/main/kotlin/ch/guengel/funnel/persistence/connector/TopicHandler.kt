@@ -3,6 +3,7 @@ package ch.guengel.funnel.persistence.connector
 import ch.guengel.funnel.common.deserialize
 import ch.guengel.funnel.common.serialize
 import ch.guengel.funnel.domain.FeedEnvelope
+import ch.guengel.funnel.kafka.Constants.noData
 import ch.guengel.funnel.kafka.Producer
 import ch.guengel.funnel.kafka.Topics
 import ch.guengel.funnel.persistence.MongoFeedEnvelopeRepository
@@ -27,7 +28,7 @@ class TopicHandler(configuration: Config) : Closeable {
     }
 
     private fun sendAll(forKey: String, data: String) {
-        if (!data.isBlank()) {
+        if (data != noData) {
             return
         }
 
@@ -42,7 +43,7 @@ class TopicHandler(configuration: Config) : Closeable {
 
     fun handle(topic: String, key: String, data: String) {
         when (topic) {
-            Topics.feedUpdate -> saveFeed(data)
+            Topics.persistFeed -> saveFeed(data)
             Topics.retrieveAll -> sendAll(key, data)
             else -> logger.error("Don't know how to handle message in topic '$topic'")
         }

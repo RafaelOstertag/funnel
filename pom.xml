@@ -18,7 +18,7 @@
         <funnel.common.version>1.0.0-SNAPSHOT</funnel.common.version>
         <funnel.domain.version>1.0.0-SNAPSHOT</funnel.domain.version>
         <funnel.persistence.version>1.0.0-SNAPSHOT</funnel.persistence.version>
-        <funnel.retrievers.version>1.0.0-SNAPSHOT</funnel.retrievers.version>
+        <funnel.xml-retriever.version>1.0.0-SNAPSHOT</funnel.xml-retriever.version>
         <funnel.kafka.version>1.0.0-SNAPSHOT</funnel.kafka.version>
         <funnel.persistence-connector.version>1.0.0-SNAPSHOT</funnel.persistence-connector.version>
         <funnel.retriever-connector.version>1.0.0-SNAPSHOT</funnel.retriever-connector.version>
@@ -47,11 +47,11 @@
         <module>common</module>
         <module>funnel-config</module>
         <module>domain</module>
+        <module>kafka</module>
         <module>xml-retriever</module>
         <module>persistence</module>
         <module>persistence-connector</module>
         <module>retriever-connector</module>
-        <module>kafka</module>
     </modules>
 
     <dependencyManagement>

@@ -7,6 +7,9 @@ class FeedItems(val maxItems: Int = 20) {
     private val internalItems: MutableSet<FeedItem> = TreeSet()
     @get:JsonIgnore
     val size: Int get() = internalItems.size
+    @get:JsonIgnore
+    val empty: Boolean
+        get() = internalItems.isEmpty()
     val items: Set<FeedItem> get() = internalItems
     @get:JsonIgnore
     val latest: FeedItem

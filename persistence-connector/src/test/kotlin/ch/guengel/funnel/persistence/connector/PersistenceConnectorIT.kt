@@ -5,6 +5,8 @@ import assertk.assertions.isTrue
 import ch.guengel.funnel.common.deserialize
 import ch.guengel.funnel.common.serialize
 import ch.guengel.funnel.domain.FeedEnvelope
+import ch.guengel.funnel.kafka.Constants
+import ch.guengel.funnel.kafka.Constants.noData
 import ch.guengel.funnel.kafka.Consumer
 import ch.guengel.funnel.kafka.Producer
 import ch.guengel.funnel.kafka.Topics
@@ -19,7 +21,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 
 
 @EnabledIfEnvironmentVariable(named = "HAS_LOCAL_ENVIRONMENT", matches = "yes|true")
-class SendReceiveIT {
+class PersistenceConnectorIT {
     private var configuration = readConfiguration(Configuration)
 
     @Test
@@ -32,7 +34,7 @@ class SendReceiveIT {
         consumer.start { topic, key, data ->
             if (topic == Topics.retrieveAll &&
                 key == "the-test-key" &&
-                !data.isBlank()
+                data != noData
             ) {
                 val actual = deserialize<List<FeedEnvelope>>(data)
                 if (actual.size != 1) {
@@ -54,7 +56,7 @@ class SendReceiveIT {
 
             // Initiate retrieval of all feeds
             Producer(configuration[Configuration.kafka]).use {
-                it.send(Topics.retrieveAll, "the-test-key", "")
+                it.send(Topics.retrieveAll, "the-test-key", noData)
             }
 
             runBlocking {
@@ -79,7 +81,7 @@ class SendReceiveIT {
 
     private fun sendSaveEnvelopeMessage(feedEnvelope: FeedEnvelope) {
         Producer(configuration[Configuration.kafka]).use {
-            it.send(Topics.feedUpdate, "", serialize(feedEnvelope))
+            it.send(Topics.persistFeed, Constants.noKey, serialize(feedEnvelope))
         }
     }
 }

@@ -1,5 +1,9 @@
 package ch.guengel.funnel.domain
 
+import assertk.assert
+import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
+import assertk.assertions.isTrue
 import ch.guengel.funnel.makeFeedItems
 import ch.guengel.funnel.makeItem
 import org.junit.jupiter.api.Test
@@ -66,4 +70,24 @@ class FeedItemsTest {
         val feedItem = makeItem(1)
         assertEquals(true, feedItems.hasItem(feedItem))
     }
+
+    @Test
+    fun `size should report correct size`() {
+        var feedItems = makeFeedItems(2)
+        assert(feedItems.size).isEqualTo(2)
+
+        feedItems = makeFeedItems(0)
+        assert(feedItems.size).isEqualTo(0)
+    }
+
+    @Test
+    fun `empty should work`() {
+        var feedItems = makeFeedItems(2)
+        assert(feedItems.empty).isFalse()
+
+        feedItems = makeFeedItems(0)
+        assert(feedItems.empty).isTrue()
+    }
+
+
 }
