@@ -23,15 +23,9 @@ pipeline {
             }
         }
 
-        stage('build') {
+        stage('Build and Test') {
             steps {
-                sh 'mvn -B compile'
-            }
-        }
-
-        stage('test') {
-            steps {
-                sh 'mvn -B test'
+                sh 'mvn -B install'
             }
         }
     }
