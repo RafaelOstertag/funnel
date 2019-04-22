@@ -14,18 +14,20 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <funnel.domain.version>1.0.0-SNAPSHOT</funnel.domain.version>
-        <funnel.retrievers.version>1.0.0-SNAPSHOT</funnel.retrievers.version>
-        <funnel.persistence.version>1.0.0-SNAPSHOT</funnel.persistence.version>
-        <funnel.persistence-connector.version>1.0.0-SNAPSHOT</funnel.persistence-connector.version>
         <funnel.config.version>1.0.0-SNAPSHOT</funnel.config.version>
+        <funnel.common.version>1.0.0-SNAPSHOT</funnel.common.version>
+        <funnel.domain.version>1.0.0-SNAPSHOT</funnel.domain.version>
+        <funnel.persistence.version>1.0.0-SNAPSHOT</funnel.persistence.version>
+        <funnel.retrievers.version>1.0.0-SNAPSHOT</funnel.retrievers.version>
         <funnel.kafka.version>1.0.0-SNAPSHOT</funnel.kafka.version>
+        <funnel.persistence-connector.version>1.0.0-SNAPSHOT</funnel.persistence-connector.version>
+        <funnel.retriever-connector.version>1.0.0-SNAPSHOT</funnel.retriever-connector.version>
 
         <kotlin.version>1.3.30</kotlin.version>
         <kotlin.coroutines.version>1.2.0</kotlin.coroutines.version>
         <ktor.version>1.1.4</ktor.version>
         <junit5.version>5.3.2</junit5.version>
-        <jackson.version>2.9.7</jackson.version>
+        <jackson.version>2.9.8</jackson.version>
         <jackson-module-kotlin.version>2.9.7</jackson-module-kotlin.version>
         <mockserver-netty.version>5.4.1</mockserver-netty.version>
         <kmongo.version>3.9.0</kmongo.version>
@@ -42,6 +44,7 @@
     </properties>
 
     <modules>
+        <module>common</module>
         <module>funnel-config</module>
         <module>domain</module>
         <module>xml-retriever</module>
