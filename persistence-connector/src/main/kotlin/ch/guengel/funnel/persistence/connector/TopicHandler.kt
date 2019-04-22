@@ -1,5 +1,7 @@
 package ch.guengel.funnel.persistence.connector
 
+import ch.guengel.funnel.common.deserialize
+import ch.guengel.funnel.common.serialize
 import ch.guengel.funnel.domain.FeedEnvelope
 import ch.guengel.funnel.kafka.Producer
 import ch.guengel.funnel.persistence.MongoFeedEnvelopeRepository

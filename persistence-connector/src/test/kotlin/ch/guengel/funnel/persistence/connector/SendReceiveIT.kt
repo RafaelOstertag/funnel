@@ -2,6 +2,8 @@ package ch.guengel.funnel.persistence.connector
 
 import assertk.assert
 import assertk.assertions.isTrue
+import ch.guengel.funnel.common.deserialize
+import ch.guengel.funnel.common.serialize
 import ch.guengel.funnel.domain.FeedEnvelope
 import ch.guengel.funnel.kafka.Consumer
 import ch.guengel.funnel.kafka.Producer
