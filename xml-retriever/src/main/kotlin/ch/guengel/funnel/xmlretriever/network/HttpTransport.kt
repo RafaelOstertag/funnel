@@ -8,7 +8,6 @@ import io.ktor.client.response.HttpResponse
 import io.ktor.client.response.readText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.util.KtorExperimentalAPI
 import org.slf4j.LoggerFactory
 
 class HttpTransport(private val source: Source) {
@@ -39,7 +38,7 @@ class HttpTransport(private val source: Source) {
 
     private suspend fun httpGet(): HttpResponse {
         try {
-            return httpClient.get<HttpResponse>(source.address)
+            return httpClient.get(source.address)
         } catch (e: Throwable) {
             throw HttpError("HTTP Error", e)
         }
@@ -57,7 +56,6 @@ class HttpTransport(private val source: Source) {
     }
 
     private companion object {
-        @KtorExperimentalAPI
         val httpClient = HttpClient(CIO)
         val logger = LoggerFactory.getLogger(HttpTransport::class.java)
     }
