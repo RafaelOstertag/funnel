@@ -21,9 +21,9 @@
         <funnel.config.version>1.0.0-SNAPSHOT</funnel.config.version>
         <funnel.kafka.version>1.0.0-SNAPSHOT</funnel.kafka.version>
 
-        <kotlin.version>1.3.10</kotlin.version>
-        <kotlin.coroutines.version>1.0.1</kotlin.coroutines.version>
-        <ktor.version>1.0.0</ktor.version>
+        <kotlin.version>1.3.30</kotlin.version>
+        <kotlin.coroutines.version>1.2.0</kotlin.coroutines.version>
+        <ktor.version>1.1.4</ktor.version>
         <junit5.version>5.3.2</junit5.version>
         <jackson.version>2.9.7</jackson.version>
         <jackson-module-kotlin.version>2.9.7</jackson-module-kotlin.version>
@@ -33,7 +33,7 @@
         <assertk.version>0.12</assertk.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
-        <kafka.version>2.1.0</kafka.version>
+        <kafka.version>2.2.0</kafka.version>
         <konf.version>0.12</konf.version>
 
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
