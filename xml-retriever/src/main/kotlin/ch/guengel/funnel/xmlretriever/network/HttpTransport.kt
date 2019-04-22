@@ -2,7 +2,7 @@ package ch.guengel.funnel.xmlretriever.network
 
 import ch.guengel.funnel.domain.Source
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.features.CurlUserAgent
 import io.ktor.client.request.get
 import io.ktor.client.response.HttpResponse
 import io.ktor.client.response.readText
@@ -17,28 +17,30 @@ class HttpTransport(private val source: Source) {
 
     private suspend fun fetchResource() {
         if (contentFetched) {
-            logger.debug("Resource ${source.address} already fetched")
+            log.debug("Resource ${source.address} already fetched")
             return
         }
 
         val response = httpGet()
         if (response.status != HttpStatusCode.OK) {
-            logger.debug("Fetch failed with HTTP status ${response.status}")
+            log.debug("Fetch failed with HTTP status ${response.status}")
+            print(response.readText())
             throw HttpError("Error fetching '${source.name}' from '${source.address}': ${response.status.description}")
         }
 
         contentType = getContentTypeFromResponse(response)
-        logger.debug("Fetched content for ${source.address}")
+        log.debug("Fetched content for ${source.address}")
 
         content = response.readText()
-        logger.debug("Read content for ${source.address}")
+        log.debug("Read content for ${source.address}")
 
         contentFetched = true
     }
 
     private suspend fun httpGet(): HttpResponse {
         try {
-            return httpClient.get(source.address)
+            return httpClient
+                .get(source.address)
         } catch (e: Throwable) {
             throw HttpError("HTTP Error", e)
         }
@@ -56,8 +58,11 @@ class HttpTransport(private val source: Source) {
     }
 
     private companion object {
-        val httpClient = HttpClient(CIO)
-        val logger = LoggerFactory.getLogger(HttpTransport::class.java)
+        val httpClient = HttpClient {
+            followRedirects = true
+            CurlUserAgent()
+        }
+        val log = LoggerFactory.getLogger(HttpTransport::class.java)
     }
 }
 

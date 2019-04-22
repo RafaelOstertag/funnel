@@ -9,6 +9,7 @@ enum class FeedType {
             return when (mimeTypeWithoutCharacterSet(mimeType)) {
                 "application/atom+xml" -> ATOM
                 "text/xml" -> RSS
+                "text/html" -> RSS
                 "application/rss+xml" -> RSS
                 else -> throw UnknownFeedType("Unknown feed type '${mimeType}'")
             }
