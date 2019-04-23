@@ -4,13 +4,7 @@ import assertk.assert
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import assertk.assertions.isNullOrEmpty
-import de.flapdoodle.embed.mongo.MongodExecutable
-import de.flapdoodle.embed.mongo.MongodProcess
-import de.flapdoodle.embed.mongo.MongodStarter
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder
-import de.flapdoodle.embed.mongo.config.Net
-import de.flapdoodle.embed.mongo.distribution.Version
-import de.flapdoodle.embed.process.runtime.Network
+import ch.guengel.funnel.testutils.EmbeddedMongo
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,26 +13,20 @@ import org.junit.jupiter.api.condition.OS
 
 @DisabledOnOs(OS.OTHER)
 class MongoFeedEnvelopeRepositoryTest {
-    private val mongoPort = Network.getFreeServerPort()
-    private var mongodConfig = MongodConfigBuilder()
-            .version(Version.Main.PRODUCTION)
-            .net(Net(mongoPort, Network.localhostIsIPv6()))
-            .build()
-    private val mongoServer: MongodExecutable = mongoStarter.prepare(mongodConfig)
-    private var mongod: MongodProcess? = null
+    private var embeddedMongo: EmbeddedMongo? = null
 
     private var feedEnvelopeRepository: FeedEnvelopeRepository? = null
 
-
     @BeforeEach
     fun setUp() {
-        mongod = mongoServer.start()
-        feedEnvelopeRepository = MongoFeedEnvelopeRepository("mongodb://localhost:${mongoPort}", "test")
+        embeddedMongo = EmbeddedMongo()
+        embeddedMongo?.start()
+        feedEnvelopeRepository = MongoFeedEnvelopeRepository("mongodb://localhost:${embeddedMongo?.mongoPort}", "test")
     }
 
     @AfterEach
     fun tearDown() {
-        mongod?.stop()
+        embeddedMongo?.stop()
     }
 
     @Test
@@ -97,9 +85,5 @@ class MongoFeedEnvelopeRepositoryTest {
 
         assert(allEnvelopes?.size).isEqualTo(2)
 
-    }
-
-    companion object {
-        val mongoStarter = MongodStarter.getDefaultInstance()
     }
 }
