@@ -17,6 +17,7 @@
         <funnel.config.version>1.0.0-SNAPSHOT</funnel.config.version>
         <funnel.common.version>1.0.0-SNAPSHOT</funnel.common.version>
         <funnel.domain.version>1.0.0-SNAPSHOT</funnel.domain.version>
+        <funnel.test-utils.version>1.0.0-SNAPSHOT</funnel.test-utils.version>
         <funnel.persistence.version>1.0.0-SNAPSHOT</funnel.persistence.version>
         <funnel.xml-retriever.version>1.0.0-SNAPSHOT</funnel.xml-retriever.version>
         <funnel.kafka.version>1.0.0-SNAPSHOT</funnel.kafka.version>
@@ -44,6 +45,7 @@
     </properties>
 
     <modules>
+        <module>test-utils</module>
         <module>common</module>
         <module>funnel-config</module>
         <module>domain</module>
