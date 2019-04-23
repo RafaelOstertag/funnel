@@ -7,8 +7,12 @@ import ch.guengel.funnel.readConfiguration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
+private val MILLIS_PER_SECOND = 1000L
+private fun secondsToMillis(seconds: Int): Long = seconds * MILLIS_PER_SECOND
+
 fun main(args: Array<String>) {
     val configuration = readConfiguration(Configuration)
+    val sleepTime = secondsToMillis(configuration[Configuration.interval])
 
     val producer = Producer(configuration[Configuration.kafka])
     val consumer = setUpConsumer(configuration)
@@ -20,11 +24,12 @@ fun main(args: Array<String>) {
 
         runBlocking {
             while (true) {
-                delay(configuration[Configuration.interval])
+                delay(sleepTime)
                 producer.send(Topics.retrieveAll, groupId, noData)
             }
         }
     }
-
 }
+
+
 
