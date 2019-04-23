@@ -62,6 +62,13 @@
             <version>${kotlin.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${funnel.test-utils.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
