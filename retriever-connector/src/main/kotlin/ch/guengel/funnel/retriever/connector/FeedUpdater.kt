@@ -26,32 +26,42 @@ class FeedUpdater(private val producer: Producer) {
         val lastUpdated = feedEnvelope.lastUpdated
 
         return CoroutineScope(Dispatchers.IO).launch {
-
             val retrievedFeed = retrieveFeed(source, lastUpdated)
             if (retrievedFeed.feedItems.empty) {
-                logger.debug("No new feed items for {} since {}", source.address, lastUpdated)
+                logger.info("No new feed items for {} since {}", source.address, lastUpdated)
                 return@launch
             }
 
-            logger.debug("New feed items for {} since {}", source.address, lastUpdated)
+            logger.info("New feed items for {} since {}", source.address, lastUpdated)
 
-            informOfNewFeedItems(feedEnvelope, retrievedFeed)
+            // This will guarantee that we have the current feed id and title in the envelope
+            val newFeedEnvelope = createNewFeedEnvelopeFromRetrievedFeed(feedEnvelope, retrievedFeed)
 
-            saveMergedFeedEvelope(feedEnvelope, retrievedFeed)
+            informOfNewFeedItems(newFeedEnvelope)
+
+            saveMergedFeedEvelope(feedEnvelope, newFeedEnvelope)
         }
 
     }
 
-    private fun saveMergedFeedEvelope(feedEnvelope: FeedEnvelope, retrievedFeed: Feed) {
-        feedEnvelope.feed.mergeWith(retrievedFeed)
-        producer.send(Topics.persistFeed, Constants.noKey, serialize(feedEnvelope))
-        logger.debug("Publish persistence event for {}", feedEnvelope.source)
+    /**
+     * Given an existing feed envelope and a feed, creates a new feed envelope from the feed.
+     */
+    private fun createNewFeedEnvelopeFromRetrievedFeed(existingFeedEnvelope: FeedEnvelope, feed: Feed) =
+        FeedEnvelope(existingFeedEnvelope.source, feed)
+
+    /**
+     * Merge the old feed envelope to the new feed envelope
+     */
+    private fun saveMergedFeedEvelope(oldFeedEnvelope: FeedEnvelope, newFeedEnvelope: FeedEnvelope) {
+        newFeedEnvelope.feed.mergeWith(oldFeedEnvelope.feed)
+        producer.send(Topics.persistFeed, Constants.noKey, serialize(newFeedEnvelope))
+        logger.debug("Publish persistence event for {}", newFeedEnvelope.source)
     }
 
-    private fun informOfNewFeedItems(currentFeedEnvelope: FeedEnvelope, newFeed: Feed) {
-        val feedEnvelopeWithOnlyNewItems = FeedEnvelope(currentFeedEnvelope.source, newFeed)
-        producer.send(Topics.feedUpdate, "", serialize(feedEnvelopeWithOnlyNewItems))
-        logger.debug("Publish update event for {}", feedEnvelopeWithOnlyNewItems.source)
+    private fun informOfNewFeedItems(newFeedEnvelope: FeedEnvelope) {
+        producer.send(Topics.feedUpdate, "", serialize(newFeedEnvelope))
+        logger.debug("Publish update event for {}", newFeedEnvelope.source)
     }
 
     private suspend fun retrieveFeed(source: Source, lastUpdated: ZonedDateTime): Feed {
