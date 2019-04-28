@@ -28,6 +28,18 @@ pipeline {
                 sh 'mvn -B install'
             }
         }
+
+        stage('Deploy to Nexus') {
+            when {
+                branch 'master'
+            }
+
+            steps {
+                configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
+                    sh 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests deploy'
+                }
+            }
+        }
     }
 
     post {
