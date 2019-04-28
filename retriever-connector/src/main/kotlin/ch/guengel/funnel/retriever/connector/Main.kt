@@ -31,7 +31,7 @@ fun main(args: Array<String>) {
         runBlocking {
             while (true) {
                 delay(intervalMillis)
-                producer.send(Topics.retrieveAll, groupId, noData)
+                producer.send(Topics.retrieveAll, retrievalKey, noData)
                 logger.info("Retrieve all sources")
             }
         }
