@@ -29,7 +29,7 @@ class Producer(private val server: String) : Closeable {
 
     override fun close() {
         producer?.close()
-        logger.info("Closed kafka consumer")
+        logger.info("Closed kafka producer")
     }
 
     companion object {
