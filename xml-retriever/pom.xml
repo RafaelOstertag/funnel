@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>xml-retriever</artifactId>
-    <version>${funnel.xml-retriever.version}</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>Funnel XML Retriever</name>

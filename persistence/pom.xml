@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>persistence</artifactId>
-    <version>${funnel.persistence.version}</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>Funnel Persistence</name>

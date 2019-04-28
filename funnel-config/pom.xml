@@ -8,10 +8,11 @@
         <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <name>Funnel Configuration</name>
 
     <artifactId>funnel-config</artifactId>
-    <version>${funnel.config.version}</version>
+    <version>1.0.0</version>
+
+    <name>Funnel Configuration</name>
 
     <dependencies>
         <dependency>

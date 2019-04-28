@@ -11,7 +11,7 @@
     <name>Funnel Persistence Connector</name>
 
     <artifactId>persistence-connector</artifactId>
-    <version>${funnel.persistence-connector.version}</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <properties>

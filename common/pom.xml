@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>common</artifactId>
-    <version>${funnel.common.version}</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>Funnel Common</name>

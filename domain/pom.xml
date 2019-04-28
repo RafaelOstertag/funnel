@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>domain</artifactId>
-    <version>${funnel.domain.version}</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>Funnel Domain</name>
