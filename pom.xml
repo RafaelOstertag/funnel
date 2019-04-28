@@ -6,7 +6,7 @@
 
     <groupId>ch.guengel.funnel</groupId>
     <artifactId>main</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>Funnel</name>
@@ -14,15 +14,15 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <funnel.config.version>1.0.0-SNAPSHOT</funnel.config.version>
-        <funnel.common.version>1.0.0-SNAPSHOT</funnel.common.version>
-        <funnel.domain.version>1.0.0-SNAPSHOT</funnel.domain.version>
-        <funnel.test-utils.version>1.0.0-SNAPSHOT</funnel.test-utils.version>
-        <funnel.persistence.version>1.0.0-SNAPSHOT</funnel.persistence.version>
-        <funnel.xml-retriever.version>1.0.0-SNAPSHOT</funnel.xml-retriever.version>
-        <funnel.kafka.version>1.0.0-SNAPSHOT</funnel.kafka.version>
-        <funnel.persistence-connector.version>1.0.0-SNAPSHOT</funnel.persistence-connector.version>
-        <funnel.retriever-connector.version>1.0.0-SNAPSHOT</funnel.retriever-connector.version>
+        <funnel.config.version>1.0.0</funnel.config.version>
+        <funnel.common.version>1.0.0</funnel.common.version>
+        <funnel.domain.version>1.0.0</funnel.domain.version>
+        <funnel.test-utils.version>1.0.0</funnel.test-utils.version>
+        <funnel.persistence.version>1.0.0</funnel.persistence.version>
+        <funnel.xml-retriever.version>1.0.0</funnel.xml-retriever.version>
+        <funnel.kafka.version>1.0.0</funnel.kafka.version>
+        <funnel.persistence-connector.version>1.0.0</funnel.persistence-connector.version>
+        <funnel.retriever-connector.version>1.0.0</funnel.retriever-connector.version>
 
         <kotlin.version>1.3.30</kotlin.version>
         <kotlin.coroutines.version>1.2.0</kotlin.coroutines.version>
