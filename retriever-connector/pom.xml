@@ -5,12 +5,12 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>retriever-connector</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>Funnel Retriever Connector</name>
 
@@ -22,25 +22,25 @@
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>domain</artifactId>
-            <version>${funnel.domain.version}</version>
+            <version>1.0.1</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>funnel-config</artifactId>
-            <version>${funnel.config.version}</version>
+            <version>1.0.1</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>kafka</artifactId>
-            <version>${funnel.kafka.version}</version>
+            <version>1.0.1</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>xml-retriever</artifactId>
-            <version>${funnel.xml-retriever.version}</version>
+            <version>1.0.1</version>
         </dependency>
 
         <dependency>
@@ -58,7 +58,7 @@
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>common</artifactId>
-            <version>${funnel.common.version}</version>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
 
