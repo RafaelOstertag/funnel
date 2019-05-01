@@ -2,16 +2,17 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
-        <version>2.0.0</version>
+        <version>2.1.0-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>retriever-connector</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
+
     <name>Funnel Retriever Connector</name>
 
     <properties>
@@ -22,25 +23,31 @@
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>domain</artifactId>
-            <version>1.0.1</version>
+            <version>${funnel.domain.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>funnel-config</artifactId>
-            <version>1.0.1</version>
+            <version>${funnel.funnel-config.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>kafka</artifactId>
-            <version>1.0.1</version>
+            <version>${funnel.kafka.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>xml-retriever</artifactId>
-            <version>1.0.1</version>
+            <version>${funnel.xml-retriever.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>common</artifactId>
+            <version>${funnel.common.version}</version>
         </dependency>
 
         <dependency>
@@ -53,12 +60,6 @@
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
             <version>${jackson-module-kotlin.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.guengel.funnel</groupId>
-            <artifactId>common</artifactId>
-            <version>1.0.1</version>
         </dependency>
     </dependencies>
 
