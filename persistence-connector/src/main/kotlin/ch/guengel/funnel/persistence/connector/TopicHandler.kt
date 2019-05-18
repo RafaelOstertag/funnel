@@ -45,7 +45,16 @@ class TopicHandler(configuration: Config) : Closeable {
         when (topic) {
             Topics.persistFeed -> saveFeed(data)
             Topics.retrieveAll -> sendAll(key, data)
+            Topics.feedDelete -> deleteFeed(key)
             else -> logger.error("Don't know how to handle message in topic '$topic'")
+        }
+    }
+
+    private fun deleteFeed(name: String) {
+        try {
+            mongo.deleteById(name)
+        } catch (e: Throwable) {
+            logger.error("Error deleting feed ${name}")
         }
     }
 
