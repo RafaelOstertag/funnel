@@ -8,6 +8,7 @@ import ch.guengel.funnel.testutils.EmbeddedMongo
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.condition.DisabledOnOs
 import org.junit.jupiter.api.condition.OS
 
@@ -85,5 +86,20 @@ class MongoFeedEnvelopeRepositoryTest {
 
         assert(allEnvelopes?.size).isEqualTo(2)
 
+    }
+
+    @Test
+    fun `delete feed by id`() {
+        val feedEnvelope1 = makeFeedEnvelope(makeSource(1), makeFeed("testid", "test title", 4))
+        feedEnvelopeRepository?.save(feedEnvelope1)
+
+        feedEnvelopeRepository?.deleteById("testid")
+        assertThrows<FeedEnvelopeNotFound> { feedEnvelopeRepository?.retrieveById("testid") }
+    }
+
+    @Test
+    fun `delete non-existing feed by id`() {
+        feedEnvelopeRepository?.deleteById("testid")
+        // not throwing anything is the test
     }
 }

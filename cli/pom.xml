@@ -2,35 +2,29 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
         <version>2.1.0</version>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>persistence-connector</artifactId>
-    <version>1.0.2</version>
+    <artifactId>cli</artifactId>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>Funnel Persistence Connector</name>
+
+    <name>Funnel CLI</name>
 
     <properties>
-        <main.class>ch.guengel.funnel.persistence.connector.MainKt</main.class>
+        <main.class>ch.guengel.funnel.cli.CliKt</main.class>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>ch.guengel.funnel</groupId>
-            <artifactId>persistence</artifactId>
-            <version>${funnel.persistence.version}</version>
+            <groupId>com.github.ajalt</groupId>
+            <artifactId>clikt</artifactId>
+            <version>2.0.0</version>
         </dependency>
-
-        <dependency>
-            <groupId>ch.guengel.funnel</groupId>
-            <artifactId>domain</artifactId>
-            <version>${funnel.domain.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>kafka</artifactId>
@@ -39,40 +33,13 @@
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>funnel-config</artifactId>
-            <version>${funnel.funnel-config.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.guengel.funnel</groupId>
             <artifactId>common</artifactId>
             <version>${funnel.common.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.guengel.funnel</groupId>
-            <artifactId>test-utils</artifactId>
-            <version>${funnel.test-utils.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-reflect</artifactId>
-            <version>${kotlin.version}</version>
         </dependency>
     </dependencies>
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
 
         <plugins>
             <plugin>
@@ -101,6 +68,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

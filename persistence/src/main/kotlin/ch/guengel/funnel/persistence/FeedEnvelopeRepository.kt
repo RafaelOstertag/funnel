@@ -6,4 +6,5 @@ interface FeedEnvelopeRepository {
     fun retrieveAll(): List<FeedEnvelope>
     fun retrieveById(name: String): FeedEnvelope
     fun save(feedEnvelope: FeedEnvelope)
+    fun deleteById(name: String)
 }

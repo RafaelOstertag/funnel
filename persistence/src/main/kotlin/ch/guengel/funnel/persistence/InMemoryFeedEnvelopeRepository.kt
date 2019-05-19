@@ -17,7 +17,8 @@ class InMemoryFeedEnvelopeRepository : FeedEnvelopeRepository {
         store[feedEnvelope.name] = feedEnvelope
     }
 
-
+    override fun deleteById(name: String) {
+        store.remove(name)
+    }
 }
 
-class FeedEnvelopeNotFound(message: String) : Exception(message)

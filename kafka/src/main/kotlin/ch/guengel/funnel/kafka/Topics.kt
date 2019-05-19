@@ -10,4 +10,8 @@ object Topics {
      */
     val feedUpdate = "funnel.feed.update"
     val retrieveAll = "funnel.feed.retrieve.all"
+    /**
+     * Topic used to delete Feed
+     */
+    val feedDelete = "funnel.feed.delete"
 }

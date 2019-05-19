@@ -29,6 +29,12 @@ pipeline {
             }
         }
 
+        stage('Publish test results') {
+            steps {
+                junit '**/failsafe-reports/*.xml,**/surefire-reports/*.xml'
+            }
+        }
+
         stage('Deploy to Nexus') {
             when {
                 branch 'master'

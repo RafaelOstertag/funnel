@@ -11,7 +11,7 @@ fun setUpConsumer(configuration: Config): Consumer {
     val consumer = Consumer(
         configuration[Configuration.kafka],
         groupId,
-        listOf(Topics.retrieveAll, Topics.persistFeed)
+            listOf(Topics.retrieveAll, Topics.persistFeed, Topics.feedDelete)
     )
 
     Runtime.getRuntime().addShutdownHook(Thread {
