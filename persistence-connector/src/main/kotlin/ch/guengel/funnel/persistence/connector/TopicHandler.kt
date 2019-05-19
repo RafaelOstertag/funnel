@@ -53,6 +53,7 @@ class TopicHandler(configuration: Config) : Closeable {
     private fun deleteFeed(name: String) {
         try {
             mongo.deleteById(name)
+            logger.info("Deleted feed ${name}")
         } catch (e: Throwable) {
             logger.error("Error deleting feed ${name}")
         }
