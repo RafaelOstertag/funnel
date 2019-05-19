@@ -16,7 +16,7 @@
     <name>Funnel CLI</name>
 
     <properties>
-        <main.class>CliKt</main.class>
+        <main.class>ch.guengel.funnel.cli.CliKt</main.class>
     </properties>
 
     <dependencies>
