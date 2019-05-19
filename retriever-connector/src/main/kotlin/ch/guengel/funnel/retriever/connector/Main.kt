@@ -9,7 +9,7 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("retriever-connector")
-private val MILLIS_PER_SECOND = 1000L
+private const val MILLIS_PER_SECOND = 1000L
 private fun secondsToMillis(seconds: Int): Long = seconds * MILLIS_PER_SECOND
 
 
