@@ -7,9 +7,9 @@ import java.io.Closeable
 import java.util.*
 
 class Producer(private val server: String) : Closeable {
-    val producer: KafkaProducer<String, String>? = KafkaProducer(makeKafkaConfiguration())
+    val producer: KafkaProducer<String, String>? = KafkaProducer(createKafkaConfiguration())
 
-    private fun makeKafkaConfiguration(): Properties {
+    private fun createKafkaConfiguration(): Properties {
         val props = Properties()
         props.put("bootstrap.servers", server)
         props.put("acks", "all")
