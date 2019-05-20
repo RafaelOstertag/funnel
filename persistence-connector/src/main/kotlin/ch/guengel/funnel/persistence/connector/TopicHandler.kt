@@ -3,6 +3,7 @@ package ch.guengel.funnel.persistence.connector
 import ch.guengel.funnel.common.deserialize
 import ch.guengel.funnel.common.serialize
 import ch.guengel.funnel.domain.FeedEnvelope
+import ch.guengel.funnel.kafka.Constants
 import ch.guengel.funnel.kafka.Constants.noData
 import ch.guengel.funnel.kafka.Producer
 import ch.guengel.funnel.kafka.Topics
@@ -27,15 +28,11 @@ class TopicHandler(configuration: Config) : Closeable {
         }
     }
 
-    private fun sendAll(forKey: String, data: String) {
-        if (data != noData) {
-            return
-        }
-
+    private fun sendAll(toTopic: String) {
         try {
             val feedEnvelopes = mongo.retrieveAll()
-            kafkaProducer.send(Topics.retrieveAll, forKey, serialize(feedEnvelopes))
-            logger.info("Sent all feeds to '${Topics.retrieveAll}' for key '$forKey'")
+            kafkaProducer.send(toTopic, Constants.noKey, serialize(feedEnvelopes))
+            logger.info("Sent all feeds to '${toTopic}'")
         } catch (e: Throwable) {
             logger.error("Error responding to feed retrieval request", e)
         }
@@ -44,7 +41,7 @@ class TopicHandler(configuration: Config) : Closeable {
     fun handle(topic: String, key: String, data: String) {
         when (topic) {
             Topics.persistFeed -> saveFeed(data)
-            Topics.retrieveAll -> sendAll(key, data)
+            Topics.retrieveAll -> sendAll(data)
             Topics.feedDelete -> deleteFeed(key)
             else -> logger.error("Don't know how to handle message in topic '$topic'")
         }

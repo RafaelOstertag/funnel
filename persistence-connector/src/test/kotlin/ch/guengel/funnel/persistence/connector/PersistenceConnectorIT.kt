@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 
+private const val feedReply = "test.all.feed.retriever"
 /**
  * This test requires a running Kafka locally
  */
@@ -55,10 +56,6 @@ class PersistenceConnectorIT {
         val consumer = setupListOfFeedEnvelopesConsumer()
         var testSuccess = false
         consumer.start { topic, key, data ->
-            if (topic == Topics.retrieveAll &&
-                key == "the-test-key" &&
-                data != noData
-            ) {
                 val actual = deserialize<List<FeedEnvelope>>(data)
                 if (actual.size != 1) {
                     return@start
@@ -67,7 +64,6 @@ class PersistenceConnectorIT {
                     return@start
                 }
                 testSuccess = true
-            }
         }
 
         val topicHandler = TopicHandler(configuration)
@@ -80,7 +76,7 @@ class PersistenceConnectorIT {
 
             // Initiate retrieval of all feeds
             Producer(configuration[Configuration.kafka]).use {
-                it.send(Topics.retrieveAll, "the-test-key", noData)
+                it.send(Topics.retrieveAll, Constants.noKey, feedReply)
             }
 
             runBlocking {
@@ -93,7 +89,7 @@ class PersistenceConnectorIT {
 
     private fun setupListOfFeedEnvelopesConsumer(): Consumer {
         val consumer =
-            Consumer(configuration[Configuration.kafka], "funnel.persistence.testGroup", listOf(Topics.retrieveAll))
+            Consumer(configuration[Configuration.kafka], "funnel.persistence.testGroup", listOf(feedReply))
 
         Runtime.getRuntime().addShutdownHook(Thread {
             runBlocking {

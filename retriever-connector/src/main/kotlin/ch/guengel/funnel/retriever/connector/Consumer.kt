@@ -5,13 +5,14 @@ import ch.guengel.funnel.kafka.Topics
 import com.uchuhimo.konf.Config
 import kotlinx.coroutines.runBlocking
 
-val groupId = "funnel.retriever.connector"
+const val groupId = "funnel.retriever.connector"
+const val allFeedReplyTopic = "funnel.retriever.connector.allfeeds"
 
 fun setUpConsumer(configuration: Config): Consumer {
     val consumer = Consumer(
         configuration[Configuration.kafka],
         groupId,
-        listOf(Topics.retrieveAll)
+        listOf(allFeedReplyTopic)
     )
 
     Runtime.getRuntime().addShutdownHook(Thread {

@@ -8,23 +8,22 @@ import com.uchuhimo.konf.Config
 import org.slf4j.LoggerFactory
 import java.io.Closeable
 
-val retrievalKey = "ch.guengel.retriever-connector"
-
 class TopicHandler(configuration: Config) : Closeable {
     private val kafkaProducer = Producer(configuration[Configuration.kafka])
     private val feedUpdater = FeedUpdater(kafkaProducer)
 
-    private fun handleRetrieveAll(forKey: String, data: String) {
-        if (data.isBlank() || forKey != retrievalKey) {
+    private fun handleRetrieveAll(data: String) {
+        if (data.isBlank()) {
             return
         }
 
         try {
+            logger.info("Process feeds arrived on '${allFeedReplyTopic}'")
             val feedEnvelopes = deserialize<List<FeedEnvelope>>(data)
             feedEnvelopes.forEach {
                 feedUpdater.updateFeed(it)
             }
-            logger.info("Sent all feeds to '${Topics.retrieveAll}' for key '$forKey'")
+            logger.info("Done processing feeds for '${allFeedReplyTopic}'")
         } catch (e: Throwable) {
             logger.error("Error responding to feed retrieval response", e)
         }
@@ -32,7 +31,7 @@ class TopicHandler(configuration: Config) : Closeable {
 
     fun handle(topic: String, key: String, data: String) {
         when (topic) {
-            Topics.retrieveAll -> handleRetrieveAll(key, data)
+            allFeedReplyTopic -> handleRetrieveAll(data)
             else -> logger.error("Don't know how to handle message in topic '$topic'")
         }
     }

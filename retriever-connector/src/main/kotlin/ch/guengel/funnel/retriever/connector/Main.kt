@@ -1,5 +1,6 @@
 package ch.guengel.funnel.retriever.connector
 
+import ch.guengel.funnel.kafka.Constants
 import ch.guengel.funnel.kafka.Constants.noData
 import ch.guengel.funnel.kafka.Producer
 import ch.guengel.funnel.kafka.Topics
@@ -31,7 +32,7 @@ fun main(args: Array<String>) {
         runBlocking {
             while (true) {
                 delay(intervalMillis)
-                producer.send(Topics.retrieveAll, retrievalKey, noData)
+                producer.send(Topics.retrieveAll, Constants.noKey, allFeedReplyTopic)
                 logger.info("Retrieve all sources")
             }
         }
