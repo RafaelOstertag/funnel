@@ -9,7 +9,6 @@ import org.litote.kmongo.*
 
 class MongoFeedEnvelopeRepository(connection: String, databaseName: String) :
     FeedEnvelopeRepository {
-
     private val client = KMongo.createClient(ConnectionString(connection))
     private val database = client.getDatabase(databaseName)
     private val collection: MongoCollection<FeedEnvelope> = database.getCollection<FeedEnvelope>()
@@ -23,16 +22,22 @@ class MongoFeedEnvelopeRepository(connection: String, databaseName: String) :
         return collection.find().distinct()
     }
 
-    override fun retrieveById(name: String): FeedEnvelope {
+    override fun retrieveByName(name: String): FeedEnvelope? {
         return collection.findOne(FeedEnvelope::name eq name)
-                ?: throw FeedEnvelopeNotFound("Feed Envelope '$name' not found")
     }
 
     override fun save(feedEnvelope: FeedEnvelope) {
         collection.updateOne(FeedEnvelope::name eq feedEnvelope.name, feedEnvelope, UpdateOptions().upsert(true))
     }
 
-    override fun deleteById(name: String) {
+    override fun deleteByName(name: String) {
         collection.deleteOne(FeedEnvelope::name eq name)
+    }
+
+    override fun getAllFeedNames(): List<String> {
+        return collection
+                .find()
+                .map { document -> document.name }
+                .toList()
     }
 }

@@ -4,7 +4,8 @@ import ch.guengel.funnel.domain.FeedEnvelope
 
 interface FeedEnvelopeRepository {
     fun retrieveAll(): List<FeedEnvelope>
-    fun retrieveById(name: String): FeedEnvelope
+    fun retrieveByName(name: String): FeedEnvelope?
     fun save(feedEnvelope: FeedEnvelope)
-    fun deleteById(name: String)
+    fun deleteByName(name: String)
+    fun getAllFeedNames(): List<String>
 }
