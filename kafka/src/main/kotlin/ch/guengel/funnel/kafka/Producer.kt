@@ -23,7 +23,7 @@ class Producer(private val server: String) : Closeable {
     }
 
     fun send(topic: String, key: String, data: String) {
-        logger.debug("kafka send to topic '$topic': '$data' with key '$key")
+        logger.debug("kafka send to topic '$topic': '$data' with key '$key'")
         producer?.send(ProducerRecord<String, String>(topic, key, data))
     }
 
