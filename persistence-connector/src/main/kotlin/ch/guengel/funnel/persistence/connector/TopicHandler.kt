@@ -4,9 +4,9 @@ import ch.guengel.funnel.common.deserialize
 import ch.guengel.funnel.common.serialize
 import ch.guengel.funnel.domain.FeedEnvelope
 import ch.guengel.funnel.kafka.Constants
-import ch.guengel.funnel.kafka.Constants.noData
 import ch.guengel.funnel.kafka.Producer
 import ch.guengel.funnel.kafka.Topics
+import ch.guengel.funnel.kafka.messages.RetrieveByNameMessage
 import ch.guengel.funnel.persistence.MongoFeedEnvelopeRepository
 import com.uchuhimo.konf.Config
 import org.slf4j.LoggerFactory
@@ -43,13 +43,42 @@ class TopicHandler(configuration: Config) : Closeable {
             Topics.persistFeed -> saveFeed(data)
             Topics.retrieveAll -> sendAll(data)
             Topics.feedDelete -> deleteFeed(key)
+            Topics.retrieveAllNames -> sendAllNames(data)
+            Topics.retrieveFeedByName -> sendFeedByName(data)
             else -> logger.error("Don't know how to handle message in topic '$topic'")
+        }
+    }
+
+    private fun sendFeedByName(data: String) {
+        try {
+            val retrieveByNameMessage = deserialize<RetrieveByNameMessage>(data)
+            val feedName = retrieveByNameMessage.feedName
+            val feed = mongo.retrieveByName(feedName)
+            if (feed == null) {
+                logger.info("Feed with source name '${feedName}' not found in datastore")
+                return
+            }
+
+            val toTopic = retrieveByNameMessage.replyToTopic
+            kafkaProducer.send(toTopic, Constants.noKey, serialize(feed))
+        } catch (e: Throwable) {
+            logger.error("Error responding to feed retrieval by name request", e)
+        }
+    }
+
+    private fun sendAllNames(toTopic: String) {
+        try {
+            val feedNames = mongo.getAllFeedNames()
+            kafkaProducer.send(toTopic, Constants.noKey, serialize(feedNames))
+            logger.info("Sent all feed names to '${toTopic}'")
+        } catch (e: Throwable) {
+            logger.error("Error responding to feed name retrieval request", e)
         }
     }
 
     private fun deleteFeed(name: String) {
         try {
-            mongo.deleteById(name)
+            mongo.deleteByName(name)
             logger.info("Deleted feed ${name}")
         } catch (e: Throwable) {
             logger.error("Error deleting feed ${name}")
@@ -58,6 +87,7 @@ class TopicHandler(configuration: Config) : Closeable {
 
     override fun close() {
         kafkaProducer.close()
+        mongo.close()
     }
 
     companion object {
