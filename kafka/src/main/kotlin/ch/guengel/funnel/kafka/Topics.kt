@@ -4,14 +4,23 @@ object Topics {
     /**
      * Topic used to persist a Feed
      */
-    val persistFeed = "funnel.feed.persist"
+    const val persistFeed = "funnel.feed.persist"
     /**
      * Topic used to publish Feed updates
      */
-    val feedUpdate = "funnel.feed.update"
-    val retrieveAll = "funnel.feed.retrieve.all"
+    const val feedUpdate = "funnel.feed.update"
+    const val retrieveAll = "funnel.feed.retrieve.all"
     /**
      * Topic used to delete Feed
      */
-    val feedDelete = "funnel.feed.delete"
+    const val feedDelete = "funnel.feed.delete"
+    /**
+     * Topic used to retrieve all feed names
+     */
+    const val retrieveAllNames = "funnel.feed.retrieve.all.names"
+    /**
+     * Topic used to retrieve feed by name
+     */
+    const val retrieveFeedByName = "funnel.feed.retrieve.by.name"
+
 }
