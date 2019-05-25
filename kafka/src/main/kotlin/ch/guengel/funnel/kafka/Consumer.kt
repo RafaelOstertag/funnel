@@ -38,6 +38,8 @@ class Consumer(private val server: String, private val groupId: String, private 
                         handler(it.topic(), it.key() ?: "", it.value())
                     }
                 }
+            } catch (e: Throwable) {
+                logger.error("Error polling consumer: {}", e)
             } finally {
                 consumer.close()
                 logClose()
