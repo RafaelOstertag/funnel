@@ -1,10 +1,10 @@
 package ch.guengel.funnel.retriever.connector
 
 import ch.guengel.funnel.kafka.Constants
-import ch.guengel.funnel.kafka.Constants.noData
 import ch.guengel.funnel.kafka.Producer
 import ch.guengel.funnel.kafka.Topics
 import ch.guengel.funnel.readConfiguration
+import com.uchuhimo.konf.Config
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
@@ -20,7 +20,7 @@ fun main(args: Array<String>) {
     val intervalMillis = secondsToMillis(intervalSeconds)
     logger.info("Query sources every {} seconds", intervalSeconds)
 
-    val producer = Producer(configuration[Configuration.kafka])
+    val producer = createProducer(configuration)
     val consumer = setUpConsumer(configuration)
 
     val topicHandler = TopicHandler(configuration)
@@ -37,6 +37,17 @@ fun main(args: Array<String>) {
             }
         }
     }
+}
+
+private fun createProducer(configuration: Config): Producer {
+    val producer = Producer(configuration[Configuration.kafka])
+    Runtime.getRuntime().addShutdownHook(Thread {
+        runBlocking {
+            producer.close()
+        }
+    })
+
+    return producer
 }
 
 
