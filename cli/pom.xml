@@ -25,6 +25,13 @@
             <artifactId>clikt</artifactId>
             <version>2.0.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>domain</artifactId>
+            <version>${funnel.domain.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>kafka</artifactId>
