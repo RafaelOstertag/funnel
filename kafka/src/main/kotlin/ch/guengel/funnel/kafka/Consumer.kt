@@ -26,8 +26,7 @@ class Consumer(private val server: String, private val groupId: String, private 
 
     fun start(handler: (topic: String, key: String, data: String) -> Unit) {
         job = CoroutineScope(Dispatchers.IO).launch {
-            val consumer = KafkaConsumer<String, String>(makeKafkaConfiguration())
-            consumer.subscribe(topics)
+            val consumer = createConsumer()
 
             logSubscription()
 
@@ -39,7 +38,31 @@ class Consumer(private val server: String, private val groupId: String, private 
                     }
                 }
             } catch (e: Throwable) {
-                logger.error("Error polling consumer: {}", e)
+                logger.error("Error polling consumer", e)
+            } finally {
+                consumer.close()
+                logClose()
+            }
+        }
+    }
+
+    private fun createConsumer(): KafkaConsumer<String, String> {
+        val consumer = KafkaConsumer<String, String>(makeKafkaConfiguration())
+        consumer.subscribe(topics)
+        return consumer
+    }
+
+    fun oneOff(handler: (topic: String, key: String, data: String) -> Unit, pollDuration: Duration) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val consumer = createConsumer()
+
+            try {
+                consumer.poll(pollDuration).forEach {
+                    logger.info("One Off call handler for topic '${it.topic()}'")
+                    handler(it.topic(), it.key() ?: "", it.value())
+                }
+            } catch (e: Throwable) {
+                logger.error("Error polling one off consumer", e)
             } finally {
                 consumer.close()
                 logClose()
