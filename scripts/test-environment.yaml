@@ -18,6 +18,8 @@ services:
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
     networks:
       - app-tier
+    depends_on:
+      - zookeeper
   mongodb:
     image: 'mongo:4-xenial'
     ports:
