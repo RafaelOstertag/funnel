@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>funnel-config</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Funnel Configuration</name>

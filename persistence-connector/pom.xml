@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>persistence-connector</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Funnel Persistence Connector</name>
 
@@ -22,37 +21,37 @@
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>persistence</artifactId>
-            <version>${funnel.persistence.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>domain</artifactId>
-            <version>${funnel.domain.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>kafka</artifactId>
-            <version>${funnel.kafka.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>funnel-config</artifactId>
-            <version>${funnel.funnel-config.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>common</artifactId>
-            <version>${funnel.common.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>test-utils</artifactId>
-            <version>${funnel.test-utils.version}</version>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
 

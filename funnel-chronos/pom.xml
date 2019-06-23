@@ -11,7 +11,6 @@
 
     <artifactId>funnel-chronos</artifactId>
 
-    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Funnel Chronos</name>
@@ -25,27 +24,27 @@
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>common</artifactId>
-            <version>${funnel.common.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>domain</artifactId>
-            <version>${funnel.domain.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>funnel-config</artifactId>
-            <version>${funnel.funnel-config.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>kafka</artifactId>
-            <version>${funnel.kafka.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>persistence</artifactId>
-            <version>${funnel.persistence.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
