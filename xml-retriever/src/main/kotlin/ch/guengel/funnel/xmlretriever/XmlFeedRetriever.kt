@@ -10,8 +10,8 @@ class XmlFeedRetriever(private val httpTransport: HttpTransport) : FeedRetriever
         var feed: Feed = Feed()
         httpTransport.retrieve { contentType: String, content: String ->
 
-            val feedType = FeedType.mimeTypeToFeedType(contentType)
-            val parser = makeFeedParser(feedType)
+            val feedType = FeedType.detectFeedType(content)
+            val parser = createFeedParser(feedType)
             feed = parser.parse(content, since)
         }
         return feed

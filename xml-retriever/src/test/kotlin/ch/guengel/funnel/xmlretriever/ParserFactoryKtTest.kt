@@ -7,7 +7,7 @@ class ParserFactoryKtTest {
 
     @Test
     fun makeFeedParser() {
-        assertTrue(ch.guengel.funnel.xmlretriever.makeFeedParser(FeedType.ATOM) is AtomParser)
-        assertTrue(ch.guengel.funnel.xmlretriever.makeFeedParser(FeedType.RSS) is RssParser)
+        assertTrue(ch.guengel.funnel.xmlretriever.createFeedParser(FeedType.ATOM) is AtomParser)
+        assertTrue(ch.guengel.funnel.xmlretriever.createFeedParser(FeedType.RSS) is RssParser)
     }
 }

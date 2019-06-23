@@ -1,23 +1,28 @@
 package ch.guengel.funnel.xmlretriever
 
+import java.util.regex.Pattern
+
 enum class FeedType {
     RSS,
     ATOM;
 
     companion object {
-        fun mimeTypeToFeedType(mimeType: String): FeedType {
-            return when (mimeTypeWithoutCharacterSet(mimeType)) {
-                "application/atom+xml" -> ATOM
-                "text/xml" -> RSS
-                "text/html" -> RSS
-                "application/rss+xml" -> RSS
-                else -> throw UnknownFeedType("Unknown feed type '${mimeType}'")
+        val pattern = Pattern.compile("<\\?xml.*\\?>")
+        fun detectFeedType(rawFeed: String): FeedType {
+            val withoutNewLines = rawFeed.replace("\n", "").replace("\r", "")
+            val matcher = pattern.matcher(withoutNewLines)
+            val withoutXmlDeclaration = matcher.replaceAll("")
+
+            if (withoutXmlDeclaration.startsWith("<rss ")) {
+                return RSS
             }
+
+            if (withoutXmlDeclaration.startsWith("<feed ")) {
+                return ATOM
+            }
+
+            throw UnknownFeedType("Cannot detect feed type for: ${withoutXmlDeclaration}")
         }
-
-        private fun mimeTypeWithoutCharacterSet(fullMimeType: String): String =
-                fullMimeType.split(";")[0]
-
     }
 }
 

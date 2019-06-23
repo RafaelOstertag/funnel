@@ -133,30 +133,6 @@ class XmlFeedRetrieverTest {
         )
 
         val atomFeedRetriever = XmlFeedRetriever(httpTransport)
-        assertThrows<CannotDeserializeXML> { runBlocking { atomFeedRetriever.retrieve(ZonedDateTime.parse("2001-01-01T00:00:00Z")) } }
-    }
-
-    @Test
-    fun `invalid content type`() {
-        invalidContentTypeMockFeedServer()
-
-        val httpTransport = HttpTransport(
-            Source("test", "http://localhost:1080/atom")
-        )
-
-        val atomFeedRetriever = XmlFeedRetriever(httpTransport)
-        assertThrows<UnknownFeedType> { runBlocking { atomFeedRetriever.retrieve(ZonedDateTime.parse("2001-01-01T00:00:00Z")) } }
-    }
-
-    @Test
-    fun `no content type`() {
-        noContentTypeMockFeedServer()
-
-        val httpTransport = HttpTransport(
-            Source("test", "http://localhost:1080/atom")
-        )
-
-        val atomFeedRetriever = XmlFeedRetriever(httpTransport)
         assertThrows<UnknownFeedType> { runBlocking { atomFeedRetriever.retrieve(ZonedDateTime.parse("2001-01-01T00:00:00Z")) } }
     }
 
@@ -238,59 +214,4 @@ class XmlFeedRetrieverTest {
                     .withBody("Simply text")
             )
     }
-
-    private fun noContentTypeMockFeedServer() {
-        mockServer
-            ?.`when`(
-                request()
-                    .withMethod("GET")
-                    .withPath("/atom")
-            )
-            ?.respond(
-                response()
-                    .withStatusCode(200)
-                    .withBody(atomTestFile)
-            )
-
-        mockServer
-            ?.`when`(
-                request()
-                    .withMethod("GET")
-                    .withPath("/rss")
-            )
-            ?.respond(
-                response()
-                    .withStatusCode(200)
-                    .withBody(rssTestFile)
-            )
-    }
-
-    private fun invalidContentTypeMockFeedServer() {
-        mockServer
-            ?.`when`(
-                request()
-                    .withMethod("GET")
-                    .withPath("/atom")
-            )
-            ?.respond(
-                response()
-                    .withStatusCode(200)
-                    .withHeader(CONTENT_TYPE, "text/plain")
-                    .withBody(atomTestFile)
-            )
-
-        mockServer
-            ?.`when`(
-                request()
-                    .withMethod("GET")
-                    .withPath("/rss")
-            )
-            ?.respond(
-                response()
-                    .withStatusCode(200)
-                    .withHeader(CONTENT_TYPE, "text/plain")
-                    .withBody(rssTestFile)
-            )
-    }
-
 }
