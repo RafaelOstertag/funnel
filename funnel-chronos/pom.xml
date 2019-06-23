@@ -46,6 +46,11 @@
             <artifactId>persistence</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>build-info</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>ch.qos.logback</groupId>

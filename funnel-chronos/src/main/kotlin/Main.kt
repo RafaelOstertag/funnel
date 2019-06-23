@@ -1,5 +1,6 @@
 package ch.guengel.funnel.chronos
 
+import ch.guengel.funnel.build.info.readBuildInfo
 import ch.guengel.funnel.kafka.Producer
 import ch.guengel.funnel.persistence.MongoFeedEnvelopeRepository
 import ch.guengel.funnel.readConfiguration
@@ -7,10 +8,12 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 
-private val logger = LoggerFactory.getLogger("main")
+private val logger = LoggerFactory.getLogger("funnel-chronos")
 private val TO_MILLIS = 1_000L
+private val buildInfo = readBuildInfo("/git.json")
 
 fun main(args: Array<String>) {
+    logger.info("${buildInfo.buildVersion} ${buildInfo.commitIdAbbrev}")
     val configuration = readConfiguration(Configuration)
 
     val mongoFeedEnvelopeRepository = MongoFeedEnvelopeRepository(

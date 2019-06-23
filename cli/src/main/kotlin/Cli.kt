@@ -1,5 +1,6 @@
 package ch.guengel.funnel.cli
 
+import ch.guengel.funnel.build.info.readBuildInfo
 import ch.guengel.funnel.common.serialize
 import ch.guengel.funnel.domain.Feed
 import ch.guengel.funnel.domain.FeedEnvelope
@@ -16,6 +17,8 @@ import com.github.ajalt.clikt.parameters.options.option
 private const val defaultKafkaAddress = "localhost:9092"
 private const val PERSIST_TOPIC = "ch.guengel.funnel.persist.envelope"
 private const val DELETE_TOPIC = "ch.guengel.funnel.delete.envelope"
+
+private val buildInfo = readBuildInfo("/git.json")
 
 private fun makeFeed(sourceName: String, sourceAddress: String): FeedEnvelope {
     val source = Source(sourceName, sourceAddress)
@@ -63,7 +66,10 @@ class CliOptions : CliktCommand() {
 }
 
 
-fun main(args: Array<String>) = CliOptions().subcommands(CreateFeed()).subcommands(DeleteFeed()).main(args)
+fun main(args: Array<String>) {
+    println("${buildInfo.buildVersion} (${buildInfo.commitIdAbbrev})")
+    CliOptions().subcommands(CreateFeed()).subcommands(DeleteFeed()).main(args)
+}
 
 
 
