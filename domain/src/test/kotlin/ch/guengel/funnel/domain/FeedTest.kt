@@ -46,9 +46,9 @@ class FeedTest {
 
     @Test
     fun `should return fresh empty feed`() {
-        val empty1 = Feed.empty()
+        val empty1 = Feed()
         empty1.feedItems.add(FeedItem("id", "title", ZonedDateTime.parse("2018-01-01T00:00:00Z")))
 
-        assertEquals(0, Feed.empty().feedItems.size)
+        assertEquals(0, Feed().feedItems.size)
     }
 }

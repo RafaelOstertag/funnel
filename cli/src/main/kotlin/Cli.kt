@@ -22,7 +22,7 @@ private val buildInfo = readBuildInfo("/git.json")
 
 private fun makeFeed(sourceName: String, sourceAddress: String): FeedEnvelope {
     val source = Source(sourceName, sourceAddress)
-    val feed = Feed.empty()
+    val feed = Feed()
     return FeedEnvelope(source, feed)
 }
 

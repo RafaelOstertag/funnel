@@ -12,7 +12,7 @@ private val logger = LoggerFactory.getLogger("funnel-chronos")
 private val TO_MILLIS = 1_000L
 private val buildInfo = readBuildInfo("/git.json")
 
-fun main(args: Array<String>) {
+fun main() {
     logger.info("${buildInfo.buildVersion} ${buildInfo.commitIdAbbrev}")
     val configuration = readConfiguration(Configuration)
 

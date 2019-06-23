@@ -7,7 +7,7 @@ import java.time.ZonedDateTime
 
 class XmlFeedRetriever(private val httpTransport: HttpTransport) : FeedRetriever {
     override suspend fun retrieve(since: ZonedDateTime): Feed {
-        var feed: Feed = Feed.empty()
+        var feed: Feed = Feed()
         httpTransport.retrieve { contentType: String, content: String ->
 
             val feedType = FeedType.mimeTypeToFeedType(contentType)
