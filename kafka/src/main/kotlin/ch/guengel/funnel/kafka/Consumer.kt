@@ -1,6 +1,5 @@
 package ch.guengel.funnel.kafka
 
-
 import kotlinx.coroutines.*
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
