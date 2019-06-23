@@ -19,7 +19,7 @@ fun main(args: Array<String>) {
 
     val producer = Producer(configuration[Configuration.kafka])
 
-    val sender = Sender("ch.guengel.funnel.all.envelops", producer)
+    val sender = Sender("ch.guengel.funnel.all.envelopes", producer)
 
     val feedEnvelopSenderTask = FeedEnvelopSenderTask(mongoFeedEnvelopeRepository, sender)
 
