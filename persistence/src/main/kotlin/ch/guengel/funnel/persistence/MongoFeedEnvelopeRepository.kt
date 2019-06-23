@@ -26,14 +26,17 @@ class MongoFeedEnvelopeRepository(connection: String, databaseName: String) :
     }
 
     override fun retrieveByName(name: String): FeedEnvelope? {
+        logger.debug("Retrieve feed envelope '{}'", name)
         return collection.findOne(FeedEnvelope::name eq name)
     }
 
     override fun save(feedEnvelope: FeedEnvelope) {
+        logger.debug("Save feed envelope '{}'", feedEnvelope.name)
         collection.updateOne(FeedEnvelope::name eq feedEnvelope.name, feedEnvelope, UpdateOptions().upsert(true))
     }
 
     override fun deleteByName(name: String) {
+        logger.debug("Delete feed envelope '{}'", name)
         collection.deleteOne(FeedEnvelope::name eq name)
     }
 
