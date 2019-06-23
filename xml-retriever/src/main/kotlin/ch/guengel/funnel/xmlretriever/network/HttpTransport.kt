@@ -24,7 +24,6 @@ class HttpTransport(private val source: Source) {
         val response = httpGet()
         if (response.status != HttpStatusCode.OK) {
             log.debug("Fetch failed with HTTP status ${response.status}")
-            print(response.readText())
             throw HttpError("Error fetching '${source.name}' from '${source.address}': ${response.status.description}")
         }
 
