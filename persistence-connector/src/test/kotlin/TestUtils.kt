@@ -1,3 +1,5 @@
+package ch.guengel.funnel.persistence.connector
+
 import ch.guengel.funnel.domain.*
 import java.time.ZonedDateTime
 
