@@ -2,28 +2,17 @@ package ch.guengel.funnel.retriever.connector
 
 import ch.guengel.funnel.common.deserialize
 import ch.guengel.funnel.domain.FeedEnvelope
-import ch.guengel.funnel.kafka.Producer
-import ch.guengel.funnel.kafka.Topics
-import com.uchuhimo.konf.Config
 import org.slf4j.LoggerFactory
-import java.io.Closeable
 
-class TopicHandler(configuration: Config) : Closeable {
-    private val kafkaProducer = Producer(configuration[Configuration.kafka])
-    private val feedUpdater = FeedUpdater(kafkaProducer)
-
+class TopicHandler(private val feedUpdater: FeedUpdater) {
     private fun handleRetrieveAll(data: String) {
-        if (data.isBlank()) {
-            return
-        }
-
         try {
-            logger.info("Process feeds arrived on '${allFeedReplyTopic}'")
+            logger.info("Process feeds arrived on '${ALL_FEEDS_TOPIC}'")
             val feedEnvelopes = deserialize<List<FeedEnvelope>>(data)
             feedEnvelopes.forEach {
                 feedUpdater.updateFeed(it)
             }
-            logger.info("Done processing feeds for '${allFeedReplyTopic}'")
+            logger.info("Done processing feeds for '${ALL_FEEDS_TOPIC}'")
         } catch (e: Throwable) {
             logger.error("Error responding to feed retrieval response", e)
         }
@@ -31,13 +20,9 @@ class TopicHandler(configuration: Config) : Closeable {
 
     fun handle(topic: String, key: String, data: String) {
         when (topic) {
-            allFeedReplyTopic -> handleRetrieveAll(data)
+            ALL_FEEDS_TOPIC -> handleRetrieveAll(data)
             else -> logger.error("Don't know how to handle message in topic '$topic'")
         }
-    }
-
-    override fun close() {
-        kafkaProducer.close()
     }
 
     companion object {

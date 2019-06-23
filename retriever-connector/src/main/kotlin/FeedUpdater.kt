@@ -6,7 +6,6 @@ import ch.guengel.funnel.domain.FeedEnvelope
 import ch.guengel.funnel.domain.Source
 import ch.guengel.funnel.kafka.Constants
 import ch.guengel.funnel.kafka.Producer
-import ch.guengel.funnel.kafka.Topics
 import ch.guengel.funnel.xmlretriever.XmlFeedRetriever
 import ch.guengel.funnel.xmlretriever.network.HttpTransport
 import kotlinx.coroutines.CoroutineScope
@@ -55,12 +54,12 @@ class FeedUpdater(private val producer: Producer) {
      */
     private fun saveMergedFeedEvelope(oldFeedEnvelope: FeedEnvelope, newFeedEnvelope: FeedEnvelope) {
         newFeedEnvelope.feed.mergeWith(oldFeedEnvelope.feed)
-        producer.send(Topics.persistFeed, Constants.noKey, serialize(newFeedEnvelope))
+        producer.send(PERSIST_TOPIC, Constants.noKey, serialize(newFeedEnvelope))
         logger.debug("Publish persistence event for {}", newFeedEnvelope.source)
     }
 
     private fun informOfNewFeedItems(newFeedEnvelope: FeedEnvelope) {
-        producer.send(Topics.feedUpdate, "", serialize(newFeedEnvelope))
+        producer.send(UPDATE_TOPIC, "", serialize(newFeedEnvelope))
         logger.debug("Publish update event for {}", newFeedEnvelope.source)
     }
 
