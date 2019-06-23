@@ -2,6 +2,7 @@ package ch.guengel.funnel.xmlretriever
 
 import ch.guengel.funnel.domain.Feed
 import ch.guengel.funnel.xmlretriever.network.HttpTransport
+
 import java.time.ZonedDateTime
 
 

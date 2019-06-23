@@ -15,22 +15,23 @@ private data class AtomLink(
         val href: String)
 
 private data class AtomEntry(
-        var title: String,
-        var link: AtomLink,
-        var id: String,
-        var updated: ZonedDateTime,
-        var summary: String = "")
+    var title: String,
+    var link: AtomLink,
+    var id: String,
+    var updated: ZonedDateTime,
+    var summary: String = ""
+)
 
 private data class Author(var name: String)
 
 @JsonRootName(value = "feed")
 private data class AtomFeedElement(
-        var title: String,
-        var link: AtomLink,
-        var updated: ZonedDateTime,
-        var author: Author,
-        var id: String,
-        @JacksonXmlElementWrapper(useWrapping = false)
+    var title: String,
+    var link: AtomLink,
+    var updated: ZonedDateTime,
+    var author: Author,
+    var id: String,
+    @JacksonXmlElementWrapper(useWrapping = false)
         @JacksonXmlProperty(localName = "entry")
         var atomEntries: List<AtomEntry>)
 

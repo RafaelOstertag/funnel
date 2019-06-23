@@ -307,8 +307,9 @@ class InItemPubDateTag : ParserState {
 }
 
 class ParserContext(
-        private val ignoreItemsBefore: ZonedDateTime,
-        private var currentState: ParserState = RootElement()) {
+    private val ignoreItemsBefore: ZonedDateTime,
+    private var currentState: ParserState = RootElement()
+) {
     private val feedData = FeedData(ignoreItemsBefore)
 
     fun startTag(name: String, attributes: Attributes) {
