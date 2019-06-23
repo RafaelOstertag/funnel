@@ -10,7 +10,7 @@ import java.lang.Thread.sleep
 private val logger = LoggerFactory.getLogger("persistence-connector")
 private val buildInfo = readBuildInfo("/git.json")
 
-fun main(args: Array<String>) {
+fun main() {
     logger.info("${buildInfo.buildVersion} ${buildInfo.commitIdAbbrev}")
     val configuration = readConfiguration(Configuration)
 

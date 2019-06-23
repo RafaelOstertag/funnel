@@ -13,7 +13,7 @@ private const val MILLIS_PER_SECOND = 1000L
 private val buildInfo = readBuildInfo("/git.json")
 
 
-fun main(args: Array<String>) {
+fun main() {
     logger.info("${buildInfo.buildVersion} ${buildInfo.commitIdAbbrev}")
     val configuration = readConfiguration(Configuration)
 
