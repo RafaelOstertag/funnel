@@ -41,6 +41,7 @@ class HttpTransport(private val source: Source) {
             return httpClient
                 .get(source.address)
         } catch (e: Throwable) {
+            log.error("Error retrieving feed for '${source.name}' via '${source.address}", e)
             throw HttpError("HTTP Error", e)
         }
     }
