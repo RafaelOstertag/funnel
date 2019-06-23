@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 
 class Sender(private val topic: String, private val producer: Producer) {
     fun send(envelopes: List<FeedEnvelope>) {
+        logger.info("Send all envelopes to '${topic}'")
         serialize(envelopes)
                 .apply { producer.send(topic, KEY, this) }
         logger.debug("Sent {} envelope(s) to topic '{}' with key '{}'",
