@@ -1,6 +1,8 @@
 package ch.guengel.funnel.rest
 
 import ch.guengel.funnel.build.info.readBuildInfo
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.application.log
@@ -29,6 +31,8 @@ fun Application.jsonModule() {
     log.info("Setup JSON Module")
     install(ContentNegotiation) {
         jackson {
+            registerModule(JavaTimeModule())
+            disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
         }
     }
 }
