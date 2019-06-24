@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
-        <version>2.2.0-SNAPSHOT</version>
+        <version>3.0.0</version>
     </parent>
 
     <artifactId>retriever-connector</artifactId>
@@ -27,7 +27,7 @@
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>funnel-config</artifactId>
+            <artifactId>config</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
