@@ -1,4 +1,4 @@
-package ch.guengel.funnel.rest
+package ch.guengel.funnel.rest.modules
 
 import ch.guengel.funnel.domain.Feed
 import ch.guengel.funnel.domain.FeedEnvelope
@@ -14,9 +14,7 @@ import io.ktor.response.respond
 import io.ktor.routing.*
 import io.ktor.util.pipeline.PipelineContext
 
-data class ErrorResponse(val code: Int, val message: String)
-
-private const val UNKNOWN_REASON = "unknown reason"
+class FeedNotFoundException(message: String) : Exception(message)
 
 fun Application.routes() {
     log.info("Setting up routes")
@@ -38,35 +36,16 @@ fun Application.routes() {
 private suspend fun PipelineContext<Unit, ApplicationCall>.saveEnvelope(feedEnvelopeRepository: MongoFeedEnvelopeRepository) {
     val source = call.receive<Source>()
     val feedEnvelope = FeedEnvelope(source, Feed())
-    try {
-        feedEnvelopeRepository.save(feedEnvelope)
-        call.respond(HttpStatusCode.Created)
-    } catch (e: Throwable) {
-        call.respond(
-            HttpStatusCode.InternalServerError,
-            ErrorResponse(HttpStatusCode.InternalServerError.value, e.message ?: UNKNOWN_REASON)
-        )
-    }
 
+    feedEnvelopeRepository.save(feedEnvelope)
+    call.respond(HttpStatusCode.Created)
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.deleteByName(feedEnvelopeRepository: MongoFeedEnvelopeRepository) {
     val feedEnvelopeName = call.parameters["name"]
-    if (feedEnvelopeName == null) {
-        call.respond(HttpStatusCode.BadRequest, ErrorResponse(HttpStatusCode.BadRequest.value, "no name specified"))
-        return
-    }
+    feedEnvelopeName ?: throw IllegalArgumentException("no name specified")
 
-    try {
-        feedEnvelopeRepository.deleteByName(feedEnvelopeName)
-    } catch (e: Throwable) {
-        call.respond(
-            HttpStatusCode.InternalServerError,
-            ErrorResponse(HttpStatusCode.InternalServerError.value, e.message ?: UNKNOWN_REASON)
-        )
-        return
-    }
-
+    feedEnvelopeRepository.deleteByName(feedEnvelopeName)
     call.respond(HttpStatusCode.NoContent)
 }
 
@@ -80,27 +59,11 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.retrieveByName(
     feedEnvelopeRepository: MongoFeedEnvelopeRepository
 ) {
     val feedEnvelopeName = call.parameters["name"]
-    if (feedEnvelopeName == null) {
-        call.respond(HttpStatusCode.BadRequest, ErrorResponse(HttpStatusCode.BadRequest.value, "no name specified"))
-        return
-    }
+    feedEnvelopeName ?: throw IllegalArgumentException("no name specified")
 
-    try {
-        val feedEnvelope = feedEnvelopeRepository.retrieveByName(feedEnvelopeName)
-        if (feedEnvelope == null) {
-            call.respond(
-                HttpStatusCode.NotFound,
-                ErrorResponse(HttpStatusCode.NotFound.value, "No Feed Envelope with name ${feedEnvelopeName} exists")
-            )
-            return
-        }
-        call.respond(feedEnvelope)
-    } catch (e: Throwable) {
-        call.respond(
-            HttpStatusCode.InternalServerError,
-            ErrorResponse(HttpStatusCode.InternalServerError.value, e.message ?: UNKNOWN_REASON)
-        )
-    }
+    val feedEnvelope = feedEnvelopeRepository.retrieveByName(feedEnvelopeName)
+    feedEnvelope ?: throw FeedNotFoundException("No Feed Envelope with name ${feedEnvelopeName} exists")
+    call.respond(feedEnvelope)
 }
 
 private fun setupMongoFeedEnvelopeRepository(application: Application): MongoFeedEnvelopeRepository {

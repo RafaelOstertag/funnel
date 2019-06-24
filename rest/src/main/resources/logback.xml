@@ -9,10 +9,10 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_DIR:-.}/funnel-persistence.log</file>
+        <file>${LOG_DIR:-.}/funnel-rest.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
-            <fileNamePattern>funnel-persistence.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>funnel-rest.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
             <totalSizeCap>250MB</totalSizeCap>
 
