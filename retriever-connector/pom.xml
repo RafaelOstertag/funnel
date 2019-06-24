@@ -6,11 +6,10 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
-        <version>2.1.0</version>
+        <version>3.0.0</version>
     </parent>
 
     <artifactId>retriever-connector</artifactId>
-    <version>1.0.2</version>
     <packaging>jar</packaging>
 
     <name>Funnel Retriever Connector</name>
@@ -23,31 +22,37 @@
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>domain</artifactId>
-            <version>${funnel.domain.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>funnel-config</artifactId>
-            <version>${funnel.funnel-config.version}</version>
+            <artifactId>config</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>kafka</artifactId>
-            <version>${funnel.kafka.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>xml-retriever</artifactId>
-            <version>${funnel.xml-retriever.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>common</artifactId>
-            <version>${funnel.common.version}</version>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>build-info</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
@@ -55,17 +60,10 @@
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-kotlin</artifactId>
-            <version>${jackson-module-kotlin.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
 
         <plugins>
             <plugin>
@@ -94,6 +92,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>

@@ -7,9 +7,9 @@ import java.io.Closeable
 import java.util.*
 
 class Producer(private val server: String) : Closeable {
-    val producer: KafkaProducer<String, String>? = KafkaProducer(makeKafkaConfiguration())
+    val producer: KafkaProducer<String, String>? = KafkaProducer(createKafkaConfiguration())
 
-    private fun makeKafkaConfiguration(): Properties {
+    private fun createKafkaConfiguration(): Properties {
         val props = Properties()
         props.put("bootstrap.servers", server)
         props.put("acks", "all")
@@ -23,7 +23,7 @@ class Producer(private val server: String) : Closeable {
     }
 
     fun send(topic: String, key: String, data: String) {
-        logger.debug("kafka send to topic '$topic': '$data' with key '$key")
+        logger.debug("kafka send to topic '$topic': '$data' with key '$key'")
         producer?.send(ProducerRecord<String, String>(topic, key, data))
     }
 

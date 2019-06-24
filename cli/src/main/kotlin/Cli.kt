@@ -1,12 +1,12 @@
 package ch.guengel.funnel.cli
 
+import ch.guengel.funnel.build.info.readBuildInfo
 import ch.guengel.funnel.common.serialize
 import ch.guengel.funnel.domain.Feed
 import ch.guengel.funnel.domain.FeedEnvelope
 import ch.guengel.funnel.domain.Source
 import ch.guengel.funnel.kafka.Constants
 import ch.guengel.funnel.kafka.Producer
-import ch.guengel.funnel.kafka.Topics
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.findObject
 import com.github.ajalt.clikt.core.subcommands
@@ -15,23 +15,27 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 
 private const val defaultKafkaAddress = "localhost:9092"
+private const val PERSIST_TOPIC = "ch.guengel.funnel.persist.envelope"
+private const val DELETE_TOPIC = "ch.guengel.funnel.delete.envelope"
+
+private val buildInfo = readBuildInfo("/git.json")
 
 private fun makeFeed(sourceName: String, sourceAddress: String): FeedEnvelope {
     val source = Source(sourceName, sourceAddress)
-    val feed = Feed.empty()
+    val feed = Feed()
     return FeedEnvelope(source, feed)
 }
 
 private fun createFeed(sourceName: String, sourceAddress: String, kafkaAddress: String) {
     val feed = makeFeed(sourceName, sourceAddress)
     Producer(kafkaAddress).use {
-        it.send(Topics.persistFeed, Constants.noKey, serialize(feed))
+        it.send(PERSIST_TOPIC, Constants.noKey, serialize(feed))
     }
 }
 
 private fun deleteFeed(sourceName: String, kafkaAddress: String) {
     Producer(kafkaAddress).use {
-        it.send(Topics.feedDelete, sourceName, Constants.noData)
+        it.send(DELETE_TOPIC, Constants.noKey, sourceName)
     }
 }
 
@@ -62,7 +66,10 @@ class CliOptions : CliktCommand() {
 }
 
 
-fun main(args: Array<String>) = CliOptions().subcommands(CreateFeed()).subcommands(DeleteFeed()).main(args)
+fun main(args: Array<String>) {
+    println("${buildInfo.buildVersion} (${buildInfo.commitIdAbbrev})")
+    CliOptions().subcommands(CreateFeed()).subcommands(DeleteFeed()).main(args)
+}
 
 
 

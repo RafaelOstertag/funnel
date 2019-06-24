@@ -6,11 +6,10 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
-        <version>2.1.0</version>
+        <version>3.0.0</version>
     </parent>
 
     <artifactId>test-utils</artifactId>
-    <version>1.0.2</version>
     <packaging>jar</packaging>
 
     <name>Funnel Test Utilities</name>

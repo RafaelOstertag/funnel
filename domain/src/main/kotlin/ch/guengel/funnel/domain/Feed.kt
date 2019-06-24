@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.ZonedDateTime
 
 class Feed(val id: String, val title: String, val feedItems: FeedItems) {
+    constructor() : this("", "", FeedItems())
+
     @get:JsonIgnore
     val lastUpdated: ZonedDateTime get() = feedItems.latest.created
 
@@ -24,10 +26,5 @@ class Feed(val id: String, val title: String, val feedItems: FeedItems) {
 
     override fun hashCode(): Int {
         return id.hashCode()
-    }
-
-
-    companion object {
-        fun empty() = Feed("", "", FeedItems())
     }
 }
