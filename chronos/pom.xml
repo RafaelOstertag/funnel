@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>funnel-chronos</artifactId>
+    <artifactId>chronos</artifactId>
 
     <packaging>jar</packaging>
 

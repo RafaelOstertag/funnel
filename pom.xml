@@ -39,12 +39,12 @@
         <module>test-utils</module>
         <module>common</module>
         <module>build-info</module>
-        <module>funnel-config</module>
+        <module>config</module>
         <module>domain</module>
         <module>kafka</module>
         <module>xml-retriever</module>
         <module>persistence</module>
-        <module>funnel-chronos</module>
+        <module>chronos</module>
         <module>persistence-connector</module>
         <module>retriever-connector</module>
         <module>cli</module>
