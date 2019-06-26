@@ -52,7 +52,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.deleteByName(feedEnve
 private suspend fun PipelineContext<Unit, ApplicationCall>.retrieveAllNames(
     feedEnvelopeRepository: MongoFeedEnvelopeRepository
 ) {
-    call.respond(feedEnvelopeRepository.getAllFeedNames())
+    call.respond(feedEnvelopeRepository.retrieveAllSources())
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.retrieveByName(

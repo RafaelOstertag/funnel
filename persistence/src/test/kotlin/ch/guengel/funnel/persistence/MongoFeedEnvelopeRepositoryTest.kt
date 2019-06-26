@@ -2,6 +2,7 @@ package ch.guengel.funnel.persistence
 
 import assertk.assert
 import assertk.assertions.*
+import ch.guengel.funnel.domain.Source
 import ch.guengel.funnel.testutils.EmbeddedMongo
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -114,19 +115,22 @@ class MongoFeedEnvelopeRepositoryTest {
     }
 
     @Test
-    fun `get all feed names`() {
+    fun `get all feed sources`() {
         val feedEnvelope1 = makeFeedEnvelope(makeSource(1), makeFeed("testid", "test title", 4))
         feedEnvelopeRepository?.save(feedEnvelope1)
 
         val feedEnvelope2 = makeFeedEnvelope(makeSource(2), makeFeed("testid 2", "test title", 5))
         feedEnvelopeRepository?.save(feedEnvelope2)
 
-        val allFeedNames = feedEnvelopeRepository?.getAllFeedNames()
+        val allFeedNames = feedEnvelopeRepository?.retrieveAllSources()
         assert(allFeedNames).isNotNull()
 
         allFeedNames.let {
-            val actual: List<String> = it ?: emptyList()
-            assert(actual).containsAll("sourceName 1", "sourceName 2")
+            val actual: List<Source> = it ?: emptyList()
+            assert(actual).containsAll(
+                Source("sourceName 1", "sourceAddress 1"),
+                Source("sourceName 2", "sourceAddress 2")
+            )
         }
     }
 }

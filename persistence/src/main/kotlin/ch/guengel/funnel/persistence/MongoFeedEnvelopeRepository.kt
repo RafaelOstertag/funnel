@@ -1,6 +1,7 @@
 package ch.guengel.funnel.persistence
 
 import ch.guengel.funnel.domain.FeedEnvelope
+import ch.guengel.funnel.domain.Source
 import com.mongodb.ConnectionString
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.model.IndexOptions
@@ -40,10 +41,10 @@ class MongoFeedEnvelopeRepository(connection: String, databaseName: String) :
         collection.deleteOne(FeedEnvelope::name eq name)
     }
 
-    override fun getAllFeedNames(): List<String> {
+    override fun retrieveAllSources(): List<Source> {
         return collection
                 .find()
-                .map { document -> document.name }
+            .map { document -> document.source }
                 .toList()
     }
 
