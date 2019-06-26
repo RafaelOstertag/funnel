@@ -21,7 +21,7 @@ fun Application.routes() {
     val feedEnvelopeRepository = setupMongoFeedEnvelopeRepository(this)
 
     routing {
-        route("/feedenvelopes") {
+        route("/feeds") {
             get { retrieveAllNames(feedEnvelopeRepository) }
             post { saveEnvelope(feedEnvelopeRepository) }
             route("/{name}") {
