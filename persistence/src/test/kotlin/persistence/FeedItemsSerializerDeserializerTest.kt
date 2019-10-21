@@ -1,0 +1,41 @@
+package persistence
+
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import data.FeedItem
+import data.FeedItems
+import org.junit.jupiter.api.Test
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+
+internal class FeedItemsSerializerDeserializerTest {
+    val objectMapper: ObjectMapper
+
+    init {
+        val simpleModule = SimpleModule()
+        simpleModule.addSerializer(FeedItemsSerializer())
+        simpleModule.addDeserializer(FeedItems::class.java, FeedItemsDeserializer())
+        objectMapper = jacksonObjectMapper()
+            .registerModule(simpleModule)
+            .registerModule(JavaTimeModule())
+            .enable(SerializationFeature.INDENT_OUTPUT)
+    }
+
+    @Test
+    fun `serialize and deserialize`() {
+        val time = OffsetDateTime.of(2019, 1, 2, 3, 4, 5, 0, ZoneOffset.UTC)
+        val feedItem1 = FeedItem("id1", "title1", time)
+        val feedItem2 = FeedItem("id2", "title2", time.plusDays(1))
+        val feedItems = FeedItems(listOf<FeedItem>(feedItem1, feedItem2))
+
+        val serialized = objectMapper.writeValueAsString(feedItems)
+        val deserializedFeedItems = objectMapper.readValue(serialized, FeedItems::class.java)
+
+        assertThat(deserializedFeedItems).isEqualTo(feedItems)
+    }
+}

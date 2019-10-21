@@ -1,23 +1,25 @@
-package ch.guengel.funnel.persistence
+package persistence
 
-import ch.guengel.funnel.domain.*
-import java.time.ZonedDateTime
+import data.*
+import java.time.OffsetDateTime
+
+private val createdDate = OffsetDateTime.parse("2018-10-01T13:00:00Z")
 
 fun makeItem(number: Int): FeedItem {
     return FeedItem(
         "item${number}",
         "Item ${number}",
-        ZonedDateTime.parse("2018-10-0${number}T13:00:00+02:00")
+        createdDate.plusDays(number.toLong())
     )
 }
 
 fun makeFeedItems(numberOfItems: Int): FeedItems {
-    val feedItems = FeedItems(numberOfItems)
+    val feeds = mutableListOf<FeedItem>()
     (1..numberOfItems).forEach {
-        feedItems.add(makeItem(it))
+        feeds.add(makeItem(it))
     }
 
-    return feedItems
+    return FeedItems(feeds)
 }
 
 fun makeFeed(id: String, title: String, numberOfItems: Int) =
