@@ -35,4 +35,26 @@ internal class FeedTest {
         assertThat(emptyFeed.title).isEqualTo("")
         assertThat(emptyFeed.feedItems.isEmpty).isTrue()
     }
+
+    @Test
+    fun equality() {
+        val now = ZonedDateTime.now()
+        val feedItem1 = FeedItem("1", "", now)
+        val feedItem2 = FeedItem("2", "", now.minusDays(1))
+        val feed1 = Feed(
+            "1",
+            "",
+            FeedItems(listOf(feedItem1, feedItem2))
+        )
+
+        val feedItem3 = FeedItem("1", "", now)
+        val feedItem4 = FeedItem("2", "", now.minusDays(1))
+        val feed2 = Feed(
+            "1",
+            "",
+            FeedItems(listOf(feedItem3, feedItem4))
+        )
+        assertThat(feed1).isEqualTo(feed2)
+        assertThat(feed1.hashCode()).isEqualTo(feed2.hashCode())
+    }
 }
