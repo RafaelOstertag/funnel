@@ -10,13 +10,11 @@ import data.Source
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
-import java.time.ZonedDateTime
 
 internal class FeedEnvelopeRetrieverTest {
 
     @Test
     fun retrieve() {
-        val now = ZonedDateTime.now()
         val feed = Feed("id", "title", FeedItems(listOf(FeedItem("1", "", now))))
         val feedRetrieverMock = mockk<FeedRetriever>()
         every {

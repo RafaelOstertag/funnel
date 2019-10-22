@@ -1,9 +1,9 @@
 package logic
 
 import data.FeedItem
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
-internal val now = ZonedDateTime.now()
+internal val now = OffsetDateTime.now()
 
 internal fun makeFeedItems(amount: Long): List<FeedItem> {
     val mutableList = mutableListOf<FeedItem>()

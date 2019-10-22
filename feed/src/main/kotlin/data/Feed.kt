@@ -1,11 +1,11 @@
 package data
 
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
 class Feed(val id: String, val title: String, val feedItems: FeedItems) {
     constructor() : this("", "", FeedItems())
 
-    val lastUpdated: ZonedDateTime get() = feedItems.latest.created
+    val lastUpdated: OffsetDateTime get() = feedItems.latest.created
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

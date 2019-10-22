@@ -4,7 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
 import org.junit.jupiter.api.Test
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
 internal class FeedTest {
 
@@ -16,7 +16,7 @@ internal class FeedTest {
 
     @Test
     fun `last updated`() {
-        val now = ZonedDateTime.now()
+        val now = OffsetDateTime.now()
         val feedItem1 = FeedItem("1", "", now)
         val feedItem2 = FeedItem("2", "", now.minusDays(1))
         val feed = Feed(
@@ -38,7 +38,7 @@ internal class FeedTest {
 
     @Test
     fun equality() {
-        val now = ZonedDateTime.now()
+        val now = OffsetDateTime.now()
         val feedItem1 = FeedItem("1", "", now)
         val feedItem2 = FeedItem("2", "", now.minusDays(1))
         val feed1 = Feed(

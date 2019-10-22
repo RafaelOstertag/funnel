@@ -6,11 +6,10 @@ import assertk.assertions.isFalse
 import assertk.assertions.isNotEqualTo
 import assertk.assertions.isTrue
 import org.junit.jupiter.api.Test
-
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
 internal class FeedItemsTest {
-    private val now = ZonedDateTime.now()
+    private val now = OffsetDateTime.now()
 
     @Test
     fun `empty feed items`() {

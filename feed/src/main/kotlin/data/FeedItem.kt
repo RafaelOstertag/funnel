@@ -1,11 +1,11 @@
 package data
 
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
 data class FeedItem(
     val id: String,
     val title: String,
-    val created: ZonedDateTime
+    val created: OffsetDateTime
 ) : Comparable<FeedItem> {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
