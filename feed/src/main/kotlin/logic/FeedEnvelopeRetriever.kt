@@ -6,7 +6,7 @@ import data.FeedEnvelope
 import data.Source
 
 class FeedEnvelopeRetriever(private val feedRetriever: FeedRetriever) {
-    fun retrieve(source: Source): FeedEnvelope {
+    suspend fun retrieve(source: Source): FeedEnvelope {
         val feed = feedRetriever.fetch(source)
         return FeedEnvelope(source, feed)
     }

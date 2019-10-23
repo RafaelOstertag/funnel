@@ -25,7 +25,7 @@ class FeedEnvelopeTrimmer(private val size: Int) {
         val trimmedFeeds = feedEnvelope
             .feed
             .feedItems
-            .items.partition { feedItem -> counter++ < keepFrom }
+            .items.partition { _ -> counter++ < keepFrom }
 
         return with(feedEnvelope.feed) {
             FeedEnvelope(feedEnvelope.source, Feed(id, title, FeedItems(trimmedFeeds.second)))

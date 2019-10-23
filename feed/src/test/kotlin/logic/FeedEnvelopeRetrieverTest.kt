@@ -7,17 +7,18 @@ import data.Feed
 import data.FeedItem
 import data.FeedItems
 import data.Source
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 
 internal class FeedEnvelopeRetrieverTest {
 
     @Test
-    fun retrieve() {
+    fun retrieve() = runBlocking {
         val feed = Feed("id", "title", FeedItems(listOf(FeedItem("1", "", now))))
         val feedRetrieverMock = mockk<FeedRetriever>()
-        every {
+        coEvery {
             feedRetrieverMock.fetch(any())
         }.returns(feed)
         val feedEnvelopeRetriever = FeedEnvelopeRetriever(feedRetrieverMock)
