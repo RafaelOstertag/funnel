@@ -1,6 +1,6 @@
 package ch.guengel.funnel
 
-import assertk.assert
+import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.uchuhimo.konf.ConfigSpec
 import org.junit.jupiter.api.Test
@@ -15,7 +15,7 @@ internal class ConfigurationKtTest {
     fun `read configuration`() {
         val configuration = readConfiguration(TestConfig, "src/test/resources/testconfig.yml")
 
-        assert(configuration[TestConfig.config1]).isEqualTo("value")
-        assert(configuration[TestConfig.config2]).isEqualTo(42)
+        assertThat(configuration[TestConfig.config1]).isEqualTo("value")
+        assertThat(configuration[TestConfig.config2]).isEqualTo(42)
     }
 }
