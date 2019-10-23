@@ -1,4 +1,3 @@
-package ch.guengel.funnel.persistence.connector
+package funnel.connector.persistence
 
-const val PERSIST_TOPIC = "ch.guengel.funnel.persist.envelope"
-const val DELETE_TOPIC = "ch.guengel.funnel.delete.envelope"
+const val persistTopic = "ch.guengel.funnel.persist.envelope"

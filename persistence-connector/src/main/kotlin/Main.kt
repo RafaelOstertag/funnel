@@ -1,11 +1,12 @@
-package ch.guengel.funnel.persistence.connector
+package funnel.connector.persistence
 
-import ch.guengel.funnel.build.info.readBuildInfo
-import ch.guengel.funnel.persistence.MongoFeedEnvelopeRepository
 import ch.guengel.funnel.readConfiguration
-import kotlinx.coroutines.runBlocking
+import funnel.build.info.readBuildInfo
+import logic.FeedEnvelopeSaver
+import logic.FeedEnvelopeTrimmer
 import org.slf4j.LoggerFactory
-import java.lang.Thread.sleep
+import persistence.MongoFeedPersistence
+import java.util.concurrent.CountDownLatch
 
 private val logger = LoggerFactory.getLogger("persistence-connector")
 private val buildInfo = readBuildInfo("/git.json")
@@ -13,21 +14,20 @@ private val buildInfo = readBuildInfo("/git.json")
 fun main() {
     logger.info("${buildInfo.buildVersion} ${buildInfo.commitIdAbbrev}")
     val configuration = readConfiguration(Configuration)
+    val countDownLatch = CountDownLatch(1)
 
-    val consumer = setUpConsumer(configuration[Configuration.kafka])
+    MongoFeedPersistence(configuration[Configuration.mongoDbURL], configuration[Configuration.mongoDb]).use {
+        val feedEnvelopeTrimmer = FeedEnvelopeTrimmer(configuration[Configuration.retainMaxFeeds])
+        val feedEnvelopeSaver = FeedEnvelopeSaver(it, feedEnvelopeTrimmer)
 
-    val feedEnvelopeRepository = MongoFeedEnvelopeRepository(configuration[Configuration.mongoDbURL], configuration[Configuration.mongoDb])
-    val topicHandler = TopicHandler(feedEnvelopeRepository)
-
-    consumer.start(topicHandler::handle)
+        FeedEnvelopeSaveConsumer(feedEnvelopeSaver, configuration[Configuration.kafka]).use {
+            it.start()
+            logger.info("Startup complete")
+            countDownLatch.await()
+        }
+    }
 
     Runtime.getRuntime().addShutdownHook(Thread {
-        feedEnvelopeRepository.close()
-        runBlocking { consumer.stop() }
+        countDownLatch.countDown()
     })
-
-    logger.info("Startup complete")
-    while (true) {
-        sleep(1000)
-    }
 }
