@@ -1,5 +1,7 @@
-package ch.guengel.funnel.kafka
+package kafka
 
+import data.FeedEnvelope
+import jackson.serialize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
@@ -7,7 +9,8 @@ import java.io.Closeable
 import java.util.*
 
 class Producer(private val server: String) : Closeable {
-    val producer: KafkaProducer<String, String>? = KafkaProducer(createKafkaConfiguration())
+    private val producer: KafkaProducer<String, String> = KafkaProducer(createKafkaConfiguration())
+    private var closed = false
 
     private fun createKafkaConfiguration(): Properties {
         val props = Properties()
@@ -22,17 +25,26 @@ class Producer(private val server: String) : Closeable {
         return props
     }
 
-    fun send(topic: String, key: String, data: String) {
+    fun send(topic: String, feedEnvelope: FeedEnvelope) {
+        check(!closed) {
+            logger.error(closedKafkaClientError)
+            closedKafkaClientError
+        }
+        val key = feedEnvelope.name
+        val data = serialize(feedEnvelope)
+
         logger.debug("kafka send to topic '$topic': '$data' with key '$key'")
-        producer?.send(ProducerRecord<String, String>(topic, key, data))
+        producer.send(ProducerRecord<String, String>(topic, key, data))
     }
 
     override fun close() {
-        producer?.close()
+        producer.close()
+        closed = true
         logger.info("Closed kafka producer")
     }
 
-    companion object {
+    private companion object {
         val logger = LoggerFactory.getLogger(Producer::class.java)
+        const val closedKafkaClientError = "Trying to use closed kafka client"
     }
 }

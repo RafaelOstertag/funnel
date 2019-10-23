@@ -17,7 +17,13 @@
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>domain</artifactId>
+            <artifactId>feed</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>jackson-serializer</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -33,23 +39,6 @@
             <version>${logback.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-kotlin</artifactId>
-            <version>${jackson-module-kotlin.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>kotlin-reflect</artifactId>
-                    <groupId>org.jetbrains.kotlin</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-reflect</artifactId>
-            <version>${kotlin.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
