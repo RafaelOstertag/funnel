@@ -23,6 +23,12 @@
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
+            <artifactId>jackson-feeditems-module</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.guengel.funnel</groupId>
             <artifactId>test-utils</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>

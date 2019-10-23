@@ -1,14 +1,13 @@
 package persistence
 
 import adapters.FeedPersistence
-import com.fasterxml.jackson.databind.module.SimpleModule
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClient
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.model.IndexOptions
 import com.mongodb.client.model.UpdateOptions
 import data.FeedEnvelope
-import data.FeedItems
+import jackson.jacksonFeedItemsModule
 import org.litote.kmongo.*
 import org.litote.kmongo.util.KMongoConfiguration
 import org.slf4j.LoggerFactory
@@ -48,10 +47,7 @@ class MongoFeedPersistence(connectionString: String, databaseName: String) : Fee
         val logger = LoggerFactory.getLogger(MongoFeedPersistence::class.java)
 
         init {
-            val feedItemsSerializerDeserializer = SimpleModule()
-            feedItemsSerializerDeserializer.addDeserializer(FeedItems::class.java, FeedItemsDeserializer())
-            feedItemsSerializerDeserializer.addSerializer(FeedItemsSerializer())
-            KMongoConfiguration.bsonMapper.registerModule(feedItemsSerializerDeserializer)
+            KMongoConfiguration.bsonMapper.registerModule(jacksonFeedItemsModule())
         }
     }
 }

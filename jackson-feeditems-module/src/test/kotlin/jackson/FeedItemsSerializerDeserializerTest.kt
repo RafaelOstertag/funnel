@@ -1,10 +1,9 @@
-package persistence
+package jackson
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import data.FeedItem
@@ -17,11 +16,8 @@ internal class FeedItemsSerializerDeserializerTest {
     val objectMapper: ObjectMapper
 
     init {
-        val simpleModule = SimpleModule()
-        simpleModule.addSerializer(FeedItemsSerializer())
-        simpleModule.addDeserializer(FeedItems::class.java, FeedItemsDeserializer())
         objectMapper = jacksonObjectMapper()
-            .registerModule(simpleModule)
+            .registerModule(jacksonFeedItemsModule())
             .registerModule(JavaTimeModule())
             .enable(SerializationFeature.INDENT_OUTPUT)
     }
