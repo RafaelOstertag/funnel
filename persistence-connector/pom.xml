@@ -26,12 +26,6 @@
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>domain</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.guengel.funnel</groupId>
             <artifactId>kafka</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
@@ -39,12 +33,6 @@
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>config</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.guengel.funnel</groupId>
-            <artifactId>common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 

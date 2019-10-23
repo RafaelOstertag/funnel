@@ -9,9 +9,7 @@ import org.slf4j.LoggerFactory
 class FeedEnvelopeSaveConsumer(private val feedEnvelopeSaver: FeedEnvelopeSaver, kafkaServer: String) : AutoCloseable {
     private val consumer = Consumer(kafkaServer, groupId, persistTopic)
 
-    fun start() {
-        consumer.start(this::handleSaveMessage)
-    }
+    fun start() = consumer.start(this::handleSaveMessage)
 
     override fun close() = consumer.stop()
 

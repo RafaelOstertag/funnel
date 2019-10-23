@@ -16,12 +16,16 @@ fun main() {
     val configuration = readConfiguration(Configuration)
     val countDownLatch = CountDownLatch(1)
 
-    MongoFeedPersistence(configuration[Configuration.mongoDbURL], configuration[Configuration.mongoDb]).use {
+    MongoFeedPersistence(
+        configuration[Configuration.mongoDbURL],
+        configuration[Configuration.mongoDb]
+    ).use { mongoPersistence ->
         val feedEnvelopeTrimmer = FeedEnvelopeTrimmer(configuration[Configuration.retainMaxFeeds])
-        val feedEnvelopeSaver = FeedEnvelopeSaver(it, feedEnvelopeTrimmer)
+        val feedEnvelopeSaver = FeedEnvelopeSaver(mongoPersistence, feedEnvelopeTrimmer)
 
-        FeedEnvelopeSaveConsumer(feedEnvelopeSaver, configuration[Configuration.kafka]).use {
-            it.start()
+        FeedEnvelopeSaveConsumer(feedEnvelopeSaver, configuration[Configuration.kafka]).use { feedEnvelopeConsumer ->
+            feedEnvelopeConsumer.start()
+
             logger.info("Startup complete")
             countDownLatch.await()
         }
