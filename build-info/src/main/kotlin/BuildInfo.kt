@@ -1,4 +1,4 @@
-package ch.guengel.funnel.build.info
+package funnel.build.info
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
