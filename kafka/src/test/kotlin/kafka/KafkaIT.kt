@@ -30,9 +30,9 @@ class KafkaIT {
 
         runBlocking {
             delay(500)
-            consumer.stop()
         }
 
+        consumer.stop()
         assertThat(success).isTrue()
     }
 

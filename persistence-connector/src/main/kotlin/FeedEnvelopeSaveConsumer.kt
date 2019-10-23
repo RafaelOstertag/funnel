@@ -2,7 +2,6 @@ package funnel.connector.persistence
 
 import data.FeedEnvelope
 import kafka.Consumer
-import kotlinx.coroutines.runBlocking
 import logic.FeedEnvelopeSaver
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,9 +13,7 @@ class FeedEnvelopeSaveConsumer(private val feedEnvelopeSaver: FeedEnvelopeSaver,
         consumer.start(this::handleSaveMessage)
     }
 
-    override fun close() = runBlocking {
-        consumer.stop()
-    }
+    override fun close() = consumer.stop()
 
     private fun handleSaveMessage(topic: String, feedEnvelope: FeedEnvelope) {
         try {

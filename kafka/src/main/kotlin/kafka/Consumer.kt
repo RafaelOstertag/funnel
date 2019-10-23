@@ -75,7 +75,7 @@ class Consumer(private val server: String, private val groupId: String, private 
 
     private fun logSubscription() = logger.info("Subscribed to Kafka topic '$topic'")
 
-    suspend fun stop() {
+    fun stop() = runBlocking {
         job?.cancelAndJoin()
         job = null
     }
