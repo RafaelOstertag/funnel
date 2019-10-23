@@ -13,14 +13,10 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
 internal class FeedItemsSerializerDeserializerTest {
-    val objectMapper: ObjectMapper
-
-    init {
-        objectMapper = jacksonObjectMapper()
-            .registerModule(jacksonFeedItemsModule())
-            .registerModule(JavaTimeModule())
-            .enable(SerializationFeature.INDENT_OUTPUT)
-    }
+    val objectMapper: ObjectMapper = jacksonObjectMapper()
+        .registerModule(jacksonFeedItemsModule())
+        .registerModule(JavaTimeModule())
+        .enable(SerializationFeature.INDENT_OUTPUT)
 
     @Test
     fun `serialize and deserialize`() {
