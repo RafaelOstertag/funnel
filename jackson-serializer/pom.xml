@@ -12,16 +12,18 @@
     <artifactId>common</artifactId>
     <packaging>jar</packaging>
 
-    <name>Funnel Common</name>
+    <name>Funnel Jackson Serializer</name>
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
     </build>
 
     <dependencies>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>jackson-feeditems-module</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
