@@ -1,9 +1,9 @@
-package kafka
+package ch.guengel.funnel.kafka
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
-import data.*
+import ch.guengel.funnel.feed.data.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test

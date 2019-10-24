@@ -1,6 +1,6 @@
-package persistence
+package ch.guengel.funnel.persistence
 
-import data.*
+import ch.guengel.funnel.feed.data.*
 import java.time.OffsetDateTime
 
 private val createdDate = OffsetDateTime.parse("2018-10-01T13:00:00Z")

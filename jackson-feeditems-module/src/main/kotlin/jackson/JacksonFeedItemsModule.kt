@@ -1,7 +1,7 @@
-package jackson
+package ch.guengel.funnel.jackson
 
+import ch.guengel.funnel.feed.data.FeedItems
 import com.fasterxml.jackson.databind.module.SimpleModule
-import data.FeedItems
 
 fun jacksonFeedItemsModule(): SimpleModule {
     val feedItemsModule = SimpleModule()

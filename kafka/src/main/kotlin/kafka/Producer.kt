@@ -1,7 +1,7 @@
-package kafka
+package ch.guengel.funnel.kafka
 
-import data.FeedEnvelope
-import jackson.serialize
+import ch.guengel.funnel.feed.data.FeedEnvelope
+import ch.guengel.funnel.jackson.serialize
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory

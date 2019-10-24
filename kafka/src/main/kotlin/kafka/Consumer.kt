@@ -1,7 +1,7 @@
-package kafka
+package ch.guengel.funnel.kafka
 
-import data.FeedEnvelope
-import jackson.deserialize
+import ch.guengel.funnel.feed.data.FeedEnvelope
+import ch.guengel.funnel.jackson.deserialize
 import kotlinx.coroutines.*
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory

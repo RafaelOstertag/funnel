@@ -1,8 +1,8 @@
-package jackson
+package ch.guengel.funnel.jackson
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import data.*
+import ch.guengel.funnel.feed.data.*
 import org.junit.jupiter.api.Test
 import java.time.OffsetDateTime
 import java.time.ZoneOffset

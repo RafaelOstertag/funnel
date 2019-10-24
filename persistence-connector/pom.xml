@@ -14,7 +14,7 @@
     <name>Funnel Persistence Connector</name>
 
     <properties>
-        <main.class>ch.guengel.funnel.persistence.connector.MainKt</main.class>
+        <main.class>ch.guengel.funnel.connector.persistence.MainKt</main.class>
     </properties>
 
     <dependencies>
@@ -65,7 +65,6 @@
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
 
         <plugins>
             <plugin>

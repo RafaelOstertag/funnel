@@ -1,11 +1,11 @@
-package persistence
+package ch.guengel.funnel.persistence
 
 import assertk.assertThat
 import assertk.assertions.*
-import bridges.FeedNotFoundException
-import bridges.FeedPersistence
+import ch.guengel.funnel.feed.bridges.FeedNotFoundException
+import ch.guengel.funnel.feed.bridges.FeedPersistence
+import ch.guengel.funnel.feed.logic.FeedEnvelopeMerger
 import ch.guengel.funnel.testutils.EmbeddedMongo
-import logic.FeedEnvelopeMerger
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

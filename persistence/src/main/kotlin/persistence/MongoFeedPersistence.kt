@@ -1,14 +1,14 @@
-package persistence
+package ch.guengel.funnel.persistence
 
-import bridges.FeedNotFoundException
-import bridges.FeedPersistence
+import ch.guengel.funnel.feed.bridges.FeedNotFoundException
+import ch.guengel.funnel.feed.bridges.FeedPersistence
+import ch.guengel.funnel.feed.data.FeedEnvelope
+import ch.guengel.funnel.jackson.jacksonFeedItemsModule
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClient
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.model.IndexOptions
 import com.mongodb.client.model.UpdateOptions
-import data.FeedEnvelope
-import jackson.jacksonFeedItemsModule
 import org.litote.kmongo.*
 import org.litote.kmongo.util.KMongoConfiguration
 import org.slf4j.LoggerFactory

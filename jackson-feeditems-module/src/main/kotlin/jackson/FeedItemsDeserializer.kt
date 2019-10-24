@@ -1,11 +1,11 @@
-package jackson
+package ch.guengel.funnel.jackson
 
+import ch.guengel.funnel.feed.data.FeedItem
+import ch.guengel.funnel.feed.data.FeedItems
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import data.FeedItem
-import data.FeedItems
 
 class FeedItemsDeserializer : StdDeserializer<FeedItems>(FeedItems::class.java) {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): FeedItems {

@@ -1,13 +1,13 @@
-package jackson
+package ch.guengel.funnel.jackson
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import ch.guengel.funnel.feed.data.FeedItem
+import ch.guengel.funnel.feed.data.FeedItems
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import data.FeedItem
-import data.FeedItems
 import org.junit.jupiter.api.Test
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
