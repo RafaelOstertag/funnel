@@ -9,7 +9,7 @@ import java.io.Closeable
 import java.util.*
 
 class Producer(private val server: String) : Closeable {
-    private val producer: KafkaProducer<String, String> = KafkaProducer(createKafkaConfiguration())
+    private val kafkaProducer: KafkaProducer<String, String> = KafkaProducer(createKafkaConfiguration())
     private var closed = false
 
     private fun createKafkaConfiguration(): Properties {
@@ -34,11 +34,11 @@ class Producer(private val server: String) : Closeable {
         val data = serialize(feedEnvelope)
 
         logger.debug("kafka send to topic '$topic': '$data' with key '$key'")
-        producer.send(ProducerRecord<String, String>(topic, key, data))
+        kafkaProducer.send(ProducerRecord<String, String>(topic, key, data))
     }
 
     override fun close() {
-        producer.close()
+        kafkaProducer.close()
         closed = true
         logger.info("Closed kafka producer")
     }
