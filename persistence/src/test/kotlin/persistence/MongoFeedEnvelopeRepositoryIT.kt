@@ -94,6 +94,33 @@ class MongoFeedEnvelopeRepositoryIT {
         val allEnvelopes = feedEnvelopeRepository?.findAllFeedEnvelopes()
 
         assertThat(allEnvelopes?.size).isEqualTo(2)
+    }
 
+    @Test
+    fun `delete feed envelope`() {
+        val controlFeedEnvelope = makeFeedEnvelope(
+            makeSource(1),
+            makeFeed("testid", "test title", 4)
+        )
+        feedEnvelopeRepository?.saveFeedEnvelope(controlFeedEnvelope)
+
+        val storedFeedEnvelope = feedEnvelopeRepository?.findFeedEnvelope(controlFeedEnvelope.name)
+        assertThat(storedFeedEnvelope?.feed?.feedItems?.size).isEqualTo(4)
+
+
+        feedEnvelopeRepository?.deleteFeedEnvelope(storedFeedEnvelope!!)
+
+        assertThat { feedEnvelopeRepository?.findFeedEnvelope(controlFeedEnvelope.name) }.isFailure()
+            .isInstanceOf(FeedNotFoundException::class)
+    }
+
+    @Test
+    fun `delete non-existing feed envelope`() {
+        val controlFeedEnvelope = makeFeedEnvelope(
+            makeSource(1),
+            makeFeed("testid", "test title", 4)
+        )
+        feedEnvelopeRepository?.deleteFeedEnvelope(controlFeedEnvelope)
+        // Not throwing an exception is the test
     }
 }

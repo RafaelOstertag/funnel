@@ -48,6 +48,12 @@ class MongoFeedPersistence(connectionString: String, databaseName: String) : Fee
         collection.updateOne(FeedEnvelope::name eq feedEnvelope.name, feedEnvelope, UpdateOptions().upsert(true))
     }
 
+    override fun deleteFeedEnvelope(feedEnvelope: FeedEnvelope) {
+        checkClosedState()
+        logger.debug("Delete feed envelope '{}'", feedEnvelope.name)
+        collection.deleteOne(FeedEnvelope::name eq feedEnvelope.name)
+    }
+
     private fun checkClosedState() {
         check(!closed) {
             val errorMessage = "Mongo Client closed, cannot perform operations on it"
