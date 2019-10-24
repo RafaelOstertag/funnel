@@ -14,7 +14,7 @@
             <!-- daily rollover -->
             <fileNamePattern>funnel-rest.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
-            <totalSizeCap>250MB</totalSizeCap>
+            <totalSizeCap>10MB</totalSizeCap>
 
         </rollingPolicy>
 
