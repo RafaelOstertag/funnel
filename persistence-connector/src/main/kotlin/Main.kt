@@ -14,24 +14,27 @@ private val buildInfo = readBuildInfo("/git.json")
 fun main() {
     logger.info("${buildInfo.buildVersion} ${buildInfo.commitIdAbbrev}")
     val configuration = readConfiguration(Configuration)
+
+
+    val mongoFeedPersistence = MongoFeedPersistence(
+        configuration[Configuration.mongoDbURL], configuration[Configuration.mongoDb]
+    )
+
+    val feedEnvelopeTrimmer = FeedEnvelopeTrimmer(configuration[Configuration.retainMaxFeeds])
+    val feedEnvelopeSaver = FeedEnvelopeSaver(mongoFeedPersistence, feedEnvelopeTrimmer)
+
+    val feedEnvelopeSaveConsumer =
+        FeedEnvelopeSaveConsumer(feedEnvelopeSaver, configuration[Configuration.kafka])
+
+    feedEnvelopeSaveConsumer.start()
+
     val countDownLatch = CountDownLatch(1)
-
-    MongoFeedPersistence(
-        configuration[Configuration.mongoDbURL],
-        configuration[Configuration.mongoDb]
-    ).use { mongoPersistence ->
-        val feedEnvelopeTrimmer = FeedEnvelopeTrimmer(configuration[Configuration.retainMaxFeeds])
-        val feedEnvelopeSaver = FeedEnvelopeSaver(mongoPersistence, feedEnvelopeTrimmer)
-
-        FeedEnvelopeSaveConsumer(feedEnvelopeSaver, configuration[Configuration.kafka]).use { feedEnvelopeConsumer ->
-            feedEnvelopeConsumer.start()
-
-            logger.info("Startup complete")
-            countDownLatch.await()
-        }
-    }
-
     Runtime.getRuntime().addShutdownHook(Thread {
+        feedEnvelopeSaveConsumer.close()
+        mongoFeedPersistence.close()
         countDownLatch.countDown()
     })
+
+    logger.info("Startup complete")
+    countDownLatch.await()
 }

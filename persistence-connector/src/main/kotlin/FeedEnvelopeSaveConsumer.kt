@@ -2,6 +2,7 @@ package funnel.connector.persistence
 
 import data.FeedEnvelope
 import kafka.Consumer
+import kafka.persistTopic
 import logic.FeedEnvelopeSaver
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
