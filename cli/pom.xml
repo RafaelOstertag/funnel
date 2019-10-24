@@ -27,7 +27,7 @@
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>domain</artifactId>
+            <artifactId>feed</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -43,11 +43,6 @@
             <version>${project.parent.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>ch.guengel.funnel</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
