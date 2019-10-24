@@ -5,6 +5,7 @@ import ch.guengel.funnel.feed.data.Feed
 import ch.guengel.funnel.feed.data.FeedEnvelope
 import ch.guengel.funnel.feed.data.Source
 import ch.guengel.funnel.persistence.MongoFeedEnvelopePersistence
+import feed.logic.FeedEnvelopeRemover
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
@@ -45,10 +46,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.deleteByName(feedEnve
     val feedEnvelopeName = call.parameters["name"]
     feedEnvelopeName ?: throw IllegalArgumentException("no name specified")
 
-    val source = Source(feedEnvelopeName, "not required")
-    val feedEnvelope = FeedEnvelope(source, Feed())
-
-    feedEnvelopePersistence.deleteFeedEnvelope(feedEnvelope)
+    FeedEnvelopeRemover(feedEnvelopePersistence).remove(feedEnvelopeName)
     call.respond(HttpStatusCode.NoContent)
 }
 

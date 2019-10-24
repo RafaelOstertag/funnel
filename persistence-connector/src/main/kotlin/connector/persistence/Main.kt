@@ -5,6 +5,7 @@ import ch.guengel.funnel.configuration.readConfiguration
 import ch.guengel.funnel.feed.logic.FeedEnvelopeSaver
 import ch.guengel.funnel.feed.logic.FeedEnvelopeTrimmer
 import ch.guengel.funnel.persistence.MongoFeedEnvelopePersistence
+import feed.logic.FeedEnvelopeRemover
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CountDownLatch
 
@@ -32,7 +33,7 @@ fun main() {
 
     val feedEnvelopeDeleteConsumer =
         FeedEnvelopeDeleteConsumer(
-            mongoFeedPersistence,
+            FeedEnvelopeRemover(mongoFeedPersistence),
             configuration[Configuration.kafka]
         )
     feedEnvelopeDeleteConsumer.start()
