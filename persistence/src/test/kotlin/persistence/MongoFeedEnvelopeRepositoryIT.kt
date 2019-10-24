@@ -1,8 +1,8 @@
 package persistence
 
-import adapters.FeedPersistence
 import assertk.assertThat
 import assertk.assertions.*
+import bridges.FeedPersistence
 import ch.guengel.funnel.testutils.EmbeddedMongo
 import logic.FeedEnvelopeMerger
 import org.junit.jupiter.api.AfterEach

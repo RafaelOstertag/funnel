@@ -1,7 +1,7 @@
 package retriever
 
-import adapters.FeedRetriever
-import adapters.FeedRetrieverException
+import bridges.FeedRetriever
+import bridges.FeedRetrieverException
 import data.Feed
 import data.Source
 import io.ktor.http.Url

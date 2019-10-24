@@ -1,6 +1,6 @@
 package persistence
 
-import adapters.FeedPersistence
+import bridges.FeedPersistence
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClient
 import com.mongodb.client.MongoCollection

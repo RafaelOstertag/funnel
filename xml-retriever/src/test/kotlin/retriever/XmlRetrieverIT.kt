@@ -1,10 +1,10 @@
 package retriever
 
-import adapters.FeedRetrieverException
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
+import bridges.FeedRetrieverException
 import data.Source
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterAll
