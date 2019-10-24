@@ -6,7 +6,7 @@
     <parent>
         <groupId>ch.guengel.funnel</groupId>
         <artifactId>main</artifactId>
-        <version>3.0.1</version>
+        <version>4.0.0</version>
     </parent>
 
     <artifactId>persistence</artifactId>
@@ -14,22 +14,16 @@
 
     <name>Funnel Persistence</name>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>${jackson.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>domain</artifactId>
+            <artifactId>feed</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>jackson-feeditems-module</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -47,9 +41,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.litote.kmongo</groupId>
-            <artifactId>kmongo-coroutine</artifactId>
-            <version>${kmongo.version}</version>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
