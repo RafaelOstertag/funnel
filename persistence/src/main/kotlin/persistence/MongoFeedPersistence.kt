@@ -1,5 +1,6 @@
 package persistence
 
+import bridges.FeedNotFoundException
 import bridges.FeedPersistence
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClient

@@ -2,6 +2,7 @@ package persistence
 
 import assertk.assertThat
 import assertk.assertions.*
+import bridges.FeedNotFoundException
 import bridges.FeedPersistence
 import ch.guengel.funnel.testutils.EmbeddedMongo
 import logic.FeedEnvelopeMerger

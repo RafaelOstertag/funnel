@@ -1,5 +1,6 @@
 package ch.guengel.funnel.rest.modules
 
+import bridges.FeedNotFoundException
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import io.ktor.application.*
@@ -7,7 +8,6 @@ import io.ktor.features.StatusPages
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.util.pipeline.PipelineContext
-import persistence.FeedNotFoundException
 
 private const val UNKNOWN_REASON = "unknown reason"
 

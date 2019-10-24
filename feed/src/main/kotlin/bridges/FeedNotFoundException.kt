@@ -1,3 +1,3 @@
-package persistence
+package bridges
 
 class FeedNotFoundException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
