@@ -31,6 +31,7 @@ class XmlRetriever : FeedRetriever, AutoCloseable {
 
     override fun close() {
         xmlFetcher.close()
+        logger.info("Close XML Feed Fetcher")
     }
 
     private companion object {

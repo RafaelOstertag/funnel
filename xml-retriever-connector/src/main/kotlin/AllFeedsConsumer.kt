@@ -50,7 +50,7 @@ class AllFeedsConsumer(private val feedEnvelopeRetriever: FeedEnvelopeRetriever,
         val feedEnvelopeDifference =
             FeedEnvelopeDifference().difference(currentFeedEnvelope, latestFeedEnvelope)
         if (!feedEnvelopeDifference.feed.feedItems.isEmpty) {
-            logger.debug("Notifying of new items in feed '{}'", latestFeedEnvelope.name)
+            logger.info("Notifying of new items in feed '{}'", latestFeedEnvelope.name)
             producer.send(updateNotificationTopic, feedEnvelopeDifference)
         }
     }

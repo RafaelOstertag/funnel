@@ -22,13 +22,13 @@ class MongoFeedPersistence(connectionString: String, databaseName: String) : Fee
         val database = client.getDatabase(databaseName)
         collection = database.getCollection()
         collection.createIndex("{ name: 1 }", IndexOptions().unique(true))
-        logger.debug("Initialized Mongo Feed Envelope Repository")
+        logger.info("Initialized Mongo Feed Envelope Repository")
     }
 
     override fun close() {
         client.close()
         closed = true
-        logger.debug("Closed Mongo Feed Envelope Repository")
+        logger.info("Closed Mongo Feed Envelope Repository")
     }
 
     override fun findFeedEnvelope(name: String): FeedEnvelope {

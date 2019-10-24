@@ -17,7 +17,7 @@ class FeedEnvelopeSaveConsumer(private val feedEnvelopeSaver: FeedEnvelopeSaver,
     private fun handleSaveMessage(topic: String, feedEnvelope: FeedEnvelope) {
         try {
             feedEnvelopeSaver.save(feedEnvelope)
-            logger.debug("Saved feed envelope '${feedEnvelope.name}' received via topic '${topic}'")
+            logger.info("Saved feed envelope '${feedEnvelope.name}' received via topic '${topic}'")
         } catch (e: Exception) {
             logger.error("Error saving feed envelope '${feedEnvelope.name}' received via topic '${topic}'", e)
         }
@@ -25,6 +25,6 @@ class FeedEnvelopeSaveConsumer(private val feedEnvelopeSaver: FeedEnvelopeSaver,
 
     private companion object {
         val logger: Logger = LoggerFactory.getLogger(FeedEnvelopeSaveConsumer::class.java)
-        const val groupId = "funnel.connector.persistence"
+        const val groupId = "funnel.connector.persistence.save"
     }
 }

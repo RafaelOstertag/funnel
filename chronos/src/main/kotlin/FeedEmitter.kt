@@ -19,7 +19,7 @@ class FeedEmitter(private val feedPersistence: FeedPersistence, kafkaServer: Str
 
         feedPersistence.findAllFeedEnvelopes().forEach {
             producer.send(allFeedTopics, it)
-            logger.debug("Emitted '${it.name}'")
+            logger.info("Emitted '${it.name}'")
         }
     }
 

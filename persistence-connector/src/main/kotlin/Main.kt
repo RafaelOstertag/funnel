@@ -25,12 +25,17 @@ fun main() {
 
     val feedEnvelopeSaveConsumer =
         FeedEnvelopeSaveConsumer(feedEnvelopeSaver, configuration[Configuration.kafka])
-
     feedEnvelopeSaveConsumer.start()
+
+    val feedEnvelopeDeleteConsumer =
+        FeedEnvelopeDeleteConsumer(mongoFeedPersistence, configuration[Configuration.kafka])
+    feedEnvelopeDeleteConsumer.start()
+
 
     val countDownLatch = CountDownLatch(1)
     Runtime.getRuntime().addShutdownHook(Thread {
         feedEnvelopeSaveConsumer.close()
+        feedEnvelopeDeleteConsumer.close()
         mongoFeedPersistence.close()
         countDownLatch.countDown()
     })
