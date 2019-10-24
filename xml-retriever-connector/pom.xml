@@ -15,7 +15,7 @@
     <name>Funnel XML Retriever Connector</name>
 
     <properties>
-        <main.class>ch.guengel.funnel.retriever.connector.MainKt</main.class>
+        <main.class>ch.guengel.funnel.connector.xmlretriever.MainKt</main.class>
     </properties>
 
     <dependencies>
