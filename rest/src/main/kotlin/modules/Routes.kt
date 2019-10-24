@@ -1,9 +1,9 @@
 package ch.guengel.funnel.rest.modules
 
-import ch.guengel.funnel.domain.Feed
-import ch.guengel.funnel.domain.FeedEnvelope
-import ch.guengel.funnel.domain.Source
-import ch.guengel.funnel.persistence.MongoFeedEnvelopeRepository
+import bridges.FeedPersistence
+import data.Feed
+import data.FeedEnvelope
+import data.Source
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
@@ -13,8 +13,7 @@ import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.*
 import io.ktor.util.pipeline.PipelineContext
-
-class FeedNotFoundException(message: String) : Exception(message)
+import persistence.MongoFeedPersistence
 
 fun Application.routes() {
     log.info("Setting up routes")
@@ -33,44 +32,46 @@ fun Application.routes() {
     log.info("Routes set up")
 }
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.saveEnvelope(feedEnvelopeRepository: MongoFeedEnvelopeRepository) {
+private suspend fun PipelineContext<Unit, ApplicationCall>.saveEnvelope(feedPersistence: FeedPersistence) {
     val source = call.receive<Source>()
     val feedEnvelope = FeedEnvelope(source, Feed())
 
-    feedEnvelopeRepository.save(feedEnvelope)
+    feedPersistence.saveFeedEnvelope(feedEnvelope)
     call.respond(HttpStatusCode.Created)
 }
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.deleteByName(feedEnvelopeRepository: MongoFeedEnvelopeRepository) {
+private suspend fun PipelineContext<Unit, ApplicationCall>.deleteByName(feedPersistence: FeedPersistence) {
     val feedEnvelopeName = call.parameters["name"]
     feedEnvelopeName ?: throw IllegalArgumentException("no name specified")
 
-    feedEnvelopeRepository.deleteByName(feedEnvelopeName)
+    val source = Source(feedEnvelopeName, "not required")
+    val feedEnvelope = FeedEnvelope(source, Feed())
+
+    feedPersistence.deleteFeedEnvelope(feedEnvelope)
     call.respond(HttpStatusCode.NoContent)
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.retrieveAllNames(
-    feedEnvelopeRepository: MongoFeedEnvelopeRepository
+    feedPersistence: FeedPersistence
 ) {
-    call.respond(feedEnvelopeRepository.retrieveAllSources())
+    call.respond(feedPersistence.findAllFeedEnvelopes().map { feedEnvelope -> feedEnvelope.source })
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.retrieveByName(
-    feedEnvelopeRepository: MongoFeedEnvelopeRepository
+    feedEnvelopeRepository: FeedPersistence
 ) {
     val feedEnvelopeName = call.parameters["name"]
     feedEnvelopeName ?: throw IllegalArgumentException("no name specified")
 
-    val feedEnvelope = feedEnvelopeRepository.retrieveByName(feedEnvelopeName)
-    feedEnvelope ?: throw FeedNotFoundException("No Feed Envelope with name ${feedEnvelopeName} exists")
+    val feedEnvelope = feedEnvelopeRepository.findFeedEnvelope(feedEnvelopeName)
     call.respond(feedEnvelope)
 }
 
-private fun setupMongoFeedEnvelopeRepository(application: Application): MongoFeedEnvelopeRepository {
+private fun setupMongoFeedEnvelopeRepository(application: Application): FeedPersistence {
     application.log.info("Initialize Feed Envelope Repository")
     val mongoConfig = application.environment.config.config("mongo")
 
-    return MongoFeedEnvelopeRepository(
+    return MongoFeedPersistence(
         mongoConfig.property("url").getString(),
         mongoConfig.property("database").getString()
     )

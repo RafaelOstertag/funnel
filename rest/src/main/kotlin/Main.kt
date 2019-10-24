@@ -1,6 +1,6 @@
 package ch.guengel.funnel.rest
 
-import ch.guengel.funnel.build.info.readBuildInfo
+import funnel.build.info.readBuildInfo
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty

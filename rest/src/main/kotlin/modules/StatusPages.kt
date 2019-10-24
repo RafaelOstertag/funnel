@@ -7,6 +7,7 @@ import io.ktor.features.StatusPages
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.util.pipeline.PipelineContext
+import persistence.FeedNotFoundException
 
 private const val UNKNOWN_REASON = "unknown reason"
 

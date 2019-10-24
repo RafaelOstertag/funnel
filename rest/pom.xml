@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>domain</artifactId>
+            <artifactId>feed</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -31,18 +31,14 @@
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>build-info</artifactId>
+            <artifactId>jackson-feeditems-module</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-kotlin</artifactId>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>build-info</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
