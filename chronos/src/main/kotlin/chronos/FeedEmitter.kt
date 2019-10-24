@@ -1,12 +1,12 @@
 package ch.guengel.funnel.chronos
 
-import ch.guengel.funnel.feed.bridges.FeedPersistence
+import ch.guengel.funnel.feed.bridges.FeedEnvelopePersistence
 import ch.guengel.funnel.kafka.Producer
 import ch.guengel.funnel.kafka.allFeedTopics
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class FeedEmitter(private val feedPersistence: FeedPersistence, kafkaServer: String) : AutoCloseable {
+class FeedEmitter(private val feedEnvelopePersistence: FeedEnvelopePersistence, kafkaServer: String) : AutoCloseable {
     private val producer = Producer(kafkaServer)
     private var closed = false
 
@@ -17,7 +17,7 @@ class FeedEmitter(private val feedPersistence: FeedPersistence, kafkaServer: Str
             errorMessage
         }
 
-        feedPersistence.findAllFeedEnvelopes().forEach {
+        feedEnvelopePersistence.findAllFeedEnvelopes().forEach {
             producer.send(allFeedTopics, it)
             logger.info("Emitted '${it.name}'")
         }

@@ -2,8 +2,8 @@ package ch.guengel.funnel.persistence
 
 import assertk.assertThat
 import assertk.assertions.*
-import ch.guengel.funnel.feed.bridges.FeedNotFoundException
-import ch.guengel.funnel.feed.bridges.FeedPersistence
+import ch.guengel.funnel.feed.bridges.FeedEnvelopeNotFoundException
+import ch.guengel.funnel.feed.bridges.FeedEnvelopePersistence
 import ch.guengel.funnel.feed.logic.FeedEnvelopeMerger
 import ch.guengel.funnel.testutils.EmbeddedMongo
 import org.junit.jupiter.api.AfterEach
@@ -13,16 +13,16 @@ import org.junit.jupiter.api.condition.DisabledOnOs
 import org.junit.jupiter.api.condition.OS
 
 @DisabledOnOs(OS.OTHER)
-class MongoFeedEnvelopeRepositoryIT {
+class MongoFeedEnvelopePersistenceIT {
     private var embeddedMongo: EmbeddedMongo? = null
 
-    private var feedEnvelopeRepository: FeedPersistence? = null
+    private var feedEnvelopeRepository: FeedEnvelopePersistence? = null
 
     @BeforeEach
     fun setUp() {
         embeddedMongo = EmbeddedMongo()
         embeddedMongo?.start()
-        feedEnvelopeRepository = MongoFeedPersistence("mongodb://localhost:${embeddedMongo?.mongoPort}", "test")
+        feedEnvelopeRepository = MongoFeedEnvelopePersistence("mongodb://localhost:${embeddedMongo?.mongoPort}", "test")
     }
 
     @AfterEach
@@ -52,7 +52,7 @@ class MongoFeedEnvelopeRepositoryIT {
     @Test
     fun `retrieve non-existing feed`() {
         assertThat { feedEnvelopeRepository?.findFeedEnvelope("should not exist") }.isFailure()
-            .isInstanceOf(FeedNotFoundException::class)
+            .isInstanceOf(FeedEnvelopeNotFoundException::class)
     }
 
     @Test
@@ -112,7 +112,7 @@ class MongoFeedEnvelopeRepositoryIT {
         feedEnvelopeRepository?.deleteFeedEnvelope(storedFeedEnvelope!!)
 
         assertThat { feedEnvelopeRepository?.findFeedEnvelope(controlFeedEnvelope.name) }.isFailure()
-            .isInstanceOf(FeedNotFoundException::class)
+            .isInstanceOf(FeedEnvelopeNotFoundException::class)
     }
 
     @Test

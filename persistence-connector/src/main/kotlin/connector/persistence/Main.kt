@@ -4,7 +4,7 @@ import ch.guengel.funnel.build.readBuildInfo
 import ch.guengel.funnel.configuration.readConfiguration
 import ch.guengel.funnel.feed.logic.FeedEnvelopeSaver
 import ch.guengel.funnel.feed.logic.FeedEnvelopeTrimmer
-import ch.guengel.funnel.persistence.MongoFeedPersistence
+import ch.guengel.funnel.persistence.MongoFeedEnvelopePersistence
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CountDownLatch
 
@@ -16,7 +16,7 @@ fun main() {
     val configuration = readConfiguration(Configuration)
 
 
-    val mongoFeedPersistence = MongoFeedPersistence(
+    val mongoFeedPersistence = MongoFeedEnvelopePersistence(
         configuration[Configuration.mongoDbURL], configuration[Configuration.mongoDb]
     )
 

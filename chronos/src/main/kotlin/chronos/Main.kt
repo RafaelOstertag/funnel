@@ -2,7 +2,7 @@ package ch.guengel.funnel.chronos
 
 import ch.guengel.funnel.build.readBuildInfo
 import ch.guengel.funnel.configuration.readConfiguration
-import ch.guengel.funnel.persistence.MongoFeedPersistence
+import ch.guengel.funnel.persistence.MongoFeedEnvelopePersistence
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CountDownLatch
 
@@ -15,7 +15,7 @@ fun main() {
     val configuration = readConfiguration(Configuration)
 
     val feedPersistence =
-        MongoFeedPersistence(configuration[Configuration.mongoDbURL], configuration[Configuration.mongoDb])
+        MongoFeedEnvelopePersistence(configuration[Configuration.mongoDbURL], configuration[Configuration.mongoDb])
     val feedEmitter = FeedEmitter(feedPersistence, configuration[Configuration.kafka])
     val scheduler = Scheduler(configuration[Configuration.interval].toLong(), feedEmitter)
 

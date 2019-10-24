@@ -1,10 +1,10 @@
 package ch.guengel.funnel.rest.modules
 
-import ch.guengel.funnel.feed.bridges.FeedPersistence
+import ch.guengel.funnel.feed.bridges.FeedEnvelopePersistence
 import ch.guengel.funnel.feed.data.Feed
 import ch.guengel.funnel.feed.data.FeedEnvelope
 import ch.guengel.funnel.feed.data.Source
-import ch.guengel.funnel.persistence.MongoFeedPersistence
+import ch.guengel.funnel.persistence.MongoFeedEnvelopePersistence
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
@@ -18,48 +18,48 @@ import io.ktor.util.pipeline.PipelineContext
 
 fun Application.routes() {
     log.info("Setting up routes")
-    val feedEnvelopeRepository = setupMongoFeedEnvelopeRepository(this)
+    val feedEnvelopePersistence = setupMongoFeedEnvelopePersistence(this)
 
     routing {
         route("/feeds") {
-            get { retrieveAllNames(feedEnvelopeRepository) }
-            post { saveEnvelope(feedEnvelopeRepository) }
+            get { retrieveAllNames(feedEnvelopePersistence) }
+            post { saveEnvelope(feedEnvelopePersistence) }
             route("/{name}") {
-                get { retrieveByName(feedEnvelopeRepository) }
-                delete { deleteByName(feedEnvelopeRepository) }
+                get { retrieveByName(feedEnvelopePersistence) }
+                delete { deleteByName(feedEnvelopePersistence) }
             }
         }
     }
     log.info("Routes set up")
 }
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.saveEnvelope(feedPersistence: FeedPersistence) {
+private suspend fun PipelineContext<Unit, ApplicationCall>.saveEnvelope(feedEnvelopePersistence: FeedEnvelopePersistence) {
     val source = call.receive<Source>()
     val feedEnvelope = FeedEnvelope(source, Feed())
 
-    feedPersistence.saveFeedEnvelope(feedEnvelope)
+    feedEnvelopePersistence.saveFeedEnvelope(feedEnvelope)
     call.respond(HttpStatusCode.Created)
 }
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.deleteByName(feedPersistence: FeedPersistence) {
+private suspend fun PipelineContext<Unit, ApplicationCall>.deleteByName(feedEnvelopePersistence: FeedEnvelopePersistence) {
     val feedEnvelopeName = call.parameters["name"]
     feedEnvelopeName ?: throw IllegalArgumentException("no name specified")
 
     val source = Source(feedEnvelopeName, "not required")
     val feedEnvelope = FeedEnvelope(source, Feed())
 
-    feedPersistence.deleteFeedEnvelope(feedEnvelope)
+    feedEnvelopePersistence.deleteFeedEnvelope(feedEnvelope)
     call.respond(HttpStatusCode.NoContent)
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.retrieveAllNames(
-    feedPersistence: FeedPersistence
+    feedEnvelopePersistence: FeedEnvelopePersistence
 ) {
-    call.respond(feedPersistence.findAllFeedEnvelopes().map { feedEnvelope -> feedEnvelope.source })
+    call.respond(feedEnvelopePersistence.findAllFeedEnvelopes().map { feedEnvelope -> feedEnvelope.source })
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.retrieveByName(
-    feedEnvelopeRepository: FeedPersistence
+    feedEnvelopeRepository: FeedEnvelopePersistence
 ) {
     val feedEnvelopeName = call.parameters["name"]
     feedEnvelopeName ?: throw IllegalArgumentException("no name specified")
@@ -68,11 +68,11 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.retrieveByName(
     call.respond(feedEnvelope)
 }
 
-private fun setupMongoFeedEnvelopeRepository(application: Application): FeedPersistence {
+private fun setupMongoFeedEnvelopePersistence(application: Application): FeedEnvelopePersistence {
     application.log.info("Initialize Feed Envelope Repository")
     val mongoConfig = application.environment.config.config("mongo")
 
-    return MongoFeedPersistence(
+    return MongoFeedEnvelopePersistence(
         mongoConfig.property("url").getString(),
         mongoConfig.property("database").getString()
     )

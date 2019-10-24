@@ -1,6 +1,6 @@
 package ch.guengel.funnel.rest.modules
 
-import ch.guengel.funnel.feed.bridges.FeedNotFoundException
+import ch.guengel.funnel.feed.bridges.FeedEnvelopeNotFoundException
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import io.ktor.application.*
@@ -28,7 +28,7 @@ fun Application.statusPages() {
             badRequest(cause)
         }
 
-        exception<FeedNotFoundException> { cause ->
+        exception<FeedEnvelopeNotFoundException> { cause ->
             val message = ErrorResponse(HttpStatusCode.NotFound.value, cause.message ?: UNKNOWN_REASON)
             call.respond(HttpStatusCode.NotFound, message)
         }

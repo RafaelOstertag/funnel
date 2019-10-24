@@ -1,7 +1,7 @@
 package ch.guengel.funnel.persistence
 
-import ch.guengel.funnel.feed.bridges.FeedNotFoundException
-import ch.guengel.funnel.feed.bridges.FeedPersistence
+import ch.guengel.funnel.feed.bridges.FeedEnvelopeNotFoundException
+import ch.guengel.funnel.feed.bridges.FeedEnvelopePersistence
 import ch.guengel.funnel.feed.data.FeedEnvelope
 import ch.guengel.funnel.jackson.jacksonFeedItemsModule
 import com.mongodb.ConnectionString
@@ -14,7 +14,8 @@ import org.litote.kmongo.util.KMongoConfiguration
 import org.slf4j.LoggerFactory
 import java.io.Closeable
 
-class MongoFeedPersistence(connectionString: String, databaseName: String) : FeedPersistence, Closeable {
+class MongoFeedEnvelopePersistence(connectionString: String, databaseName: String) : FeedEnvelopePersistence,
+    Closeable {
     private val client: MongoClient = KMongo.createClient(ConnectionString(connectionString))
     private val collection: MongoCollection<FeedEnvelope>
     private var closed = false
@@ -35,7 +36,8 @@ class MongoFeedPersistence(connectionString: String, databaseName: String) : Fee
     override fun findFeedEnvelope(name: String): FeedEnvelope {
         checkClosedState()
         logger.debug("Retrieve feed envelope '{}'", name)
-        return collection.findOne(FeedEnvelope::name eq name) ?: throw FeedNotFoundException("Feed '${name}' not found")
+        return collection.findOne(FeedEnvelope::name eq name)
+            ?: throw FeedEnvelopeNotFoundException("Feed '${name}' not found")
     }
 
     override fun findAllFeedEnvelopes(): List<FeedEnvelope> {
@@ -64,7 +66,7 @@ class MongoFeedPersistence(connectionString: String, databaseName: String) : Fee
     }
 
     private companion object {
-        val logger = LoggerFactory.getLogger(MongoFeedPersistence::class.java)
+        val logger = LoggerFactory.getLogger(MongoFeedEnvelopePersistence::class.java)
 
         init {
             KMongoConfiguration.bsonMapper.registerModule(jacksonFeedItemsModule())
