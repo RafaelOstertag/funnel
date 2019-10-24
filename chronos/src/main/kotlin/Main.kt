@@ -1,43 +1,34 @@
 package ch.guengel.funnel.chronos
 
-import ch.guengel.funnel.build.info.readBuildInfo
-import ch.guengel.funnel.kafka.Producer
-import ch.guengel.funnel.persistence.MongoFeedEnvelopeRepository
 import ch.guengel.funnel.readConfiguration
+import funnel.build.info.readBuildInfo
 import org.slf4j.LoggerFactory
-import java.util.*
+import persistence.MongoFeedPersistence
+import java.util.concurrent.CountDownLatch
 
 
 private val logger = LoggerFactory.getLogger("funnel-chronos")
-private val TO_MILLIS = 1_000L
 private val buildInfo = readBuildInfo("/git.json")
 
 fun main() {
     logger.info("${buildInfo.buildVersion} ${buildInfo.commitIdAbbrev}")
     val configuration = readConfiguration(Configuration)
 
-    val mongoFeedEnvelopeRepository = MongoFeedEnvelopeRepository(
-            configuration[Configuration.mongoDbURL],
-            configuration[Configuration.mongoDb])
+    val feedPersistence =
+        MongoFeedPersistence(configuration[Configuration.mongoDbURL], configuration[Configuration.mongoDb])
+    val feedEmitter = FeedEmitter(feedPersistence, configuration[Configuration.kafka])
+    val scheduler = Scheduler(configuration[Configuration.interval].toLong(), feedEmitter)
 
-    val producer = Producer(configuration[Configuration.kafka])
+    scheduler.start()
 
-    val sender = Sender("ch.guengel.funnel.all.envelopes", producer)
-
-    val feedEnvelopSenderTask = FeedEnvelopSenderTask(mongoFeedEnvelopeRepository, sender)
-
-
-    val interval = configuration[Configuration.interval]
-    logger.info("Send envelopes every {}sec", interval)
-
-    val timer = Timer()
-    timer.schedule(feedEnvelopSenderTask, 1000, interval * TO_MILLIS)
-
+    val countDownLatch = CountDownLatch(1)
     Runtime.getRuntime().addShutdownHook(Thread {
-        timer.cancel()
-        producer.close()
-        mongoFeedEnvelopeRepository.close()
+        scheduler.close()
+        feedPersistence.close()
+        feedEmitter.close()
+        countDownLatch.countDown()
     })
 
     logger.info("Startup complete")
+    countDownLatch.await()
 }
