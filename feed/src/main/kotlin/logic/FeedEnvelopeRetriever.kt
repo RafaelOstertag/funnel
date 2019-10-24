@@ -1,7 +1,7 @@
 package logic
 
 
-import adapters.FeedRetriever
+import bridges.FeedRetriever
 import data.FeedEnvelope
 import data.Source
 

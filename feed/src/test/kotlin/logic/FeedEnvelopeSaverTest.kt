@@ -1,6 +1,6 @@
 package logic
 
-import adapters.FeedPersistence
+import bridges.FeedPersistence
 import data.Feed
 import data.FeedEnvelope
 import data.Source

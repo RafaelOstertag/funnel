@@ -1,6 +1,6 @@
 package logic
 
-import adapters.FeedPersistence
+import bridges.FeedPersistence
 import data.FeedEnvelope
 
 class FeedEnvelopeSaver(

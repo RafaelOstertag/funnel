@@ -1,8 +1,8 @@
 package logic
 
-import adapters.FeedRetriever
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import bridges.FeedRetriever
 import data.Feed
 import data.FeedItem
 import data.FeedItems

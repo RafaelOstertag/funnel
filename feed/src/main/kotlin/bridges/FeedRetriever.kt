@@ -1,4 +1,4 @@
-package adapters
+package bridges
 
 import data.Feed
 import data.Source
