@@ -1,9 +1,9 @@
 package ch.guengel.funnel.connector.persistence
 
 import ch.guengel.funnel.feed.data.FeedEnvelope
+import ch.guengel.funnel.feed.logic.FeedEnvelopeRemover
 import ch.guengel.funnel.kafka.Consumer
 import ch.guengel.funnel.kafka.feedEnvelopeDeleteTopic
-import feed.logic.FeedEnvelopeRemover
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

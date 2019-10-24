@@ -4,8 +4,8 @@ import ch.guengel.funnel.feed.bridges.FeedEnvelopePersistence
 import ch.guengel.funnel.feed.data.Feed
 import ch.guengel.funnel.feed.data.FeedEnvelope
 import ch.guengel.funnel.feed.data.Source
+import ch.guengel.funnel.feed.logic.FeedEnvelopeRemover
 import ch.guengel.funnel.persistence.MongoFeedEnvelopePersistence
-import feed.logic.FeedEnvelopeRemover
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call

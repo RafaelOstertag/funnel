@@ -2,10 +2,10 @@ package ch.guengel.funnel.connector.persistence
 
 import ch.guengel.funnel.build.readBuildInfo
 import ch.guengel.funnel.configuration.readConfiguration
+import ch.guengel.funnel.feed.logic.FeedEnvelopeRemover
 import ch.guengel.funnel.feed.logic.FeedEnvelopeSaver
 import ch.guengel.funnel.feed.logic.FeedEnvelopeTrimmer
 import ch.guengel.funnel.persistence.MongoFeedEnvelopePersistence
-import feed.logic.FeedEnvelopeRemover
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CountDownLatch
 
