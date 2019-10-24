@@ -9,10 +9,10 @@
         <version>4.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>retriever-connector</artifactId>
+    <artifactId>xml-retriever-connector</artifactId>
     <packaging>jar</packaging>
 
-    <name>Funnel Retriever Connector</name>
+    <name>Funnel XML Retriever Connector</name>
 
     <properties>
         <main.class>ch.guengel.funnel.retriever.connector.MainKt</main.class>
@@ -21,7 +21,7 @@
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>domain</artifactId>
+            <artifactId>feed</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -40,12 +40,6 @@
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>xml-retriever</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.guengel.funnel</groupId>
-            <artifactId>common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 

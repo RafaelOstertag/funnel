@@ -1,4 +1,4 @@
-package ch.guengel.funnel.retriever.connector
+package funnel.connector.retriever
 
 import com.uchuhimo.konf.ConfigSpec
 

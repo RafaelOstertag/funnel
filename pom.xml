@@ -20,7 +20,7 @@
         <jackson-module-kotlin.version>2.9.7</jackson-module-kotlin.version>
         <mockserver-netty.version>5.4.1</mockserver-netty.version>
         <kmongo.version>3.9.0</kmongo.version>
-        <embed.mongo.version>2.1.1</embed.mongo.version>
+        <embed.mongo.version>2.2.0</embed.mongo.version>
         <assertk.version>0.20</assertk.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
@@ -36,17 +36,21 @@
     </properties>
 
     <modules>
+        <module>feed</module>
+
+        <module>jackson-feeditems-module</module>
+        <module>jackson-serializer</module>
+
         <module>test-utils</module>
-        <module>common</module>
         <module>build-info</module>
         <module>config</module>
-        <module>feed</module>
+
         <module>kafka</module>
         <module>xml-retriever</module>
         <module>persistence</module>
         <module>chronos</module>
         <module>persistence-connector</module>
-        <module>retriever-connector</module>
+        <module>xml-retriever-connector</module>
         <module>cli</module>
         <module>rest</module>
     </modules>
