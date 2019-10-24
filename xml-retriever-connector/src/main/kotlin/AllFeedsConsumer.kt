@@ -37,7 +37,7 @@ class AllFeedsConsumer(private val feedEnvelopeRetriever: FeedEnvelopeRetriever,
                 FeedEnvelopeMerger()
                     .merge(currentFeedEnvelope, latestFeedEnvelope)
                     .let {
-                        producer.send(persistTopic, it)
+                        producer.send(feedEnvelopePersistTopic, it)
                     }
             } catch (e: Exception) {
                 logger.error("Error while handling updates of '{}'", currentFeedEnvelope.name, e)
@@ -51,7 +51,7 @@ class AllFeedsConsumer(private val feedEnvelopeRetriever: FeedEnvelopeRetriever,
             FeedEnvelopeDifference().difference(currentFeedEnvelope, latestFeedEnvelope)
         if (!feedEnvelopeDifference.feed.feedItems.isEmpty) {
             logger.debug("Notifying of new items in feed '{}'", latestFeedEnvelope.name)
-            producer.send(updateTopic, feedEnvelopeDifference)
+            producer.send(updateNotificationTopic, feedEnvelopeDifference)
         }
     }
 

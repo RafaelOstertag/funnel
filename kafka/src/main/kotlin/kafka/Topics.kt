@@ -1,5 +1,6 @@
 package kafka
 
-const val persistTopic = "ch.guengel.funnel.persist.envelope"
+const val feedEnvelopePersistTopic = "ch.guengel.funnel.persist.envelope"
+const val feedEnvelopeDeleteTopic = "ch.guengel.funnel.delete.envelope"
 const val allFeedTopics = "ch.guengel.funnel.all.envelopes"
-const val updateTopic = "ch.guengel.funnel.envelopes.update"
+const val updateNotificationTopic = "ch.guengel.funnel.envelopes.update"

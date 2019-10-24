@@ -2,13 +2,13 @@ package funnel.connector.persistence
 
 import data.FeedEnvelope
 import kafka.Consumer
-import kafka.persistTopic
+import kafka.feedEnvelopePersistTopic
 import logic.FeedEnvelopeSaver
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class FeedEnvelopeSaveConsumer(private val feedEnvelopeSaver: FeedEnvelopeSaver, kafkaServer: String) : AutoCloseable {
-    private val consumer = Consumer(kafkaServer, groupId, persistTopic)
+    private val consumer = Consumer(kafkaServer, groupId, feedEnvelopePersistTopic)
 
     fun start() = consumer.start(this::handleSaveMessage)
 
