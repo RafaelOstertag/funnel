@@ -9,14 +9,13 @@
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR:-.}/funnel-chronos.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- daily rollover -->
             <fileNamePattern>${LOG_DIR:-.}/funnel-chronos.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
             <totalSizeCap>10MB</totalSizeCap>
         </rollingPolicy>
 
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%-10.10thread] %-5level %20.20logger{10} - %msg%n</pattern>
+            <pattern>%d{YYYY-MM-dd'T'HH:mm:ss.SSSXXX} [%thread] %level %logger - %msg%n</pattern>
         </encoder>
     </appender>
 
