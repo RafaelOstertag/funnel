@@ -1,6 +1,6 @@
 package ch.guengel.funnel.connector.persistence
 
-import ch.guengel.funnel.build.readBuildInfo
+import ch.guengel.funnel.build.logBuildInfo
 import ch.guengel.funnel.configuration.readConfiguration
 import ch.guengel.funnel.feed.logic.FeedEnvelopeRemover
 import ch.guengel.funnel.feed.logic.FeedEnvelopeSaver
@@ -10,10 +10,9 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.CountDownLatch
 
 private val logger = LoggerFactory.getLogger("persistence-connector")
-private val buildInfo = readBuildInfo("/git.json")
 
 fun main() {
-    logger.info("${buildInfo.buildVersion} ${buildInfo.commitIdAbbrev}")
+    logBuildInfo(logger)
     val configuration = readConfiguration(Configuration)
 
 

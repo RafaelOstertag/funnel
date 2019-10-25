@@ -9,7 +9,7 @@ import io.ktor.routing.get
 
 fun Route.infoRoute() = createRouteFromPath("/info").apply {
     get {
-        val buildInfo = readBuildInfo("/git.json")
+        val buildInfo = readBuildInfo()
         call.respond(buildInfo)
     }
 }
