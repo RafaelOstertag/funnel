@@ -13,7 +13,6 @@
             <fileNamePattern>${LOG_DIR:-.}/funnel-chronos.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
             <totalSizeCap>10MB</totalSizeCap>
-
         </rollingPolicy>
 
         <encoder>
