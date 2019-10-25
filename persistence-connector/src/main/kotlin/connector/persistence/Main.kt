@@ -1,52 +1,50 @@
 package ch.guengel.funnel.connector.persistence
 
-import ch.guengel.funnel.build.readBuildInfo
-import ch.guengel.funnel.configuration.readConfiguration
+import ch.guengel.funnel.build.logBuildInfo
 import ch.guengel.funnel.feed.logic.FeedEnvelopeRemover
 import ch.guengel.funnel.feed.logic.FeedEnvelopeSaver
 import ch.guengel.funnel.feed.logic.FeedEnvelopeTrimmer
 import ch.guengel.funnel.persistence.MongoFeedEnvelopePersistence
+import io.ktor.server.engine.commandLineEnvironment
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import org.slf4j.LoggerFactory
-import java.util.concurrent.CountDownLatch
 
 private val logger = LoggerFactory.getLogger("persistence-connector")
-private val buildInfo = readBuildInfo("/git.json")
 
-fun main() {
-    logger.info("${buildInfo.buildVersion} ${buildInfo.commitIdAbbrev}")
-    val configuration = readConfiguration(Configuration)
+fun main(args: Array<String>) {
+    logBuildInfo(logger)
 
+    val environment = commandLineEnvironment(args)
 
-    val mongoFeedPersistence = MongoFeedEnvelopePersistence(
-        configuration[Configuration.mongoDbURL], configuration[Configuration.mongoDb]
-    )
+    val mongoUrl = environment.config.property("mongo.url").getString()
+    val mongoDb = environment.config.property("mongo.database").getString()
+    val mongoFeedPersistence = MongoFeedEnvelopePersistence(mongoUrl, mongoDb)
 
-    val feedEnvelopeTrimmer = FeedEnvelopeTrimmer(configuration[Configuration.retainMaxFeeds])
+    val retainMaxFeeds = environment.config.property("persistence.retain-max-feeds").getString().toInt()
+    val feedEnvelopeTrimmer = FeedEnvelopeTrimmer(retainMaxFeeds)
     val feedEnvelopeSaver = FeedEnvelopeSaver(mongoFeedPersistence, feedEnvelopeTrimmer)
 
+    val kafkaServer = environment.config.property("kafka.server").getString()
     val feedEnvelopeSaveConsumer =
         FeedEnvelopeSaveConsumer(
             feedEnvelopeSaver,
-            configuration[Configuration.kafka]
+            kafkaServer
         )
     feedEnvelopeSaveConsumer.start()
 
     val feedEnvelopeDeleteConsumer =
         FeedEnvelopeDeleteConsumer(
             FeedEnvelopeRemover(mongoFeedPersistence),
-            configuration[Configuration.kafka]
+            kafkaServer
         )
     feedEnvelopeDeleteConsumer.start()
 
-
-    val countDownLatch = CountDownLatch(1)
     Runtime.getRuntime().addShutdownHook(Thread {
         feedEnvelopeSaveConsumer.close()
         feedEnvelopeDeleteConsumer.close()
         mongoFeedPersistence.close()
-        countDownLatch.countDown()
     })
 
-    logger.info("Startup complete")
-    countDownLatch.await()
+    embeddedServer(Netty, environment).start(wait = true)
 }

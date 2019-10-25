@@ -5,7 +5,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
-        <version>4.0.1</version>
+        <version>4.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -23,23 +23,26 @@
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>config</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.guengel.funnel</groupId>
             <artifactId>kafka</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>persistence</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>build-info</artifactId>
+            <artifactId>ktor-common</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-netty</artifactId>
+            <version>${ktor.version}</version>
         </dependency>
 
         <dependency>

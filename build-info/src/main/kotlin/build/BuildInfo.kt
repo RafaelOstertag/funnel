@@ -1,44 +1,21 @@
 package ch.guengel.funnel.build
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.InputStreamReader
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import java.util.*
 
 private val logger = LoggerFactory.getLogger("build-info")
+internal val noTime = OffsetDateTime.of(1979, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
 
-data class BuildInfo(
-    @get:JsonProperty("git.branch")
-    val branch: String,
-    @get:JsonProperty("git.build.host")
-    val buildHost: String,
-    @get:JsonProperty("git.build.time")
-    val buildTime: OffsetDateTime,
-    @get:JsonProperty("git.build.version")
-    val buildVersion: String,
-    @get:JsonProperty("git.commit.id.abbrev")
-    val commitIdAbbrev: String,
-    @get:JsonProperty("git.commit.time")
-    val commitTime: OffsetDateTime,
-    @get:JsonProperty("git.dirty")
-    val dirty: Boolean
-) {
-    constructor() : this(
-        "n/a",
-        "n/a",
-        OffsetDateTime.of(1979, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC),
-        "n/a",
-        "n/a",
-        OffsetDateTime.of(1979, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC),
-        true
-    )
-}
+data class BuildInfo(val gitInfo: GitInfo, val mavenInfo: MavenInfo)
 
 private object JSON {
     val objectMapper = ObjectMapper()
@@ -48,15 +25,47 @@ private object JSON {
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 }
 
-fun readBuildInfo(resourcePath: String): BuildInfo {
+fun readBuildInfo(): BuildInfo {
+    val gitInfo = readGitInfo("/git.json")
+    val mavenInfo = readMavenInfo("/build.info")
+    return BuildInfo(gitInfo, mavenInfo)
+}
+
+fun logBuildInfo(logger: Logger) {
+    val buildInfo = readBuildInfo()
+    logger.info(getBuildInfoString(buildInfo))
+}
+
+fun getBuildInfoString(buildInfo: BuildInfo): String =
+    "${buildInfo.mavenInfo.artifactId} ${buildInfo.mavenInfo.version} ${buildInfo.gitInfo.commitIdAbbrev} ${buildInfo.gitInfo.commitTime}"
+
+internal fun readGitInfo(resourcePath: String): GitInfo {
     try {
         return object {}.javaClass.getResourceAsStream(resourcePath).use {
             val inputStreamReader = InputStreamReader(it)
-            val buildInfo = JSON.objectMapper.readValue<BuildInfo>(inputStreamReader)
-            return@use buildInfo
+            val gitInfo = JSON.objectMapper.readValue<GitInfo>(inputStreamReader)
+            return@use gitInfo
         }
     } catch (e: NullPointerException) {
-        logger.warn("Cannot read ${resourcePath}. Return empty build info")
-        return BuildInfo()
+        logger.warn("Cannot read ${resourcePath}. Return empty git info")
+        return GitInfo()
+    }
+}
+
+internal fun readMavenInfo(resourcePath: String): MavenInfo {
+    try {
+        return object {}.javaClass.getResourceAsStream(resourcePath).use {
+            val inputStreamReader = InputStreamReader(it)
+            val mavenInfo = Properties()
+            mavenInfo.load(inputStreamReader)
+            return@use MavenInfo(
+                mavenInfo.getProperty("project.groupId"),
+                mavenInfo.getProperty("project.artifactId"),
+                mavenInfo.getProperty("project.version")
+            )
+        }
+    } catch (e: NullPointerException) {
+        logger.warn("Cannot read ${resourcePath}. Return empty maven info")
+        return MavenInfo()
     }
 }

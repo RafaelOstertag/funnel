@@ -1,0 +1,6 @@
+project.id = ch.guengel.funnel:build-info:jar:4.0.2-SNAPSHOT
+project.groupId = ch.guengel.funnel
+project.artifactId = build-info
+project.version = 4.0.2-SNAPSHOT
+project.name = Funnel Build Info
+build.time = 2019-10-25 11:05:56

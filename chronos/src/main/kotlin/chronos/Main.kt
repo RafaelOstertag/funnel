@@ -1,34 +1,38 @@
 package ch.guengel.funnel.chronos
 
-import ch.guengel.funnel.build.readBuildInfo
-import ch.guengel.funnel.configuration.readConfiguration
+import ch.guengel.funnel.build.logBuildInfo
 import ch.guengel.funnel.persistence.MongoFeedEnvelopePersistence
+import io.ktor.server.engine.commandLineEnvironment
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import org.slf4j.LoggerFactory
-import java.util.concurrent.CountDownLatch
 
 
 private val logger = LoggerFactory.getLogger("funnel-chronos")
-private val buildInfo = readBuildInfo("/git.json")
 
-fun main() {
-    logger.info("${buildInfo.buildVersion} ${buildInfo.commitIdAbbrev}")
-    val configuration = readConfiguration(Configuration)
+fun main(args: Array<String>) {
+    logBuildInfo(logger)
 
+    val environment = commandLineEnvironment(args)
+
+    val mongoUrl = environment.config.property("mongo.url").getString()
+    val mongoDb = environment.config.property("mongo.database").getString()
     val feedPersistence =
-        MongoFeedEnvelopePersistence(configuration[Configuration.mongoDbURL], configuration[Configuration.mongoDb])
-    val feedEmitter = FeedEmitter(feedPersistence, configuration[Configuration.kafka])
-    val scheduler = Scheduler(configuration[Configuration.interval].toLong(), feedEmitter)
+        MongoFeedEnvelopePersistence(mongoUrl, mongoDb)
+
+    val kafkaServer = environment.config.property("kafka.server").getString()
+    val feedEmitter = FeedEmitter(feedPersistence, kafkaServer)
+
+    val interval = environment.config.property("chronos.interval").getString().toLong()
+    val scheduler = Scheduler(interval, feedEmitter)
 
     scheduler.start()
 
-    val countDownLatch = CountDownLatch(1)
     Runtime.getRuntime().addShutdownHook(Thread {
         scheduler.close()
         feedPersistence.close()
         feedEmitter.close()
-        countDownLatch.countDown()
     })
 
-    logger.info("Startup complete")
-    countDownLatch.await()
+    embeddedServer(Netty, environment).start(wait = true)
 }

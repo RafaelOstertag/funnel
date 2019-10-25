@@ -1,5 +1,6 @@
 package ch.guengel.funnel.cli
 
+import ch.guengel.funnel.build.getBuildInfoString
 import ch.guengel.funnel.build.readBuildInfo
 import ch.guengel.funnel.feed.data.Feed
 import ch.guengel.funnel.feed.data.FeedEnvelope
@@ -15,7 +16,6 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 
 private const val defaultKafkaAddress = "localhost:9092"
-private val buildInfo = readBuildInfo("/git.json")
 
 private fun makeFeedEnvelope(sourceName: String, sourceAddress: String): FeedEnvelope {
     val source = Source(sourceName, sourceAddress)
@@ -72,7 +72,8 @@ class CliOptions : CliktCommand() {
 
 
 fun main(args: Array<String>) {
-    println("${buildInfo.buildVersion} (${buildInfo.commitIdAbbrev})")
+    val buildInfo = readBuildInfo()
+    println(getBuildInfoString(buildInfo))
     CliOptions()
         .subcommands(CreateFeed()).subcommands(DeleteFeed()).main(args)
 }

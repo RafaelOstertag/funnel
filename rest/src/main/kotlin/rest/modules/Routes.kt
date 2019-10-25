@@ -6,6 +6,7 @@ import ch.guengel.funnel.feed.data.FeedEnvelope
 import ch.guengel.funnel.feed.data.Source
 import ch.guengel.funnel.feed.logic.FeedEnvelopeRemover
 import ch.guengel.funnel.persistence.MongoFeedEnvelopePersistence
+import ch.guengel.funnel.rest.infoRoute
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
@@ -22,6 +23,7 @@ fun Application.routes() {
     val feedEnvelopePersistence = setupMongoFeedEnvelopePersistence(this)
 
     routing {
+        infoRoute()
         route("/feeds") {
             get { retrieveAllNames(feedEnvelopePersistence) }
             post { saveEnvelope(feedEnvelopePersistence) }
