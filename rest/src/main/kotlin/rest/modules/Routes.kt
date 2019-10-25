@@ -15,6 +15,7 @@ import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.*
 import io.ktor.util.pipeline.PipelineContext
+import rest.modules.infoRoute
 
 
 fun Application.routes() {
@@ -22,6 +23,7 @@ fun Application.routes() {
     val feedEnvelopePersistence = setupMongoFeedEnvelopePersistence(this)
 
     routing {
+        infoRoute()
         route("/feeds") {
             get { retrieveAllNames(feedEnvelopePersistence) }
             post { saveEnvelope(feedEnvelopePersistence) }
