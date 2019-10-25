@@ -33,8 +33,11 @@ fun readBuildInfo(): BuildInfo {
 
 fun logBuildInfo(logger: Logger) {
     val buildInfo = readBuildInfo()
-    logger.info("${buildInfo.mavenInfo.artifactId} ${buildInfo.mavenInfo.version} ${buildInfo.gitInfo.commitIdAbbrev} ${buildInfo.gitInfo.commitTime}")
+    logger.info(getBuildInfoString(buildInfo))
 }
+
+fun getBuildInfoString(buildInfo: BuildInfo): String =
+    "${buildInfo.mavenInfo.artifactId} ${buildInfo.mavenInfo.version} ${buildInfo.gitInfo.commitIdAbbrev} ${buildInfo.gitInfo.commitTime}"
 
 internal fun readGitInfo(resourcePath: String): GitInfo {
     try {
