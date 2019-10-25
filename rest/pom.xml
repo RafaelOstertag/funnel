@@ -37,7 +37,7 @@
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>build-info</artifactId>
+            <artifactId>ktor-info-route</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 

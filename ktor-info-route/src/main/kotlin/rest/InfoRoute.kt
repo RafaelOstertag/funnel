@@ -1,4 +1,4 @@
-package rest.modules
+package ch.guengel.funnel.rest
 
 import ch.guengel.funnel.build.readBuildInfo
 import io.ktor.application.call
@@ -8,8 +8,8 @@ import io.ktor.routing.createRouteFromPath
 import io.ktor.routing.get
 
 fun Route.infoRoute() = createRouteFromPath("/info").apply {
+    val buildInfo = readBuildInfo()
     get {
-        val buildInfo = readBuildInfo()
         call.respond(buildInfo)
     }
 }

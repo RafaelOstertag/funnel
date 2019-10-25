@@ -6,6 +6,7 @@ import ch.guengel.funnel.feed.data.FeedEnvelope
 import ch.guengel.funnel.feed.data.Source
 import ch.guengel.funnel.feed.logic.FeedEnvelopeRemover
 import ch.guengel.funnel.persistence.MongoFeedEnvelopePersistence
+import ch.guengel.funnel.rest.infoRoute
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
@@ -15,7 +16,6 @@ import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.*
 import io.ktor.util.pipeline.PipelineContext
-import rest.modules.infoRoute
 
 
 fun Application.routes() {
