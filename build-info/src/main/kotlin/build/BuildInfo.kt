@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.InputStreamReader
 import java.time.OffsetDateTime
@@ -28,6 +29,11 @@ fun readBuildInfo(): BuildInfo {
     val gitInfo = readGitInfo("/git.json")
     val mavenInfo = readMavenInfo("/build.info")
     return BuildInfo(gitInfo, mavenInfo)
+}
+
+fun logBuildInfo(logger: Logger) {
+    val buildInfo = readBuildInfo()
+    logger.info("${buildInfo.mavenInfo.artifactId} ${buildInfo.mavenInfo.version} ${buildInfo.gitInfo.commitIdAbbrev} ${buildInfo.gitInfo.commitTime}")
 }
 
 internal fun readGitInfo(resourcePath: String): GitInfo {
