@@ -21,7 +21,7 @@ fun main(args: Array<String>) {
     val mongoDb = environment.config.property("mongo.database").getString()
     val mongoFeedPersistence = MongoFeedEnvelopePersistence(mongoUrl, mongoDb)
 
-    val retainMaxFeeds = environment.config.property("persistence.retainMaxFeeds").getString().toInt()
+    val retainMaxFeeds = environment.config.property("persistence.retain-max-feeds").getString().toInt()
     val feedEnvelopeTrimmer = FeedEnvelopeTrimmer(retainMaxFeeds)
     val feedEnvelopeSaver = FeedEnvelopeSaver(mongoFeedPersistence, feedEnvelopeTrimmer)
 
