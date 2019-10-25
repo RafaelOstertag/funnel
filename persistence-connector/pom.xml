@@ -32,8 +32,14 @@
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>config</artifactId>
+            <artifactId>ktor-common</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-netty</artifactId>
+            <version>${ktor.version}</version>
         </dependency>
 
         <dependency>
@@ -44,22 +50,9 @@
         </dependency>
 
         <dependency>
-            <groupId>ch.guengel.funnel</groupId>
-            <artifactId>build-info</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-reflect</artifactId>
-            <version>${kotlin.version}</version>
         </dependency>
     </dependencies>
 

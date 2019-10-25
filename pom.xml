@@ -44,7 +44,6 @@
 
         <module>test-utils</module>
         <module>build-info</module>
-        <module>config</module>
 
         <module>kafka</module>
         <module>xml-retriever</module>
