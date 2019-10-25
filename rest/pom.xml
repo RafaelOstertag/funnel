@@ -31,25 +31,13 @@
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>jackson-feeditems-module</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.guengel.funnel</groupId>
-            <artifactId>ktor-info-route</artifactId>
+            <artifactId>ktor-common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-netty</artifactId>
-            <version>${ktor.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.ktor</groupId>
-            <artifactId>ktor-jackson</artifactId>
             <version>${ktor.version}</version>
         </dependency>
 

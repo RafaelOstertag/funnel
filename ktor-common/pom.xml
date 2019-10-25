@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>ktor-info-route</artifactId>
+    <artifactId>ktor-common</artifactId>
     <packaging>jar</packaging>
 
     <name>Funnel Ktor Info Route</name>
@@ -22,10 +22,22 @@
         </dependency>
 
         <dependency>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>jackson-feeditems-module</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-host-common</artifactId>
             <version>${ktor.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-jackson</artifactId>
+            <version>${ktor.version}</version>
         </dependency>
     </dependencies>
 
