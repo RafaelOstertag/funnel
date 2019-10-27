@@ -25,10 +25,10 @@ internal class FeedEnvelopeUpdateNotifierTest {
         val feedEnvelopeDifferenceMock = mockk<FeedEnvelopeDifference>()
         every {
             feedEnvelopeDifferenceMock.difference(any(), any())
-        }.returns(FeedEnvelope(source1, Feed()))
+        }.returns(FeedEnvelope(source1, Feed("test", "test", FeedItems())))
 
         val feedEnvelopeUpdateNotifier = FeedEnvelopeUpdateNotifier(feedEnvelopeDifferenceMock) {
-            fail()
+            fail("There should be no difference to notify of")
         }
 
         feedEnvelopeUpdateNotifier.notify(feedEnvelopeCurrent, feedEnvelopeLatest)
