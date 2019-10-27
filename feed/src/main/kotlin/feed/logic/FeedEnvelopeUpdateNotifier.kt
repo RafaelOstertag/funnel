@@ -1,8 +1,7 @@
-package feed.logic
+package ch.guengel.funnel.feed.logic
 
 import ch.guengel.funnel.feed.data.Feed
 import ch.guengel.funnel.feed.data.FeedEnvelope
-import ch.guengel.funnel.feed.logic.FeedEnvelopeDifference
 
 class FeedEnvelopeUpdateNotifier(
     private val feedEnvelopeDifference: FeedEnvelopeDifference,

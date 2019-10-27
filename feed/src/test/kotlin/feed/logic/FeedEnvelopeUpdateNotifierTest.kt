@@ -1,9 +1,8 @@
-package feed.logic
+package ch.guengel.funnel.feed.logic
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import ch.guengel.funnel.feed.data.*
-import ch.guengel.funnel.feed.logic.FeedEnvelopeDifference
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verifyAll
