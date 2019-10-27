@@ -8,34 +8,27 @@ import io.ktor.http.Url
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class XmlRetriever : FeedRetriever, AutoCloseable {
+class XmlRetriever : FeedRetriever {
     private val syndAdapter = SyndAdapter()
-    private val xmlFetcher = XmlFetcher()
 
     override suspend fun fetch(source: Source): Feed {
-        check(!xmlFetcher.closed) {
-            logger.error(closedClientErrorMessage)
-            closedClientErrorMessage
+        // Open and closing the client should be a bottleneck, since it is assumed that interval between calls to the
+        // same site is minutes or hours apart. But is should fix issues with the client hogging the CPU on long running
+        // processes
+        XmlFetcher().use {
+            val url = Url(source.address)
+            try {
+                val feedXml = it.fetch(url)
+                return syndAdapter.toFeed(feedXml)
+            } catch (e: Exception) {
+                val errorMessage = "Error while retrieving feed ${source.address}"
+                logger.error(errorMessage, e)
+                throw FeedRetrieverException(errorMessage, e)
+            }
         }
-
-        val url = Url(source.address)
-        try {
-            val feedXml = xmlFetcher.fetch(url)
-            return syndAdapter.toFeed(feedXml)
-        } catch (e: Exception) {
-            val errorMessage = "Error while retrieving feed ${source.address}"
-            logger.error(errorMessage, e)
-            throw FeedRetrieverException(errorMessage, e)
-        }
-    }
-
-    override fun close() {
-        xmlFetcher.close()
-        logger.info("Close XML Feed Fetcher")
     }
 
     private companion object {
         val logger: Logger = LoggerFactory.getLogger(XmlRetriever::class.java)
-        const val closedClientErrorMessage = "Client is closed"
     }
 }
