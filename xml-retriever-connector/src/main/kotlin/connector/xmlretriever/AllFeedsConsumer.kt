@@ -4,6 +4,7 @@ import ch.guengel.funnel.feed.data.FeedEnvelope
 import ch.guengel.funnel.feed.logic.FeedEnvelopeDifference
 import ch.guengel.funnel.feed.logic.FeedEnvelopeMerger
 import ch.guengel.funnel.feed.logic.FeedEnvelopeRetriever
+import ch.guengel.funnel.feed.logic.FeedEnvelopeUpdateNotifier
 import ch.guengel.funnel.kafka.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,11 +15,12 @@ import org.slf4j.LoggerFactory
 
 class AllFeedsConsumer(private val feedEnvelopeRetriever: FeedEnvelopeRetriever, kafkaServer: String) : AutoCloseable {
     private val ioScope = CoroutineScope(Dispatchers.IO)
-    private val consumer = Consumer(
-        kafkaServer,
-        groupId, allFeedTopics
-    )
+    private val consumer = Consumer(kafkaServer, groupId, allFeedTopics)
     private val producer = Producer(kafkaServer)
+    private val feedEnvelopeUpdateNotifier = FeedEnvelopeUpdateNotifier(FeedEnvelopeDifference()) {
+        logger.info("Notifying of new items in feed '{}'", it.name)
+        producer.send(updateNotificationTopic, it)
+    }
     private var closed = false
 
     fun start() {
@@ -36,7 +38,7 @@ class AllFeedsConsumer(private val feedEnvelopeRetriever: FeedEnvelopeRetriever,
             try {
                 logger.info("Retrieving updates for '{}'", currentFeedEnvelope.name)
                 val latestFeedEnvelope = retrieveLatestFeed(currentFeedEnvelope)
-                notifyFeedUpdateIfRequired(currentFeedEnvelope, latestFeedEnvelope)
+                feedEnvelopeUpdateNotifier.notify(currentFeedEnvelope, latestFeedEnvelope)
                 FeedEnvelopeMerger()
                     .merge(currentFeedEnvelope, latestFeedEnvelope)
                     .let {
@@ -47,15 +49,6 @@ class AllFeedsConsumer(private val feedEnvelopeRetriever: FeedEnvelopeRetriever,
             }
         }
 
-    }
-
-    private fun notifyFeedUpdateIfRequired(currentFeedEnvelope: FeedEnvelope, latestFeedEnvelope: FeedEnvelope) {
-        val feedEnvelopeDifference =
-            FeedEnvelopeDifference().difference(currentFeedEnvelope, latestFeedEnvelope)
-        if (!feedEnvelopeDifference.feed.feedItems.isEmpty) {
-            logger.info("Notifying of new items in feed '{}'", latestFeedEnvelope.name)
-            producer.send(updateNotificationTopic, feedEnvelopeDifference)
-        }
     }
 
     private suspend fun retrieveLatestFeed(currentFeedEnvelope: FeedEnvelope): FeedEnvelope {

@@ -5,14 +5,14 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
-        <version>4.1.0</version>
+        <version>4.1.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ktor-common</artifactId>
     <packaging>jar</packaging>
 
-    <name>Funnel Ktor Info Route</name>
+    <name>Funnel Ktor Common</name>
 
     <dependencies>
         <dependency>
