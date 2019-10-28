@@ -58,6 +58,7 @@ internal class SyndAdapter {
         return FeedItem(
             syndEntry.uri,
             syndEntry.title,
+            syndEntry.link,
             createdDate ?: FeedConstants.emptyCreated
         )
     }

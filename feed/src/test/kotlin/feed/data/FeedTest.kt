@@ -3,6 +3,7 @@ package ch.guengel.funnel.feed.data
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
+import ch.guengel.funnel.feed.logic.createFeedItem
 import org.junit.jupiter.api.Test
 import java.time.OffsetDateTime
 
@@ -14,11 +15,12 @@ internal class FeedTest {
         assertThat(emptyFeed.lastUpdated).isEqualTo(FeedConstants.emptyCreated)
     }
 
+
     @Test
     fun `last updated`() {
         val now = OffsetDateTime.now()
-        val feedItem1 = FeedItem("1", "", now)
-        val feedItem2 = FeedItem("2", "", now.minusDays(1))
+        val feedItem1 = createFeedItem("1", now)
+        val feedItem2 = createFeedItem("2", now.minusDays(1))
         val feed = Feed(
             "1",
             "",
@@ -39,16 +41,16 @@ internal class FeedTest {
     @Test
     fun equality() {
         val now = OffsetDateTime.now()
-        val feedItem1 = FeedItem("1", "", now)
-        val feedItem2 = FeedItem("2", "", now.minusDays(1))
+        val feedItem1 = createFeedItem("1", now)
+        val feedItem2 = createFeedItem("2", now.minusDays(1))
         val feed1 = Feed(
             "1",
             "",
             FeedItems(listOf(feedItem1, feedItem2))
         )
 
-        val feedItem3 = FeedItem("1", "", now)
-        val feedItem4 = FeedItem("2", "", now.minusDays(1))
+        val feedItem3 = createFeedItem("1", now)
+        val feedItem4 = createFeedItem("2", now.minusDays(1))
         val feed2 = Feed(
             "1",
             "",

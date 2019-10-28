@@ -33,7 +33,7 @@ internal class FeedEnvelopeDifferenceTest {
         val currentSource = Source("name1", "address1")
         val currentFeedEnvelope = FeedEnvelope(currentSource, currentFeed)
 
-        val latestFeedItem = FeedItem("latest", "title", now.plusDays(1))
+        val latestFeedItem = FeedItem("latest", "title", "link", now.plusDays(1))
         val latestFeedItems = FeedItems(listOf(latestFeedItem))
         val latestFeed = Feed("id2", "title2", latestFeedItems)
         val latestSource = Source("name2", "address2")

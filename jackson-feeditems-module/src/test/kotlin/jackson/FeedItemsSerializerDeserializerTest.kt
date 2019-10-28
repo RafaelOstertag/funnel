@@ -21,8 +21,8 @@ internal class FeedItemsSerializerDeserializerTest {
     @Test
     fun `serialize and deserialize`() {
         val time = OffsetDateTime.of(2019, 1, 2, 3, 4, 5, 0, ZoneOffset.UTC)
-        val feedItem1 = FeedItem("id1", "title1", time)
-        val feedItem2 = FeedItem("id2", "title2", time.plusDays(1))
+        val feedItem1 = FeedItem("id1", "title1", "link1", time)
+        val feedItem2 = FeedItem("id2", "title2", "link2", time.plusDays(1))
         val feedItems = FeedItems(listOf<FeedItem>(feedItem1, feedItem2))
 
         val serialized = objectMapper.writeValueAsString(feedItems)

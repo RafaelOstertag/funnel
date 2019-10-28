@@ -4,7 +4,6 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import ch.guengel.funnel.feed.bridges.FeedRetriever
 import ch.guengel.funnel.feed.data.Feed
-import ch.guengel.funnel.feed.data.FeedItem
 import ch.guengel.funnel.feed.data.FeedItems
 import ch.guengel.funnel.feed.data.Source
 import io.mockk.coEvery
@@ -19,7 +18,7 @@ internal class FeedEnvelopeRetrieverTest {
         val feed = Feed(
             "id",
             "title",
-            FeedItems(listOf(FeedItem("1", "", now)))
+            FeedItems(listOf(createFeedItem("1", now)))
         )
         val feedRetrieverMock = mockk<FeedRetriever>()
         coEvery {

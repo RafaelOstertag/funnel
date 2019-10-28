@@ -14,6 +14,7 @@ pipeline {
     options {
         ansiColor('xterm')
         buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')
+        timestamps()
     }
 
     stages {
@@ -91,6 +92,16 @@ pipeline {
                     step([$class                 : "RundeckNotifier",
                           includeRundeckLogs     : true,
                           jobId                  : "5449aefb-9bb2-4e59-aa93-88f7fc33a974",
+                          options                : "version=$version",
+                          rundeckInstance        : "gizmo",
+                          shouldFailTheBuild     : true,
+                          shouldWaitForRundeckJob: true,
+                          tailLog                : true])
+
+                    // notifier
+                    step([$class                 : "RundeckNotifier",
+                          includeRundeckLogs     : true,
+                          jobId                  : "9d14ad7e-1902-4ab1-b29f-babd0bdb7104",
                           options                : "version=$version",
                           rundeckInstance        : "gizmo",
                           shouldFailTheBuild     : true,

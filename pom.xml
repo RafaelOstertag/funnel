@@ -6,7 +6,7 @@
 
     <groupId>ch.guengel.funnel</groupId>
     <artifactId>main</artifactId>
-    <version>4.1.2</version>
+    <version>5.0.0</version>
     <packaging>pom</packaging>
 
     <name>Funnel</name>
@@ -54,6 +54,7 @@
         <module>xml-retriever-connector</module>
         <module>cli</module>
         <module>rest</module>
+        <module>notifier</module>
     </modules>
 
     <dependencyManagement>

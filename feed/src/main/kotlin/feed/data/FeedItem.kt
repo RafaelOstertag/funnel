@@ -5,6 +5,7 @@ import java.time.OffsetDateTime
 data class FeedItem(
     val id: String,
     val title: String,
+    val link: String,
     val created: OffsetDateTime
 ) : Comparable<FeedItem> {
     override fun equals(other: Any?): Boolean {
@@ -32,6 +33,7 @@ data class FeedItem(
     companion object {
         private val comparator = FeedItemComparator()
         val empty = FeedItem(
+            "",
             "",
             "",
             FeedConstants.emptyCreated

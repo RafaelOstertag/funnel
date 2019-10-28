@@ -5,6 +5,7 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isNotEqualTo
 import assertk.assertions.isTrue
+import ch.guengel.funnel.feed.logic.createFeedItem
 import org.junit.jupiter.api.Test
 import java.time.OffsetDateTime
 
@@ -34,10 +35,10 @@ internal class FeedItemsTest {
 
     @Test
     fun `keep items ordered by creation time`() {
-        val item1 = FeedItem("1", "", now)
+        val item1 = createFeedItem("1", now)
 
         val earlierThanNow = now.minusSeconds(1)
-        val item2 = FeedItem("2", "", earlierThanNow)
+        val item2 = createFeedItem("2", earlierThanNow)
 
         val feedItems = FeedItems(listOf(item1, item2))
         assertThat(feedItems.items.first())
@@ -48,21 +49,21 @@ internal class FeedItemsTest {
 
     @Test
     fun `latest returns latest feed item`() {
-        val recentFeedItem = FeedItem("0", "", now)
+        val recentFeedItem = createFeedItem("0", now)
         var feedItems = FeedItems(listOf(recentFeedItem))
         assertThat(feedItems.latest).isEqualTo(recentFeedItem)
 
         val older = now.minusSeconds(1)
-        val lessRecentFeedItem = FeedItem("1", "", older)
+        val lessRecentFeedItem = createFeedItem("1", older)
         feedItems = FeedItems(listOf(lessRecentFeedItem, recentFeedItem))
         assertThat(feedItems.latest).isEqualTo(recentFeedItem)
     }
 
     @Test
     fun `add feed item`() {
-        val feedItem1 = FeedItem("1", "", now)
+        val feedItem1 = createFeedItem("1", now)
         val feedItems1 = FeedItems(listOf(feedItem1))
-        val feedItem2 = FeedItem("2", "", now.plusDays(1))
+        val feedItem2 = createFeedItem("2", now.plusDays(1))
 
         val feedItemsSum = feedItems1 + feedItem2
         assertThat(feedItemsSum.hasItem(feedItem1)).isTrue()
@@ -71,9 +72,9 @@ internal class FeedItemsTest {
 
     @Test
     fun `add feed items`() {
-        val feedItem1 = FeedItem("1", "", now)
+        val feedItem1 = createFeedItem("1", now)
         val feedItems1 = FeedItems(listOf(feedItem1))
-        val feedItem2 = FeedItem("2", "", now.plusDays(1))
+        val feedItem2 = createFeedItem("2", now.plusDays(1))
         val feedItems2 = FeedItems(listOf(feedItem2))
 
         val feedItemsSum = feedItems1 + feedItems2
@@ -83,10 +84,10 @@ internal class FeedItemsTest {
 
     @Test
     fun `not equal`() {
-        val feedItem1 = FeedItem("1", "", now)
+        val feedItem1 = createFeedItem("1", now)
         val feedItems1 = FeedItems(listOf(feedItem1))
 
-        val feedItem2 = FeedItem("2", "", now.plusDays(1))
+        val feedItem2 = createFeedItem("2", now.plusDays(1))
         val feedItems2 = FeedItems(listOf(feedItem2))
 
         assertThat(feedItems1).isNotEqualTo(feedItems2)
@@ -94,10 +95,10 @@ internal class FeedItemsTest {
 
     @Test
     fun `is equal`() {
-        val feedItem1 = FeedItem("1", "", now)
+        val feedItem1 = createFeedItem("1", now)
         val feedItems1 = FeedItems(listOf(feedItem1))
 
-        val feedItem2 = FeedItem("1", "", now)
+        val feedItem2 = createFeedItem("1", now)
         val feedItems2 = FeedItems(listOf(feedItem2))
 
         assertThat(feedItems1).isEqualTo(feedItems2)
@@ -105,10 +106,10 @@ internal class FeedItemsTest {
 
     @Test
     fun `non-equal hash code`() {
-        val feedItem1 = FeedItem("1", "", now)
+        val feedItem1 = createFeedItem("1", now)
         val feedItems1 = FeedItems(listOf(feedItem1))
 
-        val feedItem2 = FeedItem("2", "", now.plusDays(1))
+        val feedItem2 = createFeedItem("2", now.plusDays(1))
         val feedItems2 = FeedItems(listOf(feedItem2))
 
         assertThat(feedItems1.hashCode()).isNotEqualTo(feedItems2.hashCode())
@@ -116,10 +117,10 @@ internal class FeedItemsTest {
 
     @Test
     fun `equal hash code`() {
-        val feedItem1 = FeedItem("1", "", now)
+        val feedItem1 = createFeedItem("1", now)
         val feedItems1 = FeedItems(listOf(feedItem1))
 
-        val feedItem2 = FeedItem("1", "", now)
+        val feedItem2 = createFeedItem("1", now)
         val feedItems2 = FeedItems(listOf(feedItem2))
 
         assertThat(feedItems1.hashCode()).isEqualTo(feedItems2.hashCode())

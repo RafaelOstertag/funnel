@@ -9,6 +9,7 @@ fun makeItem(number: Int): FeedItem {
     return FeedItem(
         "item${number}",
         "Item ${number}",
+        "Link ${number}",
         createdDate.plusDays(number.toLong())
     )
 }

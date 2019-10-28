@@ -28,7 +28,7 @@ internal class FeedEnvelopeTrimmerTest {
         }
         with(trimmedFeed.feed.feedItems) {
             assertThat(size).isEqualTo(1)
-            assertThat(items.last()).isEqualTo(FeedItem("3", "title 3", now))
+            assertThat(items.last()).isEqualTo(FeedItem("3", "title 3", "link 3", now))
         }
     }
 
@@ -53,8 +53,8 @@ internal class FeedEnvelopeTrimmerTest {
         }
         with(trimmedFeed.feed.feedItems) {
             assertThat(size).isEqualTo(2)
-            assertThat(items.first()).isEqualTo(FeedItem("2", "title 2", now.minusDays(1)))
-            assertThat(items.last()).isEqualTo(FeedItem("3", "title 3", now))
+            assertThat(items.first()).isEqualTo(FeedItem("2", "title 2", "link 2", now.minusDays(1)))
+            assertThat(items.last()).isEqualTo(FeedItem("3", "title 3", "link 3", now))
         }
     }
 
@@ -78,7 +78,7 @@ internal class FeedEnvelopeTrimmerTest {
         }
         with(trimmedFeed.feed.feedItems) {
             assertThat(size).isEqualTo(3)
-            assertThat(items.last()).isEqualTo(FeedItem("3", "title 3", now))
+            assertThat(items.last()).isEqualTo(FeedItem("3", "title 3", "link 3", now))
         }
     }
 }
