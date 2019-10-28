@@ -1,6 +1,5 @@
 package ch.guengel.funnel.feed.logic
 
-import ch.guengel.funnel.feed.data.Feed
 import ch.guengel.funnel.feed.data.FeedEnvelope
 
 class FeedEnvelopeUpdateNotifier(
@@ -11,7 +10,7 @@ class FeedEnvelopeUpdateNotifier(
         feedEnvelopeDifference
             .difference(currentFeedEnvelope, latestFeedEnvelope)
             .apply {
-                if (feed != Feed()) {
+                if (!feed.feedItems.isEmpty) {
                     block(this)
                 }
             }
