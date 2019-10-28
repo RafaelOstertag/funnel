@@ -49,7 +49,7 @@ internal class FeedEnvelopeUpdateNotifierTest {
 
         val feedEnvelopeDifferenceMock = mockk<FeedEnvelopeDifference>()
 
-        val feedItem = FeedItem("id", "title", OffsetDateTime.now())
+        val feedItem = FeedItem("id", "title", "link", OffsetDateTime.now())
         val expectedFeedEnvelope = FeedEnvelope(source1, Feed("id", "title", FeedItems(listOf(feedItem))))
         every {
             feedEnvelopeDifferenceMock.difference(any(), any())

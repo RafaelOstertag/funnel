@@ -32,7 +32,7 @@ internal class FeedEnvelopeMergerTest {
         val source1 = Source("name1", "address1")
         val feedEnvelope1 = FeedEnvelope(source1, feed1)
 
-        val feedItem2 = FeedItem("latest", "title", now.plusDays(1))
+        val feedItem2 = FeedItem("latest", "title", "link", now.plusDays(1))
         val feedItems2 = FeedItems(listOf(feedItem2))
         val feed2 = Feed("id2", "title2", feedItems2)
         val source2 = Source("name2", "address2")
