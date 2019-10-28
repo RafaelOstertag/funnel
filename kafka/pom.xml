@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
-        <version>4.1.3-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>kafka</artifactId>
