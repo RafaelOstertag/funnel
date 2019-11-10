@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
-        <version>5.0.3</version>
+        <version>5.0.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>xml-retriever-connector</artifactId>
