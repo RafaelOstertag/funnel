@@ -37,6 +37,13 @@
 
         <dependency>
             <groupId>io.ktor</groupId>
+            <artifactId>ktor-auth-jwt</artifactId>
+            <version>${ktor.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.ktor</groupId>
             <artifactId>ktor-server-netty</artifactId>
             <version>${ktor.version}</version>
         </dependency>
