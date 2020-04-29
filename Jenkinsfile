@@ -5,6 +5,7 @@ pipeline {
 
     triggers {
         pollSCM ''
+        cron '@daily'
     }
 
     tools {
@@ -39,6 +40,9 @@ pipeline {
         stage('Deploy to Nexus') {
             when {
                 branch 'master'
+                not {
+                    triggeredBy "TimerTrigger"
+                }
             }
 
             steps {
@@ -51,6 +55,9 @@ pipeline {
         stage('Deploy') {
             when {
                 branch 'master'
+                not {
+                  triggeredBy "TimerTrigger"
+                }
             }
 
             steps {
