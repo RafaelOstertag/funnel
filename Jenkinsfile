@@ -108,7 +108,7 @@ pipeline {
                     // notifier
                     step([$class                 : "RundeckNotifier",
                           includeRundeckLogs     : true,
-                          jobId                  : "86370596-68bb-47ac-ab25-a4e4a4abcc2",
+                          jobId                  : "86370596-68bb-47ac-ab25-a4e4a4abcc2a",
                           options                : "version=$version",
                           rundeckInstance        : "gizmo",
                           shouldFailTheBuild     : true,
