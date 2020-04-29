@@ -5,6 +5,7 @@ pipeline {
 
     triggers {
         pollSCM ''
+        cron '@daily'
     }
 
     tools {
@@ -39,6 +40,9 @@ pipeline {
         stage('Deploy to Nexus') {
             when {
                 branch 'master'
+                not {
+                    triggeredBy "TimerTrigger"
+                }
             }
 
             steps {
@@ -51,6 +55,9 @@ pipeline {
         stage('Deploy') {
             when {
                 branch 'master'
+                not {
+                  triggeredBy "TimerTrigger"
+                }
             }
 
             steps {
@@ -61,7 +68,7 @@ pipeline {
                     // retriever-connector
                     step([$class                 : "RundeckNotifier",
                           includeRundeckLogs     : true,
-                          jobId                  : "b1b0d79f-7d05-48a0-8032-48a75d1a91ae",
+                          jobId                  : "a5087093-c53d-4939-ab6f-298b5e5ffb18",
                           options                : "version=$version",
                           rundeckInstance        : "gizmo",
                           shouldFailTheBuild     : true,
@@ -71,7 +78,7 @@ pipeline {
                     // persistence-connector
                     step([$class                 : "RundeckNotifier",
                           includeRundeckLogs     : true,
-                          jobId                  : "dea82711-363c-4f03-b033-e09a8223f1b8",
+                          jobId                  : "efac0085-3408-48c4-8ad9-7c8d75e06fbd",
                           options                : "version=$version",
                           rundeckInstance        : "gizmo",
                           shouldFailTheBuild     : true,
@@ -81,7 +88,7 @@ pipeline {
                     // chronos
                     step([$class                 : "RundeckNotifier",
                           includeRundeckLogs     : true,
-                          jobId                  : "88b6f9c6-ae5c-49a7-b594-510a8a42c2ce",
+                          jobId                  : "c8b6ecc9-d695-4815-b333-c953b3c3b31a",
                           options                : "version=$version",
                           rundeckInstance        : "gizmo",
                           shouldFailTheBuild     : true,
@@ -91,7 +98,7 @@ pipeline {
                     // rest
                     step([$class                 : "RundeckNotifier",
                           includeRundeckLogs     : true,
-                          jobId                  : "5449aefb-9bb2-4e59-aa93-88f7fc33a974",
+                          jobId                  : "713a8522-ed25-4b05-8253-3a36253a71b6",
                           options                : "version=$version",
                           rundeckInstance        : "gizmo",
                           shouldFailTheBuild     : true,
@@ -101,7 +108,7 @@ pipeline {
                     // notifier
                     step([$class                 : "RundeckNotifier",
                           includeRundeckLogs     : true,
-                          jobId                  : "9d14ad7e-1902-4ab1-b29f-babd0bdb7104",
+                          jobId                  : "86370596-68bb-47ac-ab25-a4e4a4abcc2",
                           options                : "version=$version",
                           rundeckInstance        : "gizmo",
                           shouldFailTheBuild     : true,

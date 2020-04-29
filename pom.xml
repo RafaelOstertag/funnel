@@ -6,7 +6,7 @@
 
     <groupId>ch.guengel.funnel</groupId>
     <artifactId>main</artifactId>
-    <version>5.0.3</version>
+    <version>6.0.0</version>
     <packaging>pom</packaging>
 
     <name>Funnel</name>
@@ -318,7 +318,7 @@
         </repository>
         <repository>
             <id>central</id>
-            <url>http://jcenter.bintray.com</url>
+            <url>https://jcenter.bintray.com</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>

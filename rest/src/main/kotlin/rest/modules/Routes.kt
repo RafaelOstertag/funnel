@@ -11,12 +11,12 @@ import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.log
+import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.*
 import io.ktor.util.pipeline.PipelineContext
-
 
 fun Application.routes() {
     log.info("Setting up routes")
@@ -24,12 +24,17 @@ fun Application.routes() {
 
     routing {
         infoRoute()
+
         route("/feeds") {
-            get { retrieveAllNames(feedEnvelopePersistence) }
-            post { saveEnvelope(feedEnvelopePersistence) }
+            authenticate {
+                get { retrieveAllNames(feedEnvelopePersistence) }
+                post { saveEnvelope(feedEnvelopePersistence) }
+            }
             route("/{name}") {
-                get { retrieveByName(feedEnvelopePersistence) }
-                delete { deleteByName(feedEnvelopePersistence) }
+                authenticate {
+                    get { retrieveByName(feedEnvelopePersistence) }
+                    delete { deleteByName(feedEnvelopePersistence) }
+                }
             }
         }
     }

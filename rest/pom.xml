@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
-        <version>5.0.3</version>
+        <version>6.0.0</version>
     </parent>
 
     <artifactId>rest</artifactId>
@@ -33,6 +33,13 @@
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>ktor-common</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-auth-jwt</artifactId>
+            <version>${ktor.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
