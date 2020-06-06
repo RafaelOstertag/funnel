@@ -20,6 +20,7 @@
     </appender>
 
     <logger name="org.apache" level="WARN"/>
+    <logger name="org.mongodb" level="WARN"/>
 
     <root level="info">
         <appender-ref ref="STDOUT"/>
