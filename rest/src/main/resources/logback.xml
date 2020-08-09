@@ -8,26 +8,10 @@
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_DIR:-.}/funnel-rest.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- daily rollover -->
-            <fileNamePattern>${LOG_DIR:-.}/funnel-rest.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>7</maxHistory>
-            <totalSizeCap>10MB</totalSizeCap>
-
-        </rollingPolicy>
-
-        <encoder>
-            <pattern>%d{YYYY-MM-dd'T'HH:mm:ss.SSSXXX} [%thread] %level %logger - %msg%n</pattern>
-        </encoder>
-    </appender>
-
     <logger name="org.apache" level="WARN"/>
     <logger name="org.mongodb" level="WARN"/>
 
     <root level="info">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="FILE"/>
     </root>
 </configuration>
