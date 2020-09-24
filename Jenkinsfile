@@ -52,68 +52,63 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Build & Push Docker Image') {
+            agent {
+                label "arm64&&docker"
+            }
+
+            environment {
+                VERSION = sh returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
+            }
+
             when {
                 branch 'master'
                 not {
-                  triggeredBy "TimerTrigger"
+                    triggeredBy "TimerTrigger"
                 }
             }
 
             steps {
-                script {
-                    def version = "undefined"
-                    version = sh label: 'Retrieve version', returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\['"
+                sh "docker build --build-arg 'VERSION=${env.VERSION}' -t rafaelostertag/funnel-chronos:${env.VERSION} docker/chronos"
+                sh "docker build --build-arg 'VERSION=${env.VERSION}' -t rafaelostertag/funnel-notifier:${env.VERSION} docker/notifier"
+                sh "docker build --build-arg 'VERSION=${env.VERSION}' -t rafaelostertag/funnel-persistence:${env.VERSION} docker/persistence"
+                sh "docker build --build-arg 'VERSION=${env.VERSION}' -t rafaelostertag/funnel-retriever:${env.VERSION} docker/retriever"
+                sh "docker build --build-arg 'VERSION=${env.VERSION}' -t rafaelostertag/funnel-rest:${env.VERSION} docker/rest"
+                withCredentials([usernamePassword(credentialsId: '750504ce-6f4f-4252-9b2b-5814bd561430', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                    sh 'docker login --username "$USERNAME" --password "$PASSWORD"'
+                    sh "docker push rafaelostertag/funnel-chronos:${env.VERSION}"
+                    sh "docker push rafaelostertag/funnel-notifier:${env.VERSION}"
+                    sh "docker push rafaelostertag/funnel-persistence:${env.VERSION}"
+                    sh "docker push rafaelostertag/funnel-retriever:${env.VERSION}"
+                    sh "docker push rafaelostertag/funnel-rest:${env.VERSION}"
+                }
+            }
+        }
 
-                    // retriever-connector
-                    step([$class                 : "RundeckNotifier",
-                          includeRundeckLogs     : true,
-                          jobId                  : "a5087093-c53d-4939-ab6f-298b5e5ffb18",
-                          options                : "version=$version",
-                          rundeckInstance        : "gizmo",
-                          shouldFailTheBuild     : true,
-                          shouldWaitForRundeckJob: true,
-                          tailLog                : true])
+        stage('Deploy to k8s') {
+            agent {
+                label "helm"
+            }
 
-                    // persistence-connector
-                    step([$class                 : "RundeckNotifier",
-                          includeRundeckLogs     : true,
-                          jobId                  : "efac0085-3408-48c4-8ad9-7c8d75e06fbd",
-                          options                : "version=$version",
-                          rundeckInstance        : "gizmo",
-                          shouldFailTheBuild     : true,
-                          shouldWaitForRundeckJob: true,
-                          tailLog                : true])
+            environment {
+                VERSION = sh returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
+            }
 
-                    // chronos
-                    step([$class                 : "RundeckNotifier",
-                          includeRundeckLogs     : true,
-                          jobId                  : "c8b6ecc9-d695-4815-b333-c953b3c3b31a",
-                          options                : "version=$version",
-                          rundeckInstance        : "gizmo",
-                          shouldFailTheBuild     : true,
-                          shouldWaitForRundeckJob: true,
-                          tailLog                : true])
+            when {
+                branch 'master'
+                not {
+                    triggeredBy "TimerTrigger"
+                }
+            }
 
-                    // rest
-                    step([$class                 : "RundeckNotifier",
-                          includeRundeckLogs     : true,
-                          jobId                  : "713a8522-ed25-4b05-8253-3a36253a71b6",
-                          options                : "version=$version",
-                          rundeckInstance        : "gizmo",
-                          shouldFailTheBuild     : true,
-                          shouldWaitForRundeckJob: true,
-                          tailLog                : true])
-
-                    // notifier
-                    step([$class                 : "RundeckNotifier",
-                          includeRundeckLogs     : true,
-                          jobId                  : "86370596-68bb-47ac-ab25-a4e4a4abcc2a",
-                          options                : "version=$version",
-                          rundeckInstance        : "gizmo",
-                          shouldFailTheBuild     : true,
-                          shouldWaitForRundeckJob: true,
-                          tailLog                : true])
+            steps {
+                sh "sed -i -e 's/^appVersion:.*/appVersion: ${env.VERSION}/' helm/*/Chart.yaml"
+                withKubeConfig(credentialsId: 'a9fe556b-01b0-4354-9a65-616baccf9cac') {
+                    sh "helm upgrade -n funnel -i chronos helm/chronos"
+                    sh "helm upgrade -n funnel -i notifier helm/notifier"
+                    sh "helm upgrade -n funnel -i persistence helm/persistence"
+                    sh "helm upgrade -n funnel -i rest helm/rest"
+                    sh "helm upgrade -n funnel -i retriever helm/retriever"
                 }
             }
         }
