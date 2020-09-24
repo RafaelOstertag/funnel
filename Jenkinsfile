@@ -102,13 +102,12 @@ pipeline {
             }
 
             steps {
-                sh "sed -i -e 's/^appVersion:.*/appVersion: ${env.VERSION}/' helm/*/Chart.yaml"
                 withKubeConfig(credentialsId: 'a9fe556b-01b0-4354-9a65-616baccf9cac') {
-                    sh "helm upgrade -n funnel -i chronos helm/chronos"
-                    sh "helm upgrade -n funnel -i notifier helm/notifier"
-                    sh "helm upgrade -n funnel -i persistence helm/persistence"
-                    sh "helm upgrade -n funnel -i rest helm/rest"
-                    sh "helm upgrade -n funnel -i retriever helm/retriever"
+                    sh "helm upgrade -n funnel -i --set image.tag=${env.VERSION} chronos helm/chronos"
+                    sh "helm upgrade -n funnel -i --set image.tag=${env.VERSION} notifier helm/notifier"
+                    sh "helm upgrade -n funnel -i --set image.tag=${env.VERSION} persistence helm/persistence"
+                    sh "helm upgrade -n funnel -i --set image.tag=${env.VERSION} rest helm/rest"
+                    sh "helm upgrade -n funnel -i --set image.tag=${env.VERSION} retriever helm/retriever"
                 }
             }
         }
