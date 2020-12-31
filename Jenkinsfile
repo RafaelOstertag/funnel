@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'freebsd&&kotlin'
+        label 'amd64&&docker&&kotlin'
     }
 
     triggers {
