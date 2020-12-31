@@ -6,17 +6,13 @@
     <parent>
         <groupId>ch.guengel.funnel</groupId>
         <artifactId>main</artifactId>
-        <version>7.1.4</version>
+        <version>7.1.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>feed</artifactId>
     <packaging>jar</packaging>
 
     <name>Funnel Feed</name>
-
-    <properties>
-        <mockk.version>1.9.3</mockk.version>
-    </properties>
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
