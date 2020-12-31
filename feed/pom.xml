@@ -14,10 +14,6 @@
 
     <name>Funnel Feed</name>
 
-    <properties>
-        <mockk.version>1.9.3</mockk.version>
-    </properties>
-
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
