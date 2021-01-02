@@ -28,12 +28,12 @@
         <jackson-module-kotlin.version>2.12.0</jackson-module-kotlin.version>
         <mockserver-netty.version>5.4.1</mockserver-netty.version>
         <kmongo.version>3.9.0</kmongo.version>
-        <embed.mongo.version>2.2.0</embed.mongo.version>
+        <embed.mongo.version>3.0.0</embed.mongo.version>
         <assertk.version>0.20</assertk.version>
         <mockk.version>1.10.4</mockk.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
-        <kafka.version>2.2.0</kafka.version>
+        <kafka.version>2.7.0</kafka.version>
         <konf.version>0.12</konf.version>
         <logstash-gelf.version>1.14.1</logstash-gelf.version>
         <git-commit-id-plugin.version>2.2.5</git-commit-id-plugin.version>

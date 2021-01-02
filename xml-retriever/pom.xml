@@ -29,6 +29,13 @@
             <version>${ktor.version}</version>
         </dependency>
 
+        <!-- httpclient provided by ktor-client-apache has security issues, override dependency and use safe version -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/com.rometools/rome -->
         <dependency>
             <groupId>com.rometools</groupId>
