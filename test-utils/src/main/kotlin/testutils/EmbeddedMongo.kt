@@ -3,7 +3,8 @@ package ch.guengel.funnel.testutils
 import de.flapdoodle.embed.mongo.MongodExecutable
 import de.flapdoodle.embed.mongo.MongodProcess
 import de.flapdoodle.embed.mongo.MongodStarter
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder
+import de.flapdoodle.embed.mongo.config.MongodConfig
+
 import de.flapdoodle.embed.mongo.config.Net
 import de.flapdoodle.embed.mongo.distribution.Version
 import de.flapdoodle.embed.process.runtime.Network
@@ -11,7 +12,7 @@ import de.flapdoodle.embed.process.runtime.Network
 class EmbeddedMongo {
     val mongoPort = Network.getFreeServerPort()
 
-    private var mongodConfig = MongodConfigBuilder()
+    private var mongodConfig = MongodConfig.builder()
         .version(Version.Main.PRODUCTION)
         .net(Net(mongoPort, Network.localhostIsIPv6()))
         .build()
