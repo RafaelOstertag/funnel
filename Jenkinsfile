@@ -20,12 +20,6 @@ pipeline {
     }
 
     stages {
-        stage('clean') {
-            steps {
-                sh label: 'maven clean', script: 'mvn -B clean'
-            }
-        }
-
         stage('Build and Test') {
             steps {
                 sh label: 'maven install', script: 'mvn -B install'
