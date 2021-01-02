@@ -30,6 +30,12 @@ pipeline {
             steps {
                 sh label: 'maven install', script: 'mvn -B install'
             }
+
+            post {
+                always {
+                    junit '**/failsafe-reports/*.xml,**/surefire-reports/*.xml'
+                }
+            }
         }
 
         stage('Sonarcloud') {
@@ -37,12 +43,6 @@ pipeline {
                 withSonarQubeEnv(installationName: 'Sonarcloud', credentialsId: 'e8795d01-550a-4c05-a4be-41b48b22403f') {
                     sh label: 'sonarcloud', script: "mvn $SONAR_MAVEN_GOAL"
                 }
-            }
-        }
-
-        stage('Publish test results') {
-            steps {
-                junit '**/failsafe-reports/*.xml,**/surefire-reports/*.xml'
             }
         }
 
