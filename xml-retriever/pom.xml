@@ -2,13 +2,11 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <properties>
-        <rome.version>1.12.2</rome.version>
-    </properties>
+
     <parent>
         <groupId>ch.guengel.funnel</groupId>
         <artifactId>main</artifactId>
-        <version>7.1.7</version>
+        <version>7.1.8-SNAPSHOT</version>
     </parent>
 
     <artifactId>xml-retriever</artifactId>
@@ -33,7 +31,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
+            <version>${httpclient.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.rometools/rome -->

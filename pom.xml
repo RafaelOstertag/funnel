@@ -6,12 +6,13 @@
 
     <groupId>ch.guengel.funnel</groupId>
     <artifactId>main</artifactId>
-    <version>7.1.7</version>
+    <version>7.1.8-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Funnel</name>
 
     <properties>
+        <kotlin.code.style>official</kotlin.code.style>
         <maven.compiler.parameters>true</maven.compiler.parameters>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -23,11 +24,10 @@
         <!-- Keep this in sync with ktor-metrics-micrometer -->
         <micrometer-registry-prometheus.version>1.6.2</micrometer-registry-prometheus.version>
         <ktor.version>1.5.0</ktor.version>
-        <junit5.version>5.5.2</junit5.version>
-        <jackson.version>2.12.0</jackson.version>
-        <jackson-module-kotlin.version>2.12.0</jackson-module-kotlin.version>
-        <mockserver-netty.version>5.4.1</mockserver-netty.version>
-        <kmongo.version>3.9.0</kmongo.version>
+        <junit5.version>5.7.0</junit5.version>
+        <jackson.version>2.11.4</jackson.version>
+        <mockserver-netty.version>5.11.2</mockserver-netty.version>
+        <kmongo.version>4.2.2</kmongo.version>
         <embed.mongo.version>3.0.0</embed.mongo.version>
         <assertk.version>0.20</assertk.version>
         <mockk.version>1.10.4</mockk.version>
@@ -36,17 +36,24 @@
         <kafka.version>2.7.0</kafka.version>
         <konf.version>0.12</konf.version>
         <logstash-gelf.version>1.14.1</logstash-gelf.version>
-        <git-commit-id-plugin.version>2.2.5</git-commit-id-plugin.version>
+        <clikt.version>2.4.0</clikt.version>
+        <httpclient.version>4.5.13</httpclient.version>
+        <javax.mail.version>1.6.2</javax.mail.version>
+        <rome.version>1.15.0</rome.version>
 
+        <git-commit-id-plugin.version>3.0.1</git-commit-id-plugin.version>
         <dependency-check-maven.version>6.0.3</dependency-check-maven.version>
-
-        <kotlin.code.style>official</kotlin.code.style>
+        <jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>
         <build-info-maven-plugin.version>1.3</build-info-maven-plugin.version>
+        <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
 
         <!-- Sonar -->
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <!-- Organization and project keys are displayed in the right sidebar of the project homepage -->
         <sonar.organization>rafaelostertag</sonar.organization>
+        <sonar.junit.reportPaths>target/failsafe-reports,target/surefire-reports</sonar.junit.reportPaths>
     </properties>
 
     <modules>
@@ -195,13 +202,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.1</version>
+                <version>${maven-surefire-plugin.version}</version>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M1</version>
+                <version>${maven-failsafe-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -303,6 +310,38 @@
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>extract</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>default-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-prepare-agent-integration</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-report-integration</id>
+                        <goals>
+                            <goal>report-integration</goal>
                         </goals>
                     </execution>
                 </executions>
