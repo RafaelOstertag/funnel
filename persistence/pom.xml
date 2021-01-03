@@ -28,21 +28,15 @@
         </dependency>
 
         <dependency>
-            <groupId>ch.guengel.funnel</groupId>
-            <artifactId>test-utils</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.litote.kmongo</groupId>
             <artifactId>kmongo</artifactId>
             <version>${kmongo.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
