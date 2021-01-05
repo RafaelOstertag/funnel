@@ -13,6 +13,7 @@ fun Application.headersModule() {
         method(HttpMethod.Delete)
         method(HttpMethod.Patch)
         header(HttpHeaders.Authorization)
+        header(HttpHeaders.ContentType)
         anyHost()
         allowCredentials = true
     }
