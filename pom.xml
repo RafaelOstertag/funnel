@@ -6,7 +6,7 @@
 
     <groupId>ch.guengel.funnel</groupId>
     <artifactId>main</artifactId>
-    <version>7.1.9-SNAPSHOT</version>
+    <version>7.1.9</version>
     <packaging>pom</packaging>
 
     <name>Funnel</name>
@@ -256,12 +256,6 @@
                     <failOnUnableToExtractRepoInfo>true</failOnUnableToExtractRepoInfo>
                     <skip>false</skip>
                     <runOnlyOnce>false</runOnlyOnce>
-                    <excludeProperties>
-                        <!-- <excludeProperty>git.user.*</excludeProperty> -->
-                    </excludeProperties>
-                    <includeOnlyProperties>
-                        <!-- <includeOnlyProperty>^git.commit.id.full$</includeOnlyProperty> -->
-                    </includeOnlyProperties>
                     <replacementProperties>
                     </replacementProperties>
                     <useNativeGit>false</useNativeGit>
