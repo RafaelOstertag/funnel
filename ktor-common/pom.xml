@@ -29,13 +29,6 @@
 
         <dependency>
             <groupId>io.ktor</groupId>
-            <artifactId>ktor-server-host-common</artifactId>
-            <version>${ktor.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.ktor</groupId>
             <artifactId>ktor-jackson</artifactId>
             <version>${ktor.version}</version>
         </dependency>
