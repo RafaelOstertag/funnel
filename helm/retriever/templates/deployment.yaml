@@ -1,3 +1,4 @@
+# @formatter:off
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,53 +7,62 @@ metadata:
     {{- include "retriever.labels" . | nindent 4 }}
 spec:
 {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+replicas: {{ .Values.replicaCount }}
 {{- end }}
-  selector:
-    matchLabels:
-      {{- include "retriever.selectorLabels" . | nindent 6 }}
-  template:
-    metadata:
-    {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
+selector:
+  matchLabels:
+    {{- include "retriever.selectorLabels" . | nindent 6 }}
+template:
+  metadata:
+  {{- with .Values.podAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+  labels:
+    {{- include "retriever.selectorLabels" . | nindent 8 }}
+  spec:
+    {{- with .Values.imagePullSecrets }}
+    imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
     {{- end }}
-      labels:
-        {{- include "retriever.selectorLabels" . | nindent 8 }}
-    spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "retriever.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      containers:
-        - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: KAFKA_SERVER
-              value: "kafka:9092"
-            - name: SERVER_PORT
-              value: "8080"
-          ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+    serviceAccountName: {{ include "retriever.serviceAccountName" . }}
+    securityContext:
+      {{- toYaml .Values.podSecurityContext | nindent 8 }}
+    containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{ - toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: { { .Values.image.pullPolicy } }
+        env:
+          - name: KAFKA_SERVER
+            value: "kafka:9092"
+          - name: SERVER_PORT
+            value: "8080"
+        ports:
+          - name: http
+            containerPort: 8080
+            protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /info
+            port: http
+          initialDelaySeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /info
+            port: http
+        resources:
+          { { - toYaml .Values.resources | nindent 12 } }
+    {{- with .Values.nodeSelector }}
+    nodeSelector:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+    affinity:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+    tolerations:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
