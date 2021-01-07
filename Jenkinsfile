@@ -71,11 +71,7 @@ pipeline {
             }
         }
 
-        stage('Build & Push Docker Image') {
-            agent {
-                label "arm64&&docker"
-            }
-
+        stage('Trigger k8s deployment') {
             environment {
                 VERSION = sh returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
             }
@@ -88,46 +84,7 @@ pipeline {
             }
 
             steps {
-                sh "docker build --build-arg 'VERSION=${env.VERSION}' -t rafaelostertag/funnel-chronos:${env.VERSION} docker/chronos"
-                sh "docker build --build-arg 'VERSION=${env.VERSION}' -t rafaelostertag/funnel-notifier:${env.VERSION} docker/notifier"
-                sh "docker build --build-arg 'VERSION=${env.VERSION}' -t rafaelostertag/funnel-persistence:${env.VERSION} docker/persistence"
-                sh "docker build --build-arg 'VERSION=${env.VERSION}' -t rafaelostertag/funnel-retriever:${env.VERSION} docker/retriever"
-                sh "docker build --build-arg 'VERSION=${env.VERSION}' -t rafaelostertag/funnel-rest:${env.VERSION} docker/rest"
-                withCredentials([usernamePassword(credentialsId: '750504ce-6f4f-4252-9b2b-5814bd561430', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-                    sh 'docker login --username "$USERNAME" --password "$PASSWORD"'
-                    sh "docker push rafaelostertag/funnel-chronos:${env.VERSION}"
-                    sh "docker push rafaelostertag/funnel-notifier:${env.VERSION}"
-                    sh "docker push rafaelostertag/funnel-persistence:${env.VERSION}"
-                    sh "docker push rafaelostertag/funnel-retriever:${env.VERSION}"
-                    sh "docker push rafaelostertag/funnel-rest:${env.VERSION}"
-                }
-            }
-        }
-
-        stage('Deploy to k8s') {
-            agent {
-                label "helm"
-            }
-
-            environment {
-                VERSION = sh returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
-            }
-
-            when {
-                branch 'master'
-                not {
-                    triggeredBy "TimerTrigger"
-                }
-            }
-
-            steps {
-                withKubeConfig(credentialsId: 'a9fe556b-01b0-4354-9a65-616baccf9cac') {
-                    sh "helm upgrade -n funnel -i --set image.tag=${env.VERSION} chronos helm/chronos"
-                    sh "helm upgrade -n funnel -i --set image.tag=${env.VERSION} notifier helm/notifier"
-                    sh "helm upgrade -n funnel -i --set image.tag=${env.VERSION} persistence helm/persistence"
-                    sh "helm upgrade -n funnel -i --set image.tag=${env.VERSION} rest helm/rest"
-                    sh "helm upgrade -n funnel -i --set image.tag=${env.VERSION} retriever helm/retriever"
-                }
+                build wait: false, job: '../docker/funnel', parameters: [string(name: 'VERSION', value: env.VERSION), booleanParam(name: 'DEPLOY', value: true)]
             }
         }
     }
