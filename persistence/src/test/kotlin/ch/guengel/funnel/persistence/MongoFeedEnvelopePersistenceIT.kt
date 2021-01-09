@@ -5,7 +5,7 @@ import assertk.assertions.*
 import ch.guengel.funnel.feed.bridges.FeedEnvelopeNotFoundException
 import ch.guengel.funnel.feed.bridges.FeedEnvelopePersistence
 import ch.guengel.funnel.feed.logic.FeedEnvelopeMerger
-import ch.guengel.funnel.testutils.EmbeddedMongo
+import ch.guengel.funnel.testutils.LocalMongoDB
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,20 +14,20 @@ import org.junit.jupiter.api.condition.OS
 
 @DisabledOnOs(OS.OTHER)
 class MongoFeedEnvelopePersistenceIT {
-    private var embeddedMongo: EmbeddedMongo? = null
+    private var localMongoDB: LocalMongoDB? = null
 
     private var feedEnvelopeRepository: FeedEnvelopePersistence? = null
 
     @BeforeEach
     fun setUp() {
-        embeddedMongo = EmbeddedMongo()
-        embeddedMongo?.start()
-        feedEnvelopeRepository = MongoFeedEnvelopePersistence("mongodb://localhost:${embeddedMongo?.mongoPort}", "test")
+        localMongoDB = LocalMongoDB()
+        localMongoDB?.start()
+        feedEnvelopeRepository = MongoFeedEnvelopePersistence("mongodb://localhost:${localMongoDB?.mongoPort}", "test")
     }
 
     @AfterEach
     fun tearDown() {
-        embeddedMongo?.stop()
+        localMongoDB?.stop()
     }
 
     @Test

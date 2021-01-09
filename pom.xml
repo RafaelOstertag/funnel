@@ -28,7 +28,6 @@
         <jackson.version>2.11.4</jackson.version>
         <mockserver-netty.version>5.11.2</mockserver-netty.version>
         <kmongo.version>4.2.2</kmongo.version>
-        <embed.mongo.version>3.0.0</embed.mongo.version>
         <assertk.version>0.20</assertk.version>
         <mockk.version>1.10.4</mockk.version>
         <slf4j.version>1.7.25</slf4j.version>
@@ -40,6 +39,7 @@
         <httpclient.version>4.5.13</httpclient.version>
         <javax.mail.version>1.6.2</javax.mail.version>
         <rome.version>1.15.0</rome.version>
+        <testcontainers.version>1.15.1</testcontainers.version>
 
         <git-commit-id-plugin.version>3.0.1</git-commit-id-plugin.version>
         <dependency-check-maven.version>6.0.4</dependency-check-maven.version>
