@@ -23,7 +23,7 @@ pipeline {
         stage('Build and Test') {
             steps {
                 configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
-                    sh label: 'maven install', script: 'mvn -s "$MAVEN_SETTINGS_XML" install'
+                    sh label: 'maven install', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" install'
                 }
             }
 
@@ -39,7 +39,7 @@ pipeline {
             steps {
                 configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
                     withSonarQubeEnv(installationName: 'Sonarcloud', credentialsId: 'e8795d01-550a-4c05-a4be-41b48b22403f') {
-                        sh label: 'sonarcloud', script: "mvn -s \"$MAVEN_SETTINGS_XML\" -Dsonar.branch.name=${env.BRANCH_NAME} $SONAR_MAVEN_GOAL"
+                        sh label: 'sonarcloud', script: "mvn -B -s \"$MAVEN_SETTINGS_XML\" -Dsonar.branch.name=${env.BRANCH_NAME} $SONAR_MAVEN_GOAL"
                     }
                 }
             }
@@ -56,7 +56,7 @@ pipeline {
         stage("Check Dependencies") {
             steps {
                 configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
-                    sh 'mvn -s "$MAVEN_SETTINGS_XML" -Psecurity-scan dependency-check:check dependency-check:aggregate'
+                    sh 'mvn -B -s "$MAVEN_SETTINGS_XML" -Psecurity-scan dependency-check:check dependency-check:aggregate'
                 }
                 dependencyCheckPublisher failedTotalCritical: 1, failedTotalHigh: 5, failedTotalLow: 8, failedTotalMedium: 8, pattern: 'target/dependency-check-report.xml', unstableTotalCritical: 0, unstableTotalHigh: 4, unstableTotalLow: 8, unstableTotalMedium: 8
             }
@@ -72,14 +72,14 @@ pipeline {
 
             steps {
                 configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
-                    sh label: 'maven deploy', script: 'mvn -s "$MAVEN_SETTINGS_XML" -DskipTests deploy'
+                    sh label: 'maven deploy', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests deploy'
                 }
             }
         }
 
         stage('Trigger k8s deployment') {
             environment {
-                VERSION = sh returnStdout: true, script: "mvn help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
+                VERSION = sh returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
             }
 
             when {
