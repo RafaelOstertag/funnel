@@ -11,7 +11,7 @@ class FeedEnvelopeMerger {
                 val mergedItems = feedItems + feedEnvelope1.feed.feedItems
                 Feed(id, title, mergedItems)
             }
-            FeedEnvelope(source, mergedFeed)
+            FeedEnvelope(feedEnvelope1.user, source, mergedFeed)
         }
     }
 }

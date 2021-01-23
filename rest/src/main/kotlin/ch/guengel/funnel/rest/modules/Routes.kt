@@ -7,6 +7,8 @@ import ch.guengel.funnel.feed.data.Source
 import ch.guengel.funnel.feed.logic.FeedEnvelopeRemover
 import ch.guengel.funnel.persistence.MongoFeedEnvelopePersistence
 import ch.guengel.funnel.rest.infoRoute
+import ch.guengel.funnel.rest.utils.extractUser
+import ch.guengel.funnel.rest.utils.getUserId
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -40,7 +42,9 @@ fun Application.routes() {
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.saveEnvelope(feedEnvelopePersistence: FeedEnvelopePersistence) {
     val source = call.receive<Source>()
-    val feedEnvelope = FeedEnvelope(source, Feed())
+    val principal = call.authentication.principal
+    val user = extractUser(principal)
+    val feedEnvelope = FeedEnvelope(user, source, Feed())
 
     feedEnvelopePersistence.saveFeedEnvelope(feedEnvelope)
     call.respond(HttpStatusCode.Created)
@@ -50,14 +54,18 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.deleteByName(feedEnve
     val feedEnvelopeName = call.parameters["name"]
     feedEnvelopeName ?: throw IllegalArgumentException("no name specified")
 
-    FeedEnvelopeRemover(feedEnvelopePersistence).remove(feedEnvelopeName)
+    val principal = call.authentication.principal
+    FeedEnvelopeRemover(feedEnvelopePersistence).remove(getUserId(principal), feedEnvelopeName)
     call.respond(HttpStatusCode.NoContent)
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.retrieveAllNames(
     feedEnvelopePersistence: FeedEnvelopePersistence
 ) {
-    call.respond(feedEnvelopePersistence.findAllFeedEnvelopes().map { feedEnvelope -> feedEnvelope.source })
+    val principal = call.authentication.principal
+    call.respond(
+        feedEnvelopePersistence.findAllFeedEnvelopesForUser(getUserId(principal))
+            .map { feedEnvelope -> feedEnvelope.source })
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.retrieveByName(
@@ -66,7 +74,8 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.retrieveByName(
     val feedEnvelopeName = call.parameters["name"]
     feedEnvelopeName ?: throw IllegalArgumentException("no name specified")
 
-    val feedEnvelope = feedEnvelopeRepository.findFeedEnvelope(feedEnvelopeName)
+    val principal = call.authentication.principal
+    val feedEnvelope = feedEnvelopeRepository.findFeedEnvelope(getUserId(principal), feedEnvelopeName)
     call.respond(feedEnvelope)
 }
 

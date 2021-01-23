@@ -29,6 +29,7 @@ class FeedEnvelopeTrimmer(private val size: Int) {
 
         return with(feedEnvelope.feed) {
             FeedEnvelope(
+                feedEnvelope.user,
                 feedEnvelope.source,
                 Feed(id, title, FeedItems(trimmedFeeds.second))
             )

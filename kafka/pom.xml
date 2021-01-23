@@ -39,6 +39,13 @@
             <version>${logback.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>ch.guengel.funnel</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

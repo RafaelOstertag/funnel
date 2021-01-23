@@ -22,7 +22,7 @@ class SmtpNotificationSender(private val smtpNotificationSettings: SmtpNotificat
 
     private fun toMessage(feedEnvelope: FeedEnvelope): Message = MimeMessage(session).apply {
         setFrom(InternetAddress(smtpNotificationSettings.sender))
-        setRecipients(Message.RecipientType.TO, InternetAddress.parse(smtpNotificationSettings.recipient))
+        setRecipients(Message.RecipientType.TO, InternetAddress.parse(feedEnvelope.user.email))
 
         val subject: String = composeSubject(feedEnvelope)
         setSubject(subject)

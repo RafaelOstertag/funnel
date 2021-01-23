@@ -18,7 +18,7 @@ class FeedEnvelopeDifference {
             val newFeed = with(feed) {
                 Feed(id, title, FeedItems(difference))
             }
-            FeedEnvelope(source, newFeed)
+            FeedEnvelope(current.user, source, newFeed)
         }
     }
 }

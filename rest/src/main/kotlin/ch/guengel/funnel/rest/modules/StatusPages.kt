@@ -1,6 +1,7 @@
 package ch.guengel.funnel.rest.modules
 
 import ch.guengel.funnel.feed.bridges.FeedEnvelopeNotFoundException
+import ch.guengel.funnel.rest.utils.AuthenticationException
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import io.ktor.application.*
@@ -26,6 +27,10 @@ fun Application.statusPages() {
 
         exception<JsonMappingException> { cause ->
             badRequest(cause)
+        }
+
+        exception<AuthenticationException> { cause ->
+            call.respond(HttpStatusCode.Forbidden, cause.message ?: UNKNOWN_REASON)
         }
 
         exception<FeedEnvelopeNotFoundException> { cause ->

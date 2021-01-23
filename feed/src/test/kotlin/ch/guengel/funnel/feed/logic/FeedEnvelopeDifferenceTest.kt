@@ -14,10 +14,12 @@ internal class FeedEnvelopeDifferenceTest {
         val currentFeedItems = makeFeedItems(3)
         val currentSource = Source("name1", "address1")
         val currentFeed = Feed("id1", "title1", FeedItems(currentFeedItems))
-        val currentFeedEnvelope = FeedEnvelope(currentSource, currentFeed)
+        val currentUser = User("userId", "email")
+        val currentFeedEnvelope = FeedEnvelope(currentUser, currentSource, currentFeed)
 
         val difference = feedEnvelopeDifference.difference(currentFeedEnvelope, currentFeedEnvelope)
 
+        assertThat(difference.user).isEqualTo(currentUser)
         assertThat(difference.source).isEqualTo(currentSource)
         with(difference.feed) {
             assertThat(id).isEqualTo("id1")
@@ -31,16 +33,19 @@ internal class FeedEnvelopeDifferenceTest {
         val currentFeedItems = makeFeedItems(3)
         val currentFeed = Feed("id1", "title1", FeedItems(currentFeedItems))
         val currentSource = Source("name1", "address1")
-        val currentFeedEnvelope = FeedEnvelope(currentSource, currentFeed)
+        val currentUser = User("userId", "email")
+        val currentFeedEnvelope = FeedEnvelope(currentUser, currentSource, currentFeed)
 
         val latestFeedItem = FeedItem("latest", "title", "link", now.plusDays(1))
         val latestFeedItems = FeedItems(listOf(latestFeedItem))
         val latestFeed = Feed("id2", "title2", latestFeedItems)
         val latestSource = Source("name2", "address2")
-        val latestFeedEnvelope = FeedEnvelope(latestSource, latestFeed)
+        val latestUser = User("userId-1", "email-1")
+        val latestFeedEnvelope = FeedEnvelope(latestUser, latestSource, latestFeed)
 
         val difference = feedEnvelopeDifference.difference(currentFeedEnvelope, latestFeedEnvelope)
 
+        assertThat(difference.user).isEqualTo(currentUser)
         assertThat(difference.source).isEqualTo(latestSource)
         with(difference.feed) {
             assertThat(id).isEqualTo("id2")

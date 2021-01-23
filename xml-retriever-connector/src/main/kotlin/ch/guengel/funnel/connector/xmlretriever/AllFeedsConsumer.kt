@@ -53,7 +53,7 @@ class AllFeedsConsumer(private val feedEnvelopeRetriever: FeedEnvelopeRetriever,
 
     private suspend fun retrieveLatestFeed(currentFeedEnvelope: FeedEnvelope): FeedEnvelope {
         val source = currentFeedEnvelope.source
-        val latestFeedEnvelope = feedEnvelopeRetriever.retrieve(source)
+        val latestFeedEnvelope = feedEnvelopeRetriever.retrieve(currentFeedEnvelope.user.userId, source)
         logger.debug("Retrieved latest feed for '${source.name}'")
         return latestFeedEnvelope
     }

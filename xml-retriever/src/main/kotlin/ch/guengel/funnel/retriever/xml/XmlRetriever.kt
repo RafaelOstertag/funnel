@@ -13,7 +13,7 @@ class XmlRetriever : FeedRetriever {
 
     override suspend fun fetch(source: Source): Feed {
         // Open and closing the client should not be a bottleneck, since it is assumed that interval between calls to the
-        // same site is minutes or hours apart. But is should fix issues with the client hogging the CPU on long running
+        // same site is minutes or hours apart. But this should fix issues with the client hogging the CPU on long running
         // processes
         XmlFetcher().use {
             val url = Url(source.address)
