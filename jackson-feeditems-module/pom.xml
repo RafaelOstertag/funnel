@@ -13,11 +13,6 @@
     <packaging>jar</packaging>
     <name>Funnel Jackson FeedItems module</name>
 
-    <build>
-        <sourceDirectory>src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
@@ -49,4 +44,8 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <sourceDirectory>src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+    </build>
 </project>

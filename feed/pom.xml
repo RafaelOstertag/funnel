@@ -14,11 +14,6 @@
 
     <name>Funnel Feed</name>
 
-    <build>
-        <sourceDirectory>src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>io.mockk</groupId>
@@ -27,4 +22,9 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <sourceDirectory>src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+    </build>
 </project>

@@ -14,11 +14,6 @@
 
     <name>Funnel Jackson Serializer</name>
 
-    <build>
-        <sourceDirectory>src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
