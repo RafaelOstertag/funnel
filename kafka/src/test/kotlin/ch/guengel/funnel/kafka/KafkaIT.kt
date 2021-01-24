@@ -4,27 +4,44 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
 import ch.guengel.funnel.feed.data.*
+import ch.guengel.funnel.testutils.LocalKafka
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
+import org.junit.jupiter.api.condition.DisabledOnOs
+import org.junit.jupiter.api.condition.OS
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
-@EnabledIfEnvironmentVariable(named = "HAS_LOCAL_ENVIRONMENT", matches = "yes|true")
+@DisabledOnOs(OS.OTHER)
 class KafkaIT {
+    private var localKafka: LocalKafka? = null
+
+    @BeforeEach
+    fun setUp() {
+        localKafka = LocalKafka()
+        localKafka?.start()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        localKafka?.stop()
+    }
+
     @Test
     fun `test kafka`() {
         val expectedFeedEnvelope = createFeedEnvelope()
         var success = false
 
-        val consumer = Consumer(kafkaServer, "test group", testTopic)
+        val consumer = Consumer(localKafka?.bootstrapServer!!, "test group", testTopic)
         consumer.start { topic, feedEnvelope ->
             assertThat(feedEnvelope).isEqualTo(feedEnvelope)
             success = true
         }
 
-        Producer(kafkaServer).use {
+        Producer(localKafka?.bootstrapServer!!).use {
             it.send(testTopic, expectedFeedEnvelope)
         }
 
@@ -43,11 +60,11 @@ class KafkaIT {
         val feedItems = FeedItems(listOf<FeedItem>(feedItem1, feedItem2))
         val feed = Feed("id", "title", feedItems)
         val source = Source("name", "address")
-        return FeedEnvelope(source, feed)
+        val user = User("userId", "email")
+        return FeedEnvelope(user, source, feed)
     }
 
     private companion object {
-        const val kafkaServer = "localhost:9092"
         const val testTopic = "funnel.test.topic"
     }
 }

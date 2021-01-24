@@ -4,6 +4,7 @@ import ch.guengel.funnel.feed.bridges.FeedEnvelopePersistence
 import ch.guengel.funnel.feed.data.Feed
 import ch.guengel.funnel.feed.data.FeedEnvelope
 import ch.guengel.funnel.feed.data.Source
+import ch.guengel.funnel.feed.data.User
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verifySequence
@@ -14,7 +15,7 @@ internal class FeedEnvelopeSaverTest {
     @Test
     fun save() {
         val feedEnvelope =
-            FeedEnvelope(Source("source", "address"), Feed())
+            FeedEnvelope(User("user-id", "email"), Source("source", "address"), Feed())
         val persistenceMock = mockk<FeedEnvelopePersistence>()
         every { persistenceMock.saveFeedEnvelope(any()) }.returns(Unit)
         val trimmerMock = mockk<FeedEnvelopeTrimmer>()

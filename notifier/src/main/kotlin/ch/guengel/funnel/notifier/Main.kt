@@ -17,8 +17,7 @@ fun main(args: Array<String>) {
     val smtpServer = environment.config.property("smtp.server").getString()
     val smtpPort = environment.config.property("smtp.port").getString().toInt()
     val smtpSender = environment.config.property("smtp.sender").getString()
-    val smtpRecipient = environment.config.property("smtp.recipient").getString()
-    val smtpNotificationSettings = SmtpNotificationSettings(smtpServer, smtpPort, smtpSender, smtpRecipient)
+    val smtpNotificationSettings = SmtpNotificationSettings(smtpServer, smtpPort, smtpSender)
 
     val kafkaServer = environment.config.property("kafka.server").getString()
     val feedEnvelopeNotificationConsumer =

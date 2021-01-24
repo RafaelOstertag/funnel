@@ -29,6 +29,6 @@ fun makeFeed(id: String, title: String, numberOfItems: Int) =
 fun makeSource(sourceNumber: Int): Source =
     Source("sourceName $sourceNumber", "sourceAddress $sourceNumber")
 
-fun makeFeedEnvelope(source: Source, feed: Feed): FeedEnvelope {
-    return FeedEnvelope(source, feed)
+fun makeFeedEnvelope(userId: String, source: Source, feed: Feed): FeedEnvelope {
+    return FeedEnvelope(User(userId, "not set"), source, feed)
 }

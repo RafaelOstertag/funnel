@@ -19,13 +19,14 @@ internal class FeedEnvelopeUpdateNotifierTest {
         // differ in the feed items, but not the sources
         val source1 = Source("source1", "test")
         val source2 = Source("source2", "test")
-        val feedEnvelopeCurrent = FeedEnvelope(source1, Feed())
-        val feedEnvelopeLatest = FeedEnvelope(source2, Feed())
+        val user = User("userId", "email1")
+        val feedEnvelopeCurrent = FeedEnvelope(user, source1, Feed())
+        val feedEnvelopeLatest = FeedEnvelope(user, source2, Feed())
 
         val feedEnvelopeDifferenceMock = mockk<FeedEnvelopeDifference>()
         every {
             feedEnvelopeDifferenceMock.difference(any(), any())
-        }.returns(FeedEnvelope(source1, Feed("test", "test", FeedItems())))
+        }.returns(FeedEnvelope(User("userId", "email"), source1, Feed("test", "test", FeedItems())))
 
         val feedEnvelopeUpdateNotifier = FeedEnvelopeUpdateNotifier(feedEnvelopeDifferenceMock) {
             fail("There should be no difference to notify of")
@@ -44,13 +45,15 @@ internal class FeedEnvelopeUpdateNotifierTest {
         // differ in the feed items, but not the sources
         val source1 = Source("source1", "test")
         val source2 = Source("source2", "test")
-        val feedEnvelopeCurrent = FeedEnvelope(source1, Feed())
-        val feedEnvelopeLatest = FeedEnvelope(source2, Feed())
+        val user = User("userId", "email")
+        val feedEnvelopeCurrent = FeedEnvelope(user, source1, Feed())
+        val feedEnvelopeLatest = FeedEnvelope(user, source2, Feed())
 
         val feedEnvelopeDifferenceMock = mockk<FeedEnvelopeDifference>()
 
         val feedItem = FeedItem("id", "title", "link", OffsetDateTime.now())
-        val expectedFeedEnvelope = FeedEnvelope(source1, Feed("id", "title", FeedItems(listOf(feedItem))))
+        val expectedFeedEnvelope =
+            FeedEnvelope(User("userId", "email"), source1, Feed("id", "title", FeedItems(listOf(feedItem))))
         every {
             feedEnvelopeDifferenceMock.difference(any(), any())
         }.returns(expectedFeedEnvelope)

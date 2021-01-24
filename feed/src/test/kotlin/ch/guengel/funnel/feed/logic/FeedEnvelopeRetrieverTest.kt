@@ -6,6 +6,7 @@ import ch.guengel.funnel.feed.bridges.FeedRetriever
 import ch.guengel.funnel.feed.data.Feed
 import ch.guengel.funnel.feed.data.FeedItems
 import ch.guengel.funnel.feed.data.Source
+import ch.guengel.funnel.feed.data.User
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -27,8 +28,10 @@ internal class FeedEnvelopeRetrieverTest {
         val feedEnvelopeRetriever = FeedEnvelopeRetriever(feedRetrieverMock)
 
         val source = Source("name", "address")
-        val feedEnvelope = feedEnvelopeRetriever.retrieve(source)
+        val feedEnvelope = feedEnvelopeRetriever.retrieve("user-id", source)
 
+        val expectedUser = User("user-id", "- n/a -")
+        assertThat(feedEnvelope.user).isEqualTo(expectedUser)
         assertThat(feedEnvelope.source).isEqualTo(source)
         assertThat(feedEnvelope.feed).isEqualTo(feed)
     }

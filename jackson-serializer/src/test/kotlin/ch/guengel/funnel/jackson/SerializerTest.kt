@@ -16,7 +16,8 @@ internal class SerializerTest {
         val feedItems = FeedItems(listOf<FeedItem>(feedItem1, feedItem2))
         val feed = Feed("id", "title", feedItems)
         val source = Source("name", "address")
-        val feedEnvelope = FeedEnvelope(source, feed)
+        val user = User("userId", "email")
+        val feedEnvelope = FeedEnvelope(user, source, feed)
 
         val serialized = serialize(feedEnvelope)
         val deserializeFeedEnvelope: FeedEnvelope = deserialize(serialized)

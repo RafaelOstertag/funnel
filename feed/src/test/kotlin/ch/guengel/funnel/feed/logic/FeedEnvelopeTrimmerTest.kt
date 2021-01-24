@@ -12,12 +12,13 @@ internal class FeedEnvelopeTrimmerTest {
         val feedItems = FeedItems(makeFeedItems(3))
         val feed = Feed("id", "title", feedItems)
         val source = Source("name", "address")
-        val feedEnvelope = FeedEnvelope(source, feed)
+        val user = User("userId", "email")
+        val feedEnvelope = FeedEnvelope(user, source, feed)
 
         val feedEnvelopeTrimmer = FeedEnvelopeTrimmer(1)
         val trimmedFeed = feedEnvelopeTrimmer.trim(feedEnvelope)
 
-
+        assertThat(trimmedFeed.user).isEqualTo(user)
         with(trimmedFeed.source) {
             assertThat(address).isEqualTo("address")
             assertThat(name).isEqualTo("name")
@@ -37,12 +38,13 @@ internal class FeedEnvelopeTrimmerTest {
         val feedItems = FeedItems(makeFeedItems(3))
         val feed = Feed("id", "title", feedItems)
         val source = Source("name", "address")
-        val feedEnvelope = FeedEnvelope(source, feed)
+        val user = User("userId", "email")
+        val feedEnvelope = FeedEnvelope(user, source, feed)
 
         val feedEnvelopeTrimmer = FeedEnvelopeTrimmer(2)
         val trimmedFeed = feedEnvelopeTrimmer.trim(feedEnvelope)
 
-
+        assertThat(trimmedFeed.user).isEqualTo(user)
         with(trimmedFeed.source) {
             assertThat(address).isEqualTo("address")
             assertThat(name).isEqualTo("name")
@@ -63,11 +65,13 @@ internal class FeedEnvelopeTrimmerTest {
         val feedItems = FeedItems(makeFeedItems(3))
         val feed = Feed("id", "title", feedItems)
         val source = Source("name", "address")
-        val feedEnvelope = FeedEnvelope(source, feed)
+        val user = User("userId", "email")
+        val feedEnvelope = FeedEnvelope(user, source, feed)
 
         val feedEnvelopeTrimmer = FeedEnvelopeTrimmer(4)
         val trimmedFeed = feedEnvelopeTrimmer.trim(feedEnvelope)
 
+        assertThat(trimmedFeed.user).isEqualTo(user)
         with(trimmedFeed.source) {
             assertThat(address).isEqualTo("address")
             assertThat(name).isEqualTo("name")

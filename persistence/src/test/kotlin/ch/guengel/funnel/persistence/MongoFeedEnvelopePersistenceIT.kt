@@ -5,7 +5,7 @@ import assertk.assertions.*
 import ch.guengel.funnel.feed.bridges.FeedEnvelopeNotFoundException
 import ch.guengel.funnel.feed.bridges.FeedEnvelopePersistence
 import ch.guengel.funnel.feed.logic.FeedEnvelopeMerger
-import ch.guengel.funnel.testutils.EmbeddedMongo
+import ch.guengel.funnel.testutils.LocalMongoDB
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,20 +14,20 @@ import org.junit.jupiter.api.condition.OS
 
 @DisabledOnOs(OS.OTHER)
 class MongoFeedEnvelopePersistenceIT {
-    private var embeddedMongo: EmbeddedMongo? = null
+    private var localMongoDB: LocalMongoDB? = null
 
     private var feedEnvelopeRepository: FeedEnvelopePersistence? = null
 
     @BeforeEach
     fun setUp() {
-        embeddedMongo = EmbeddedMongo()
-        embeddedMongo?.start()
-        feedEnvelopeRepository = MongoFeedEnvelopePersistence("mongodb://localhost:${embeddedMongo?.mongoPort}", "test")
+        localMongoDB = LocalMongoDB()
+        localMongoDB?.start()
+        feedEnvelopeRepository = MongoFeedEnvelopePersistence("mongodb://localhost:${localMongoDB?.mongoPort}", "test")
     }
 
     @AfterEach
     fun tearDown() {
-        embeddedMongo?.stop()
+        localMongoDB?.stop()
     }
 
     @Test
@@ -36,37 +36,56 @@ class MongoFeedEnvelopePersistenceIT {
     }
 
     @Test
-    fun `retrieve feed by feed envelope name`() {
+    fun `retrieveAll for user on empty database`() {
+        assertThat(feedEnvelopeRepository?.findAllFeedEnvelopesForUser("wdc")).isNullOrEmpty()
+    }
+
+    @Test
+    fun `retrieve feed by user id and feed envelope name`() {
         val feedEnvelope = makeFeedEnvelope(
+            "user1",
             makeSource(1),
             makeFeed("testid", "test title", 9)
         )
         feedEnvelopeRepository?.saveFeedEnvelope(feedEnvelope)
+        val feedEnvelopeOtherUser = makeFeedEnvelope(
+            "user2",
+            makeSource(2),
+            makeFeed("testid", "test title", 1)
+        )
+        feedEnvelopeRepository?.saveFeedEnvelope(feedEnvelopeOtherUser)
 
-        val actualFeedEnvelope = feedEnvelopeRepository?.findFeedEnvelope("sourceName 1")
-        assertThat(actualFeedEnvelope).isNotNull()
+        val actualFeedEnvelope1 = feedEnvelopeRepository?.findFeedEnvelope("user1", "sourceName 1")
+        assertThat(actualFeedEnvelope1).isNotNull()
 
-        assertThat(actualFeedEnvelope).isEqualTo(feedEnvelope)
+        assertThat(actualFeedEnvelope1).isEqualTo(feedEnvelope)
+
+        val actualFeedEnvelope2 = feedEnvelopeRepository?.findFeedEnvelope("user2", "sourceName 2")
+        assertThat(actualFeedEnvelope2).isNotNull()
+
+        assertThat(actualFeedEnvelope2).isEqualTo(feedEnvelopeOtherUser)
     }
 
     @Test
     fun `retrieve non-existing feed`() {
-        assertThat { feedEnvelopeRepository?.findFeedEnvelope("should not exist") }.isFailure()
+        assertThat { feedEnvelopeRepository?.findFeedEnvelope("wdc", "should not exist") }.isFailure()
             .isInstanceOf(FeedEnvelopeNotFoundException::class)
     }
 
     @Test
     fun `update feed`() {
         val feedEnvelope1 = makeFeedEnvelope(
+            "user1",
             makeSource(1),
             makeFeed("testid", "test title", 2)
         )
 
         feedEnvelopeRepository?.saveFeedEnvelope(feedEnvelope1)
-        var actualFeedEnvelope = feedEnvelopeRepository?.findFeedEnvelope("sourceName 1")
+        var actualFeedEnvelope = feedEnvelopeRepository?.findFeedEnvelope("user1", "sourceName 1")
         assertThat(actualFeedEnvelope).isNotNull()
 
         val feedEnvelope2 = makeFeedEnvelope(
+            "user1",
             makeSource(1),
             makeFeed("testid", "test title", 4)
         )
@@ -74,19 +93,21 @@ class MongoFeedEnvelopePersistenceIT {
         val updatedFeed = FeedEnvelopeMerger().merge(feedEnvelope1, feedEnvelope2)
 
         feedEnvelopeRepository?.saveFeedEnvelope(updatedFeed)
-        actualFeedEnvelope = feedEnvelopeRepository?.findFeedEnvelope("sourceName 1")
+        actualFeedEnvelope = feedEnvelopeRepository?.findFeedEnvelope("user1", "sourceName 1")
         assertThat(actualFeedEnvelope?.feed?.feedItems?.size).isEqualTo(4)
     }
 
     @Test
     fun `retrieve all`() {
         val feedEnvelope1 = makeFeedEnvelope(
+            "user1",
             makeSource(1),
             makeFeed("testid", "test title", 4)
         )
         feedEnvelopeRepository?.saveFeedEnvelope(feedEnvelope1)
 
         val feedEnvelope2 = makeFeedEnvelope(
+            "user2",
             makeSource(2),
             makeFeed("testid 2", "test title", 5)
         )
@@ -100,28 +121,30 @@ class MongoFeedEnvelopePersistenceIT {
     @Test
     fun `delete feed envelope`() {
         val controlFeedEnvelope = makeFeedEnvelope(
+            "user4",
             makeSource(1),
             makeFeed("testid", "test title", 4)
         )
         feedEnvelopeRepository?.saveFeedEnvelope(controlFeedEnvelope)
 
-        val storedFeedEnvelope = feedEnvelopeRepository?.findFeedEnvelope(controlFeedEnvelope.name)
+        val storedFeedEnvelope = feedEnvelopeRepository?.findFeedEnvelope("user4", controlFeedEnvelope.name)
         assertThat(storedFeedEnvelope?.feed?.feedItems?.size).isEqualTo(4)
 
+        val result = feedEnvelopeRepository?.deleteFeedEnvelope(storedFeedEnvelope!!)
+        assertThat(result!!).isTrue()
 
-        feedEnvelopeRepository?.deleteFeedEnvelope(storedFeedEnvelope!!)
-
-        assertThat { feedEnvelopeRepository?.findFeedEnvelope(controlFeedEnvelope.name) }.isFailure()
+        assertThat { feedEnvelopeRepository?.findFeedEnvelope("user4", controlFeedEnvelope.name) }.isFailure()
             .isInstanceOf(FeedEnvelopeNotFoundException::class)
     }
 
     @Test
     fun `delete non-existing feed envelope`() {
         val controlFeedEnvelope = makeFeedEnvelope(
+            "user1",
             makeSource(1),
             makeFeed("testid", "test title", 4)
         )
-        feedEnvelopeRepository?.deleteFeedEnvelope(controlFeedEnvelope)
-        // Not throwing an exception is the test
+        val result = feedEnvelopeRepository?.deleteFeedEnvelope(controlFeedEnvelope)
+        assertThat(result!!).isFalse()
     }
 }

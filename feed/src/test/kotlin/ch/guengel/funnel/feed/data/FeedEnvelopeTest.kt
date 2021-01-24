@@ -9,7 +9,8 @@ internal class FeedEnvelopeTest {
     @Test
     fun `envelope name`() {
         val source = Source("name", "address")
-        val feedEnvelope = FeedEnvelope(source, Feed())
+        val user = User("user-id", "email")
+        val feedEnvelope = FeedEnvelope(user, source, Feed())
         assertThat(feedEnvelope.name).isEqualTo("name")
     }
 }
