@@ -5,7 +5,7 @@ import org.junit.jupiter.api.condition.DisabledOnOs
 import org.junit.jupiter.api.condition.OS
 
 @DisabledOnOs(OS.OTHER)
-class LocalMongoDBTest {
+internal class LocalMongoDBTest {
     @Test
     fun `start and stop`() {
         val mongoDB = LocalMongoDB()
