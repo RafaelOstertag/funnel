@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
+        <artifactId>funnel-main</artifactId>
         <version>7.2.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>rest</artifactId>
-    <name>Funnel REST</name>
+    <artifactId>funnel-rest</artifactId>
+    <name>Funnel :: REST</name>
 
     <properties>
         <main.class>ch.guengel.funnel.rest.MainKt</main.class>
@@ -19,19 +19,19 @@
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>feed</artifactId>
+            <artifactId>funnel-feed</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>persistence</artifactId>
+            <artifactId>funnel-persistence</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>ktor-common</artifactId>
+            <artifactId>funnel-ktor-common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -69,9 +69,6 @@
     </dependencies>
 
     <build>
-        <sourceDirectory>src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
