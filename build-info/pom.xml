@@ -4,7 +4,7 @@
     <parent>
         <groupId>ch.guengel.funnel</groupId>
         <artifactId>funnel-main</artifactId>
-        <version>7.2.2-SNAPSHOT</version>
+        <version>7.2.2</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
