@@ -24,6 +24,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>ch.guengel.funnel</groupId>
             <artifactId>funnel-persistence</artifactId>
             <version>${project.parent.version}</version>
@@ -64,13 +70,6 @@
             <groupId>io.mockk</groupId>
             <artifactId>mockk</artifactId>
             <version>${mockk.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-reflect</artifactId>
-            <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
