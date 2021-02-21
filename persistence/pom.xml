@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>ch.guengel.funnel</groupId>
-        <artifactId>main</artifactId>
-        <version>7.2.0</version>
+        <artifactId>funnel-main</artifactId>
+        <version>7.2.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>persistence</artifactId>
+    <artifactId>funnel-persistence</artifactId>
     <packaging>jar</packaging>
 
-    <name>Funnel Persistence</name>
+    <name>Funnel :: Persistence</name>
 
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>feed</artifactId>
+            <artifactId>funnel-feed</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>jackson-feeditems-module</artifactId>
+            <artifactId>funnel-jackson-feeditems-module</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -35,15 +34,9 @@
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>test-utils</artifactId>
+            <artifactId>funnel-test-utils</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <sourceDirectory>src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-    </build>
-
 </project>

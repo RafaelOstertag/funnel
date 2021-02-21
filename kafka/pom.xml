@@ -4,26 +4,26 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
-        <version>7.2.0</version>
+        <artifactId>funnel-main</artifactId>
+        <version>7.2.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>kafka</artifactId>
+    <artifactId>funnel-kafka</artifactId>
     <packaging>jar</packaging>
 
-    <name>Funnel Kafka</name>
+    <name>Funnel :: Kafka</name>
 
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>feed</artifactId>
+            <artifactId>funnel-feed</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>jackson-serializer</artifactId>
+            <artifactId>funnel-jackson-serializer</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -41,16 +41,9 @@
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>test-utils</artifactId>
+            <artifactId>funnel-test-utils</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
-
-    <build>
-        <sourceDirectory>src/main/kotlin</sourceDirectory>
-    </build>
-
-
 </project>

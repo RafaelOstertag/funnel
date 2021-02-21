@@ -4,15 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>main</artifactId>
         <groupId>ch.guengel.funnel</groupId>
-        <version>7.2.0</version>
+        <artifactId>funnel-main</artifactId>
+        <version>7.2.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>xml-retriever-connector</artifactId>
+    <artifactId>funnel-xml-retriever-connector</artifactId>
     <packaging>jar</packaging>
 
-    <name>Funnel XML Retriever Connector</name>
+    <name>Funnel :: XML Retriever Connector</name>
 
     <properties>
         <main.class>ch.guengel.funnel.connector.xmlretriever.MainKt</main.class>
@@ -21,25 +21,25 @@
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>feed</artifactId>
+            <artifactId>funnel-feed</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>kafka</artifactId>
+            <artifactId>funnel-kafka</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>xml-retriever</artifactId>
+            <artifactId>funnel-xml-retriever</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>ktor-common</artifactId>
+            <artifactId>funnel-ktor-common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -63,8 +63,6 @@
     </dependencies>
 
     <build>
-        <sourceDirectory>src/main/kotlin</sourceDirectory>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

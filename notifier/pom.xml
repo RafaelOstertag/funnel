@@ -2,15 +2,15 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>main</artifactId>
-        <groupId>ch.guengel.funnel</groupId>
-        <version>7.2.0</version>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>ch.guengel.funnel</groupId>
+        <artifactId>funnel-main</artifactId>
+        <version>7.2.1-SNAPSHOT</version>
+    </parent>
 
-    <artifactId>notifier</artifactId>
-    <name>Funnel Notifier</name>
+    <artifactId>funnel-notifier</artifactId>
+    <name>Funnel :: Notifier</name>
     <packaging>jar</packaging>
 
     <properties>
@@ -20,13 +20,13 @@
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>kafka</artifactId>
+            <artifactId>funnel-kafka</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>ktor-common</artifactId>
+            <artifactId>funnel-ktor-common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -56,8 +56,6 @@
     </dependencies>
 
     <build>
-        <sourceDirectory>src/main/kotlin</sourceDirectory>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -85,6 +83,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>

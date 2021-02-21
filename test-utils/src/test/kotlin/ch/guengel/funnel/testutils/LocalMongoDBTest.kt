@@ -5,45 +5,45 @@ import org.junit.jupiter.api.condition.DisabledOnOs
 import org.junit.jupiter.api.condition.OS
 
 @DisabledOnOs(OS.OTHER)
-class LocalMongoDBTest {
+internal class LocalMongoDBTest {
     @Test
     fun `start and stop`() {
-        val embeddedMongo = LocalMongoDB()
-        embeddedMongo.start()
-        embeddedMongo.stop()
+        val mongoDB = LocalMongoDB()
+        mongoDB.start()
+        mongoDB.stop()
     }
 
     @Test
     fun `start and stop twice`() {
-        val embeddedMongo = LocalMongoDB()
-        embeddedMongo.start()
-        embeddedMongo.stop()
+        val mongoDB = LocalMongoDB()
+        mongoDB.start()
+        mongoDB.stop()
 
-        embeddedMongo.start()
-        embeddedMongo.stop()
+        mongoDB.start()
+        mongoDB.stop()
     }
 
     @Test
     fun `start twice`() {
-        val embeddedMongo = LocalMongoDB()
-        embeddedMongo.start()
-        embeddedMongo.start()
+        val mongoDB = LocalMongoDB()
+        mongoDB.start()
+        mongoDB.start()
 
-        embeddedMongo.stop()
+        mongoDB.stop()
     }
 
     @Test
     fun `stop on non-started`() {
-        val embeddedMongo = LocalMongoDB()
-        embeddedMongo.stop()
+        val mongoDB = LocalMongoDB()
+        mongoDB.stop()
     }
 
     @Test
     fun `stop twice`() {
-        val embeddedMongo = LocalMongoDB()
-        embeddedMongo.start()
+        val mongoDB = LocalMongoDB()
+        mongoDB.start()
 
-        embeddedMongo.stop()
-        embeddedMongo.stop()
+        mongoDB.stop()
+        mongoDB.stop()
     }
 }

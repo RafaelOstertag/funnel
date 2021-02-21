@@ -5,24 +5,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>ch.guengel.funnel</groupId>
-        <artifactId>main</artifactId>
-        <version>7.2.0</version>
+        <artifactId>funnel-main</artifactId>
+        <version>7.2.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jackson-serializer</artifactId>
+    <artifactId>funnel-jackson-serializer</artifactId>
     <packaging>jar</packaging>
 
-    <name>Funnel Jackson Serializer</name>
-
-    <build>
-        <sourceDirectory>src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-    </build>
+    <name>Funnel :: Jackson Serializer</name>
 
     <dependencies>
         <dependency>
             <groupId>ch.guengel.funnel</groupId>
-            <artifactId>jackson-feeditems-module</artifactId>
+            <artifactId>funnel-jackson-feeditems-module</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -48,5 +43,4 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
     </dependencies>
-
 </project>
