@@ -6,7 +6,7 @@
     <parent>
         <groupId>ch.guengel.funnel</groupId>
         <artifactId>funnel-main</artifactId>
-        <version>7.2.1-SNAPSHOT</version>
+        <version>7.2.1</version>
     </parent>
 
     <artifactId>funnel-jackson-feeditems-module</artifactId>
