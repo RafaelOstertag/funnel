@@ -5,7 +5,7 @@
 
     <groupId>ch.guengel.funnel</groupId>
     <artifactId>funnel-main</artifactId>
-    <version>7.2.2</version>
+    <version>7.2.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Funnel</name>
@@ -33,7 +33,6 @@
         <logback.version>1.2.3</logback.version>
         <kafka.version>2.7.0</kafka.version>
         <konf.version>0.12</konf.version>
-        <logstash-gelf.version>1.14.1</logstash-gelf.version>
         <httpclient.version>4.5.13</httpclient.version>
         <javax.mail.version>1.6.2</javax.mail.version>
         <rome.version>1.15.0</rome.version>
