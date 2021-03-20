@@ -18,4 +18,13 @@
     <suppress>
         <cve>CVE-2021-21290</cve>
     </suppress>
+    <suppress>
+        <cve>CVE-2017-15288</cve>
+    </suppress>
+    <suppress>
+        <cve>CVE-2021-20328</cve>
+    </suppress>
+    <suppress>
+        <cve>CVE-2020-8908</cve>
+    </suppress>
 </suppressions>
