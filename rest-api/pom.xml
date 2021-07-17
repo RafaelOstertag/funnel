@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>funnel-main</artifactId>
+        <groupId>ch.guengel.funnel</groupId>
+        <version>8.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>funnel-rest-api</artifactId>
+    <name>Funnel :: REST API</name>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>${validation-api.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${openapi-generator-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/api/${project.artifactId}.yaml</inputSpec>
+                            <generatorName>jaxrs-spec</generatorName>
+                            <skip>false</skip>
+                            <configOptions>
+                                <useSwaggerAnnotations>false</useSwaggerAnnotations>
+                                <java8>true</java8>
+                                <dateLibrary>java8</dateLibrary>
+                                <fullJavaUtil>true</fullJavaUtil>
+                                <sourceFolder>src/main/java</sourceFolder>
+                                <generatePom>false</generatePom>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useTags>true</useTags>
+                                <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                                <returnResponse>true</returnResponse>
+                                <apiPackage>ch.guengel.funnel.rest.api</apiPackage>
+                                <modelPackage>ch.guengel.funnel.rest.model</modelPackage>
+                            </configOptions>
+                            <templateDirectory>${project.basedir}/src/main/api/templates/jaxrs-spec
+                            </templateDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jboss.jandex</groupId>
+                <artifactId>jandex-maven-plugin</artifactId>
+                <version>${jandex-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>make-index</id>
+                        <goals>
+                            <goal>jandex</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

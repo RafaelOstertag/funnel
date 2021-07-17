@@ -1,0 +1,42 @@
+quarkus:
+  mongodb:
+    devservices:
+      enabled: false
+    connection-string: mongodb://localhost:27017
+  kafka:
+    devservices:
+      enabled: false
+    bootstrap:
+      servers: localhost:9092
+  oidc:
+    auth-server-url: https://sso.guengel.ch/auth/realms/guengel.ch
+    tls:
+      verification: required
+    token-principal-claim: sub
+  http:
+    access-log:
+      enabled: true
+kafka:
+  bootstrap:
+    servers: localhost:9092
+funnel:
+  mongodb:
+    database: funnel-rest
+    collection: feedenvelope
+
+mp:
+  messaging:
+    incoming:
+      "update-in":
+        topic: ch.guengel.funnel.retriever.feedenvelope.update
+        connector: smallrye-kafka
+        health-readiness-enabled: true
+    outgoing:
+      "deletion-out":
+        topic: ch.guengel.funnel.rest.feedenvelope.deletion
+        connector: smallrye-kafka
+        health-readiness-enabled: true
+      "new-out":
+        topic: ch.guengel.funnel.rest.feedenvelope.new
+        connector: smallrye-kafka
+        health-readiness-enabled: true

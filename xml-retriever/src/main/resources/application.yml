@@ -1,0 +1,42 @@
+quarkus:
+  mongodb:
+    devservices:
+      enabled: false
+    connection-string: mongodb://localhost:27017
+  kafka:
+    devservices:
+      enabled: false
+    bootstrap:
+      servers: localhost:9092
+kafka:
+  bootstrap:
+    servers: localhost:9092
+
+funnel:
+  xmlretriever:
+    schedule: 60s
+    timeout-seconds: 10
+  mongodb:
+    database: funnel-xmlretriever
+    collection: feedenvelope
+
+mp:
+  messaging:
+    incoming:
+      "new-in":
+        topic: ch.guengel.funnel.rest.feedenvelope.new
+        connector: smallrye-kafka
+        health-readiness-enabled: true
+      "delete-in":
+        topic: ch.guengel.funnel.rest.feedenvelope.deletion
+        connector: smallrye-kafka
+        health-readiness-enabled: true
+    outgoing:
+      "notify-out":
+        topic: ch.guengel.funnel.retriever.feedenvelope.notify
+        connector: smallrye-kafka
+        health-readiness-enabled: true
+      "update-out":
+        topic: ch.guengel.funnel.retriever.feedenvelope.update
+        connector: smallrye-kafka
+        health-readiness-enabled: true

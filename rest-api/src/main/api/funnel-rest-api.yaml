@@ -1,0 +1,153 @@
+openapi: 3.0.3
+info:
+  title: Funnel
+  version: '1.0'
+  contact:
+    name: Rafael Ostertag
+    email: rafi@guengel.ch
+  description: Funnel API
+servers:
+  - url: 'http://localhost:8080'
+    description: ''
+components:
+  securitySchemes:
+    Prod:
+      type: openIdConnect
+      openIdConnectUrl: 'https://sso.guengel.ch/auth/realms/guengel.ch/'
+      description: ''
+  schemas:
+    Source:
+      title: Source
+      type: object
+      description: Feed Source
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: User defined name of feed
+        address:
+          type: string
+          minLength: 1
+          description: Feed address
+      required:
+        - name
+        - address
+    Feed:
+      title: Feed
+      type: object
+      description: Feed
+      properties:
+        title:
+          type: string
+          description: Title of the feed
+        lastUpdated:
+          type: string
+          description: Time of last feed update
+        feedItems:
+          type: array
+          description: Items of the feed
+          items:
+            $ref: '#/components/schemas/FeedItem'
+      required:
+        - title
+        - lastUpdated
+    FeedItem:
+      title: FeedItem
+      type: object
+      description: Item of a feed
+      properties:
+        title:
+          type: string
+          description: Title of feed item
+        link:
+          type: string
+          description: Link to article
+          minLength: 1
+        created:
+          type: string
+          description: Creation date of feed item
+          format: date-time
+    FeedEnvelope:
+      title: FeedEnvelope
+      type: object
+      properties:
+        source:
+          $ref: '#/components/schemas/Source'
+        feed:
+          $ref: '#/components/schemas/Feed'
+  parameters:
+    FeedName:
+      name: name
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Name of feed as defined in `Source`
+paths:
+  /v1/feeds:
+    get:
+      summary: Get all feeds
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FeedItem'
+      operationId: getAllFeeds
+      description: Get all feeds for the current user.
+      tags:
+        - Feeds
+    parameters: [ ]
+    post:
+      summary: Create new feed
+      operationId: createFeed
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+      description: Create a new feed for the current user.
+      tags:
+        - Feeds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Source'
+        description: ''
+  '/v1/feeds/{name}':
+    parameters:
+      - $ref: '#/components/parameters/FeedName'
+    get:
+      summary: Get feed
+      tags:
+        - Feeds
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedEnvelope'
+        '404':
+          description: Not Found
+      operationId: getFeedByName
+      description: Get feed for the current user by name.
+    delete:
+      summary: Delete feed by name
+      operationId: deleteFeedByName
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+      description: Delete feed by name for the current user.
+      tags:
+        - Feeds
+tags:
+  - name: Feeds

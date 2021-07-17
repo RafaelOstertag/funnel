@@ -23,7 +23,7 @@ pipeline {
         stage('Build and Test') {
             steps {
                 configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
-                    sh label: 'maven install', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" install'
+                    sh label: 'maven install', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -Dquarkus.package.type=uber-jar clean install'
                 }
             }
 
@@ -72,8 +72,55 @@ pipeline {
 
             steps {
                 configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
-                    sh label: 'maven deploy', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests deploy'
+                    sh label: 'maven deploy', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests -Dquarkus.package.type=uber-jar deploy'
                 }
+            }
+        }
+
+        stage('Build & Push Development Docker Image') {
+            agent {
+                label "arm64&&docker&&kotlin"
+            }
+            when {
+                branch 'develop'
+                not {
+                    triggeredBy "TimerTrigger"
+                }
+            }
+
+            steps {
+                configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
+                    sh label: 'maven build', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests clean install'
+                }
+                buildDockerImage("notifier", "latest")
+                buildDockerImage("rest", "latest")
+                buildDockerImage("xml-retriever", "latest")
+            }
+        }
+
+        stage('Build & Push Release Docker Image') {
+            agent {
+                label "arm64&&docker&&kotlin"
+            }
+
+            environment {
+                VERSION = sh returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
+            }
+
+            when {
+                branch 'master'
+                not {
+                    triggeredBy "TimerTrigger"
+                }
+            }
+
+            steps {
+                configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
+                    sh label: 'maven build', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests clean install'
+                }
+                buildDockerImage("notifier", env.VERSION)
+                buildDockerImage("rest", env.VERSION)
+                buildDockerImage("xml-retriever", env.VERSION)
             }
         }
 
@@ -90,7 +137,7 @@ pipeline {
             }
 
             steps {
-                build wait: false, job: '../docker/funnel', parameters: [string(name: 'VERSION', value: env.VERSION), booleanParam(name: 'DEPLOY', value: true)]
+                build wait: false, job: '../Helm/funnel', parameters: [string(name: 'VERSION', value: env.VERSION)]
             }
         }
     }
@@ -100,6 +147,30 @@ pipeline {
             mail to: "rafi@guengel.ch",
                     subject: "${JOB_NAME} (${BRANCH_NAME};${env.BUILD_DISPLAY_NAME}) -- ${currentBuild.currentResult}",
                     body: "Refer to ${currentBuild.absoluteUrl}"
+        }
+    }
+}
+
+def buildDockerImage(String fromDirectory, String tag) {
+    withEnv(['IMAGE_TAG='+tag]) {
+        withCredentials([usernamePassword(credentialsId: '750504ce-6f4f-4252-9b2b-5814bd561430', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+            sh 'docker login --username "$USERNAME" --password "$PASSWORD"'
+            configFileProvider([configFile(fileId: 'b958fc4b-b1bd-4233-8692-c4a26a51c0f4', variable: 'MAVEN_SETTINGS_XML')]) {
+                dir(fromDirectory) {
+                    sh '''mvn -B \
+                        -s "${MAVEN_SETTINGS_XML}" \\
+                        clean \\
+                        package \\
+                        -DskipTests \\
+                        -Dquarkus.container-image.build=true \\
+                        -Dquarkus.container-image.tag="${IMAGE_TAG}" \\
+                        -Dquarkus.container-image.group=rafaelostertag \\
+                        -Dquarkus.container-image.push=true \\
+                        -Dquarkus.container-image.username="${USERNAME}" \\
+                        -Dquarkus.container-image.password="${PASSWORD}"
+                        '''
+                }
+            }
         }
     }
 }
