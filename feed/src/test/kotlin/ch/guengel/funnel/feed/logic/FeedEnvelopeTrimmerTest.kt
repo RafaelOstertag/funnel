@@ -2,7 +2,12 @@ package ch.guengel.funnel.feed.logic
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import ch.guengel.funnel.feed.data.*
+import ch.guengel.funnel.feed.data.Feed
+import ch.guengel.funnel.feed.data.FeedEnvelope
+import ch.guengel.funnel.feed.data.FeedItem
+import ch.guengel.funnel.feed.data.FeedItems
+import ch.guengel.funnel.feed.data.Source
+import ch.guengel.funnel.feed.data.User
 import org.junit.jupiter.api.Test
 
 internal class FeedEnvelopeTrimmerTest {

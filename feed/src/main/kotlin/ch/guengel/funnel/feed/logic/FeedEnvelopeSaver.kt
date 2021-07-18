@@ -5,7 +5,7 @@ import ch.guengel.funnel.feed.data.FeedEnvelope
 
 class FeedEnvelopeSaver(
     private val feedEnvelopePersistence: FeedEnvelopePersistence,
-    private val feedEnvelopeTrimmer: FeedEnvelopeTrimmer
+    private val feedEnvelopeTrimmer: FeedEnvelopeTrimmer,
 ) {
     fun save(feedEnvelope: FeedEnvelope) {
         val trimmedFeed = feedEnvelopeTrimmer.trim(feedEnvelope)

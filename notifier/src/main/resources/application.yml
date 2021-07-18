@@ -1,0 +1,25 @@
+quarkus:
+  mailer:
+    #    auth-methods=DIGEST-MD5 CRAM-SHA256 CRAM-SHA1 CRAM-MD5 PLAIN LOGIN
+    from: funnel@guengel.ch
+    host: colossus.kruemel.home
+    port: 587
+    #    username: YOUREMAIL@gmail.com
+    #    password: YOURGENERATEDAPPLICATIONPASSWORD
+    mock: false
+    ssl: false
+  kafka:
+    devservices:
+      enabled: false
+
+kafka:
+  bootstrap:
+    servers: localhost:9092
+
+mp:
+  messaging:
+    incoming:
+      "notify-in":
+        topic: ch.guengel.funnel.retriever.feedenvelope.notify
+        connector: smallrye-kafka
+        health-readiness-enabled: true

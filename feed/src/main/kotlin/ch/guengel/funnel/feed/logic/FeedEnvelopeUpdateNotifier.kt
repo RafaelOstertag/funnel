@@ -4,7 +4,7 @@ import ch.guengel.funnel.feed.data.FeedEnvelope
 
 class FeedEnvelopeUpdateNotifier(
     private val feedEnvelopeDifference: FeedEnvelopeDifference,
-    private val block: (feedEnvelope: FeedEnvelope) -> Unit
+    private val block: (feedEnvelope: FeedEnvelope) -> Unit,
 ) {
     fun notify(currentFeedEnvelope: FeedEnvelope, latestFeedEnvelope: FeedEnvelope) {
         feedEnvelopeDifference
