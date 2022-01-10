@@ -27,7 +27,7 @@ services:
     depends_on:
       - zookeeper
   mongodb:
-    image: 'mongo:4-xenial'
+    image: 'mongo:4'
     ports:
       - '27017:27017'
 
