@@ -78,9 +78,45 @@ pipeline {
         }
 
         stage('Build & Push Development Docker Image') {
-            agent {
-                label "arm64&&docker&&kotlin"
+            when {
+                branch 'develop'
+                not {
+                    triggeredBy "TimerTrigger"
+                }
             }
+
+            parallel {
+                stage("ARM64") {
+                    agent {
+                        label "arm64&&docker&&kotlin"
+                    }
+                    steps {
+                        configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
+                            sh label: 'maven build', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests clean install'
+                        }
+                        buildDockerImage("notifier", "latest-arm64")
+                        buildDockerImage("rest", "latest-arm64")
+                        buildDockerImage("xml-retriever", "latest-arm64")
+                    }
+                }
+
+                stage("AMD64") {
+                    agent {
+                        label "amd64&&docker&&kotlin"
+                    }
+                    steps {
+                        configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
+                            sh label: 'maven build', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests clean install'
+                        }
+                        buildDockerImage("notifier", "latest-amd64")
+                        buildDockerImage("rest", "latest-amd64")
+                        buildDockerImage("xml-retriever", "latest-amd64")
+                    }
+                }
+            }
+        }
+
+        stage('Build Development Multi Arch Docker Manifest') {
             when {
                 branch 'develop'
                 not {
@@ -89,24 +125,11 @@ pipeline {
             }
 
             steps {
-                configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
-                    sh label: 'maven build', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests clean install'
-                }
-                buildDockerImage("notifier", "latest")
-                buildDockerImage("rest", "latest")
-                buildDockerImage("xml-retriever", "latest")
+                buildMultiArchManifest("latest")
             }
         }
 
         stage('Build & Push Release Docker Image') {
-            agent {
-                label "arm64&&docker&&kotlin"
-            }
-
-            environment {
-                VERSION = sh returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
-            }
-
             when {
                 branch 'master'
                 not {
@@ -114,13 +137,61 @@ pipeline {
                 }
             }
 
-            steps {
-                configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
-                    sh label: 'maven build', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests clean install'
+            parallel {
+                stage("ARM64") {
+                    agent {
+                        label "arm64&&docker&&kotlin"
+                    }
+
+                    environment {
+                        VERSION = sh returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
+                    }
+
+                    steps {
+                        configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
+                            sh label: 'maven build', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests clean install'
+                        }
+                        buildDockerImage("notifier", env.VERSION + "-arm64")
+                        buildDockerImage("rest", env.VERSION+ "-arm64")
+                        buildDockerImage("xml-retriever", env.VERSION+ "-arm64")
+                    }
                 }
-                buildDockerImage("notifier", env.VERSION)
-                buildDockerImage("rest", env.VERSION)
-                buildDockerImage("xml-retriever", env.VERSION)
+
+                stage("AMD64") {
+                    agent {
+                        label "amd6464&&docker&&kotlin"
+                    }
+
+                    environment {
+                        VERSION = sh returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
+                    }
+
+                    steps {
+                        configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
+                            sh label: 'maven build', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests clean install'
+                        }
+                        buildDockerImage("notifier", env.VERSION + "-amd6464")
+                        buildDockerImage("rest", env.VERSION+ "-amd6464")
+                        buildDockerImage("xml-retriever", env.VERSION+ "-amd6464")
+                    }
+                }
+            }
+        }
+
+        stage('Build Production Multi Arch Docker Manifest') {
+            when {
+                branch 'master'
+                not {
+                    triggeredBy "TimerTrigger"
+                }
+            }
+
+            environment {
+                VERSION = sh returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
+            }
+
+            steps {
+                buildMultiArchManifest(env.VERSION)
             }
         }
 
@@ -171,6 +242,20 @@ def buildDockerImage(String fromDirectory, String tag) {
                         '''
                 }
             }
+        }
+    }
+}
+
+def buildMultiArchManifest(String tag) {
+    withEnv(['IMAGE_TAG='+tag]) {
+        withCredentials([usernamePassword(credentialsId: '750504ce-6f4f-4252-9b2b-5814bd561430', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+            sh 'docker login --username "$USERNAME" --password "$PASSWORD"'
+            sh 'docker manifest create "rafaelostertag/funnel-notifier:${IMAGE_TAG}" --amend "rafaelostertag/funnel-notifier:${IMAGE_TAG}-amd64" --amend "rafaelostertag/funnel-notifier:${IMAGE_TAG}-arm64"'
+            sh 'docker manifest create "rafaelostertag/funnel-rest:${IMAGE_TAG}" --amend "rafaelostertag/funnel-rest:${IMAGE_TAG}-amd64" --amend "rafaelostertag/funnel-rest:${IMAGE_TAG}-arm64"'
+            sh 'docker manifest create "rafaelostertag/funnel-xml-retriever:${IMAGE_TAG}" --amend "rafaelostertag/funnel-xml-retriever:${IMAGE_TAG}-amd64" --amend "rafaelostertag/funnel-xml-retriever:${IMAGE_TAG}-arm64"'
+            sh 'docker manifest push --purge "rafaelostertag/funnel-notifier:${IMAGE_TAG}"'
+            sh 'docker manifest push --purge "rafaelostertag/funnel-rest:${IMAGE_TAG}"'
+            sh 'docker manifest push --purge "rafaelostertag/funnel-xml-retriever:${IMAGE_TAG}"'
         }
     }
 }
