@@ -159,7 +159,7 @@ pipeline {
 
                 stage("AMD64") {
                     agent {
-                        label "amd6464&&docker&&kotlin"
+                        label "amd64&&docker&&kotlin"
                     }
 
                     environment {
