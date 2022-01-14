@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-universe-bom</quarkus.platform.artifact-id>
-        <compiler-plugin.version>3.8.1</compiler-plugin.version>
+        <compiler-plugin.version>3.9.0</compiler-plugin.version>
 
         <kotlin.version>1.6.10</kotlin.version>
         <kotlin-coroutines.version>1.6.0</kotlin-coroutines.version>
@@ -23,15 +23,15 @@
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
         <quarkus.platform.version>2.6.1.Final</quarkus.platform.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
-        <rome.version>1.15.0</rome.version>
+        <rome.version>1.17.0</rome.version>
 
         <assertk.version>0.25</assertk.version>
-        <testcontainers.version>1.15.3</testcontainers.version>
-        <wiremock.version>2.29.0</wiremock.version>
+        <testcontainers.version>1.16.2</testcontainers.version>
+        <wiremock.version>2.32.0</wiremock.version>
         <easy-random.version>5.0.0</easy-random.version>
         <mockk.version>1.12.2</mockk.version>
 
-        <dependency-check-maven.version>6.2.2</dependency-check-maven.version>
+        <dependency-check-maven.version>6.5.3</dependency-check-maven.version>
         <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
