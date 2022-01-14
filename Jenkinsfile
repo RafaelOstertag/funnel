@@ -170,9 +170,9 @@ pipeline {
                         configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
                             sh label: 'maven build', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests clean install'
                         }
-                        buildDockerImage("notifier", env.VERSION + "-amd6464")
-                        buildDockerImage("rest", env.VERSION+ "-amd6464")
-                        buildDockerImage("xml-retriever", env.VERSION+ "-amd6464")
+                        buildDockerImage("notifier", env.VERSION + "-amd64")
+                        buildDockerImage("rest", env.VERSION+ "-amd64")
+                        buildDockerImage("xml-retriever", env.VERSION+ "-amd64")
                     }
                 }
             }
