@@ -101,9 +101,6 @@ pipeline {
                 }
 
                 stage("AMD64") {
-                    agent {
-                        label "amd64&&docker&&kotlin"
-                    }
                     steps {
                         configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
                             sh label: 'maven build', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests clean install'
@@ -158,10 +155,6 @@ pipeline {
                 }
 
                 stage("AMD64") {
-                    agent {
-                        label "amd64&&docker&&kotlin"
-                    }
-
                     environment {
                         VERSION = sh returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
                     }
