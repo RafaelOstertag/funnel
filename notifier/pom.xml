@@ -6,7 +6,7 @@
     <parent>
         <groupId>ch.guengel.funnel</groupId>
         <artifactId>funnel-quarkus-build</artifactId>
-        <version>8.0.4</version>
+        <version>8.0.5-SNAPSHOT</version>
         <relativePath>../quarkus-build</relativePath>
     </parent>
 
@@ -29,6 +29,10 @@
             <artifactId>funnel-test-utils</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
         </dependency>
 
         <dependency>

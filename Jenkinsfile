@@ -36,6 +36,11 @@ pipeline {
         }
 
         stage('Sonarcloud') {
+            when {
+                not {
+                    triggeredBy "TimerTrigger"
+                }
+            }
             steps {
                 configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
                     withSonarQubeEnv(installationName: 'Sonarcloud', credentialsId: 'e8795d01-550a-4c05-a4be-41b48b22403f') {
@@ -46,6 +51,11 @@ pipeline {
         }
 
         stage("Quality Gate") {
+            when {
+                not {
+                    triggeredBy "TimerTrigger"
+                }
+            }
             steps {
                 timeout(time: 30, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
@@ -101,9 +111,6 @@ pipeline {
                 }
 
                 stage("AMD64") {
-                    agent {
-                        label "amd64&&docker&&kotlin"
-                    }
                     steps {
                         configFileProvider([configFile(fileId: '04b5debb-8434-4986-ac73-dfd1f2045515', variable: 'MAVEN_SETTINGS_XML')]) {
                             sh label: 'maven build', script: 'mvn -B -s "$MAVEN_SETTINGS_XML" -DskipTests clean install'
@@ -158,10 +165,6 @@ pipeline {
                 }
 
                 stage("AMD64") {
-                    agent {
-                        label "amd64&&docker&&kotlin"
-                    }
-
                     environment {
                         VERSION = sh returnStdout: true, script: "mvn -B help:evaluate '-Dexpression=project.version' | grep -v '\\[' | tr -d '\\n'"
                     }
