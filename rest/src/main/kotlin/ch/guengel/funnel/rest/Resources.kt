@@ -10,7 +10,7 @@ import javax.ws.rs.core.Response
 import ch.guengel.funnel.rest.model.Source as SourceDto
 
 @Authenticated
-class Resources(@Inject private val service: Service) : FeedsApi {
+class Resources(private val service: Service) : FeedsApi {
     @Inject
     private lateinit var jsonWebToken: JsonWebToken
 

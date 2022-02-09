@@ -4,10 +4,9 @@ import ch.guengel.funnel.feed.data.FeedEnvelope
 import io.quarkus.mailer.reactive.ReactiveMailer
 import org.jboss.logging.Logger
 import javax.enterprise.context.ApplicationScoped
-import javax.inject.Inject
 
 @ApplicationScoped
-class SmtpService(@Inject private val reactiveMailer: ReactiveMailer, @Inject private val mailComposer: MailComposer) {
+class SmtpService(private val reactiveMailer: ReactiveMailer, private val mailComposer: MailComposer) {
     fun sendMail(feedEnvelope: FeedEnvelope) {
         reactiveMailer.send(
             mailComposer.composeFromFeedEnvelope(feedEnvelope)

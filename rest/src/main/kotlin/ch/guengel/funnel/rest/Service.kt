@@ -7,12 +7,11 @@ import ch.guengel.funnel.feed.data.User
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
 import javax.enterprise.context.ApplicationScoped
-import javax.inject.Inject
 import ch.guengel.funnel.rest.model.FeedEnvelope as FeedEnvelopeDto
 import ch.guengel.funnel.rest.model.Source as SourceDto
 
 @ApplicationScoped
-class Service(@Inject private val feedEnvelopePersistence: FeedEnvelopePersistence, @Inject private val kafka: Kafka) {
+class Service(private val feedEnvelopePersistence: FeedEnvelopePersistence, private val kafka: Kafka) {
 
     fun getAllSourcesForUser(userId: String): Multi<SourceDto> = Multi.createFrom()
         .iterable(feedEnvelopePersistence.findAllFeedEnvelopesForUser(userId))
