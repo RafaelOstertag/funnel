@@ -8,7 +8,6 @@ import com.mongodb.client.model.IndexOptions
 import com.mongodb.client.model.Indexes
 import com.mongodb.client.model.ReplaceOptions
 import io.quarkus.mongodb.reactive.ReactiveMongoClient
-import io.quarkus.mongodb.reactive.ReactiveMongoCollection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,29 +24,29 @@ import org.jboss.logging.Logger
 import java.time.OffsetDateTime
 import javax.annotation.PostConstruct
 import javax.enterprise.context.ApplicationScoped
-import javax.inject.Inject
 
 @ApplicationScoped
 class MongoFeedEnvelopePersistence(
-    @Inject private val mongoClient: ReactiveMongoClient,
+    private val mongoClient: ReactiveMongoClient,
     @ConfigProperty(name = "funnel.mongodb.database") private val database: String,
     @ConfigProperty(name = "funnel.mongodb.collection") private val collectionName: String,
 ) : FeedEnvelopePersistence {
 
-    private lateinit var collection: ReactiveMongoCollection<MongoFeedEnvelope>
+    private fun ReactiveMongoClient.getFeedEnvelopeCollection() =
+        mongoClient.getDatabase(database).getCollection(collectionName, MongoFeedEnvelope::class.java)
 
     @PostConstruct
     fun createIndex() {
-        collection = mongoClient.getDatabase(database).getCollection(collectionName, MongoFeedEnvelope::class.java)
         CoroutineScope(Dispatchers.IO).launch {
-            collection.createIndex(Indexes.ascending(userIdField, feedNameField), IndexOptions().unique(true)).await()
+            mongoClient.getFeedEnvelopeCollection()
+                .createIndex(Indexes.ascending(userIdField, feedNameField), IndexOptions().unique(true)).await()
                 .indefinitely()
         }
     }
 
     override fun findFeedEnvelope(userId: String, name: String): FeedEnvelope? {
         logger.debugf("Retrieve feed envelope '%s' for '%s'", name, userId)
-        return collection.find(and(eq(userIdField, userId), eq(feedNameField, name)))
+        return mongoClient.getFeedEnvelopeCollection().find(and(eq(userIdField, userId), eq(feedNameField, name)))
             .toUni()
             .onItem().ifNotNull().transform { it.toFeedEnvelope() }
             .await().indefinitely()
@@ -55,18 +54,20 @@ class MongoFeedEnvelopePersistence(
     }
 
     override fun findAllFeedEnvelopes(): List<FeedEnvelope> {
-        return collection.find().onItem().transform { it.toFeedEnvelope() }.collect().asList().await().indefinitely()
+        return mongoClient.getFeedEnvelopeCollection().find().onItem().transform { it.toFeedEnvelope() }.collect()
+            .asList().await().indefinitely()
     }
 
     override fun findAllFeedEnvelopesForUser(userId: String): List<FeedEnvelope> {
         logger.debugf("Retrieve all feed envelopes for '%s'", userId)
-        return collection.find(eq(userIdField, userId)).onItem().transform { it.toFeedEnvelope() }.collect().asList()
+        return mongoClient.getFeedEnvelopeCollection().find(eq(userIdField, userId)).onItem()
+            .transform { it.toFeedEnvelope() }.collect().asList()
             .await().indefinitely()
     }
 
     override fun saveFeedEnvelope(feedEnvelope: FeedEnvelope) {
         logger.debugf("Save feed envelope '%s'", feedEnvelope.name)
-        collection.replaceOne(
+        mongoClient.getFeedEnvelopeCollection().replaceOne(
             and(eq(feedNameField, feedEnvelope.name), eq(userIdField, feedEnvelope.user.userId)),
             feedEnvelope.toMongoFeedEnvelope(),
             ReplaceOptions().upsert(true)
@@ -75,7 +76,7 @@ class MongoFeedEnvelopePersistence(
 
     override fun deleteFeedEnvelope(feedEnvelope: FeedEnvelope): Boolean {
         logger.debugf("Delete feed envelope '%f'", feedEnvelope.name)
-        return collection.deleteOne(
+        return mongoClient.getFeedEnvelopeCollection().deleteOne(
             and(
                 eq(userIdField, feedEnvelope.user.userId),
                 eq(feedNameField, feedEnvelope.name)

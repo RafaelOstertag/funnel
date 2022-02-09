@@ -16,7 +16,7 @@ import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
 
 @ApplicationScoped
-class Kafka(@Inject private val feedEnvelopePersistence: FeedEnvelopePersistence) {
+class Kafka(private val feedEnvelopePersistence: FeedEnvelopePersistence) {
     @Inject
     @Channel("deletion-out")
     private lateinit var deletionEmitter: Emitter<KafkaFeedEnvelope>

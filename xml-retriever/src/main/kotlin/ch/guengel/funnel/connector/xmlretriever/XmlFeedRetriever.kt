@@ -27,8 +27,8 @@ import javax.inject.Inject
 
 @ApplicationScoped
 class XmlFeedRetriever(
-    @Inject private val xmlRetriever: XmlRetriever,
-    @Inject private val feedEnvelopePersistence: FeedEnvelopePersistence,
+    xmlRetriever: XmlRetriever,
+    private val feedEnvelopePersistence: FeedEnvelopePersistence,
 ) {
     @Inject
     @Channel("notify-out")

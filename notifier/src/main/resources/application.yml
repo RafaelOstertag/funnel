@@ -23,3 +23,8 @@ mp:
         topic: ch.guengel.funnel.retriever.feedenvelope.notify
         connector: smallrye-kafka
         health-readiness-enabled: true
+
+"%test":
+  quarkus:
+    jacoco:
+      reuse-data-file: true

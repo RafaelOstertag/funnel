@@ -7,10 +7,9 @@ import io.smallrye.reactive.messaging.annotations.Blocking
 import org.eclipse.microprofile.reactive.messaging.Incoming
 import org.jboss.logging.Logger
 import javax.enterprise.context.ApplicationScoped
-import javax.inject.Inject
 
 @ApplicationScoped
-class Kafka(@Inject private val feedEnvelopePersistence: FeedEnvelopePersistence) {
+class Kafka(private val feedEnvelopePersistence: FeedEnvelopePersistence) {
     @Incoming("new-in")
     @Blocking
     fun receiveNewFeedEnvelope(kafkaFeedEnvelope: KafkaFeedEnvelope) {

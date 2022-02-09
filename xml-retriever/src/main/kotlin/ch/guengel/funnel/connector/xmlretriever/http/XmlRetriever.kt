@@ -9,11 +9,10 @@ import org.jboss.logging.Logger
 import java.net.URI
 import java.time.Duration
 import javax.enterprise.context.ApplicationScoped
-import javax.inject.Inject
 
 @ApplicationScoped
 class XmlRetriever(
-    @Inject private val xmlFetcher: XmlFetcher,
+    private val xmlFetcher: XmlFetcher,
     @ConfigProperty(name = "funnel.xmlretriever.timeout-seconds",
         defaultValue = "10") private val timeout: Long,
 ) : FeedRetriever {

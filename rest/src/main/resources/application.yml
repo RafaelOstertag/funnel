@@ -40,3 +40,8 @@ mp:
         topic: ch.guengel.funnel.rest.feedenvelope.new
         connector: smallrye-kafka
         health-readiness-enabled: true
+
+"%test":
+  quarkus:
+    jacoco:
+      reuse-data-file: true

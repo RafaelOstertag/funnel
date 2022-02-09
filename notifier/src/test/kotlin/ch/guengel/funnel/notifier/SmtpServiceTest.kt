@@ -39,7 +39,7 @@ internal class SmtpServiceTest {
         smtpService.sendMail(feedEnvelope)
 
         try {
-            mailUni.onSubscribe().call { _ -> Uni.createFrom().nullItem<Void>() }
+            mailUni.onSubscription().call { _ -> Uni.createFrom().nullItem<Void>() }
                 .await().atMost(Duration.ofSeconds(1))
         } catch (ex: TimeoutException) {
             System.err.println(ex)
