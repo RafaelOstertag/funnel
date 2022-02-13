@@ -28,3 +28,5 @@ mp:
   quarkus:
     jacoco:
       reuse-data-file: true
+    http:
+      test-port: 0

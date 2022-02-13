@@ -3,7 +3,7 @@ package ch.guengel.funnel.kafka
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
-import io.smallrye.reactive.messaging.kafka.OutgoingKafkaRecordMetadata
+import io.smallrye.reactive.messaging.kafka.api.OutgoingKafkaRecordMetadata
 import org.jeasy.random.EasyRandom
 import org.junit.jupiter.api.Test
 
