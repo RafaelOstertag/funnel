@@ -1,6 +1,6 @@
 package ch.guengel.funnel.kafka
 
-import io.smallrye.reactive.messaging.kafka.OutgoingKafkaRecordMetadata
+import io.smallrye.reactive.messaging.kafka.api.OutgoingKafkaRecordMetadata
 import org.eclipse.microprofile.reactive.messaging.Message
 import java.time.OffsetDateTime
 
@@ -13,8 +13,7 @@ class KafkaFeedEnvelope {
 fun KafkaFeedEnvelope.getKey() = "${user.userId}#${source.name}"
 
 fun KafkaFeedEnvelope.asMessage(): Message<KafkaFeedEnvelope> {
-    val metadata = OutgoingKafkaRecordMetadata
-        .builder<String>()
+    val metadata = OutgoingKafkaRecordMetadata.builder<String>()
         .withKey(getKey()).build()
     return Message.of(this).addMetadata(metadata)
 }
