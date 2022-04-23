@@ -106,11 +106,9 @@ workflows:
             - xml-retriever-docker-image-amd64
             - xml-retriever-docker-image-arm64
 
-
-
       - c/maven-trigger-pipeline-with-version:
           name: trigger-helm-deployment
-          project-name: astro-server-helm
+          project-name: funnel-helm
           filters:
             branches:
               only: master
