@@ -1,0 +1,136 @@
+version: 2.1
+
+orbs:
+  c: rafaelostertag/common-orb@1.13.1
+
+workflows:
+  build-any-branch:
+    jobs:
+      - c/maven-build-and-test:
+          name: build-and-test
+          sonar-project-key: "ch.guengel.funnel:funnel-main"
+          executor: c/java11-build-amd64-machine
+          context:
+            - sonar
+            - repository-read
+      - c/maven-deploy-artifacts:
+          filters:
+            branches:
+              only:
+                - master
+          name: deploy-maven-artifact
+          requires:
+            - build-and-test
+          context:
+            - maven-repository-write
+      - c/maven-quarkus-docker-image:
+          name: notifier-docker-image-amd64
+          executor: c/java11-build-amd64
+          dir: "notifier"
+          context:
+            - repository-read
+            - docker-build
+          requires:
+            - deploy-maven-artifact
+      - c/maven-quarkus-docker-image:
+          name: notifier-docker-image-arm64
+          executor: c/java11-build-arm64
+          remote_docker: false
+          dir: "notifier"
+          context:
+            - repository-read
+            - docker-build
+          requires:
+            - deploy-maven-artifact
+      - c/maven-quarkus-docker-image:
+          name: rest-docker-image-amd64
+          executor: c/java11-build-amd64
+          dir: "rest"
+          context:
+            - repository-read
+            - docker-build
+          requires:
+            - deploy-maven-artifact
+      - c/maven-quarkus-docker-image:
+          name: rest-docker-image-arm64
+          executor: c/java11-build-arm64
+          remote_docker: false
+          dir: "rest"
+          context:
+            - repository-read
+            - docker-build
+          requires:
+            - deploy-maven-artifact
+      - c/maven-quarkus-docker-image:
+          name: xml-retriever-docker-image-amd64
+          executor: c/java11-build-amd64
+          dir: "xml-retriever"
+          context:
+            - repository-read
+            - docker-build
+          requires:
+            - deploy-maven-artifact
+      - c/maven-quarkus-docker-image:
+          name: xml-retriever-docker-image-arm64
+          executor: c/java11-build-arm64
+          remote_docker: false
+          dir: "xml-retriever"
+          context:
+            - repository-read
+            - docker-build
+          requires:
+            - deploy-maven-artifact
+
+      - c/maven-multi-arch-manifest:
+          name: build-multi-arch-notifier-manifest
+          image: "rafaelostertag/funnel-notifier"
+          context:
+            - docker-build
+          requires:
+            - notifier-docker-image-amd64
+            - notifier-docker-image-arm64
+      - c/maven-multi-arch-manifest:
+          name: build-multi-arch-rest-manifest
+          image: "rafaelostertag/funnel-rest"
+          context:
+            - docker-build
+          requires:
+            - rest-docker-image-amd64
+            - rest-docker-image-arm64
+      - c/maven-multi-arch-manifest:
+          name: build-multi-arch-xml-retriever-manifest
+          image: "rafaelostertag/funnel-xml-retriever"
+          context:
+            - docker-build
+          requires:
+            - xml-retriever-docker-image-amd64
+            - xml-retriever-docker-image-arm64
+
+
+
+      - c/maven-trigger-pipeline-with-version:
+          name: trigger-helm-deployment
+          project-name: astro-server-helm
+          filters:
+            branches:
+              only: master
+          context:
+            - circle-ci
+          requires:
+            - build-multi-arch-notifier-manifest
+            - build-multi-arch-rest-manifest
+            - build-multi-arch-xml-retriever-manifest
+
+  daily-dependency-check:
+    triggers:
+      - schedule:
+          cron: "21 4 * * *"
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+    jobs:
+      - c/maven-dependency-check:
+          context:
+            - repository-read
