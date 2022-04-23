@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  c: rafaelostertag/common-orb@1.13.1
+  c: rafaelostertag/common-orb@1.14.0
 
 workflows:
   build-any-branch:
@@ -106,11 +106,9 @@ workflows:
             - xml-retriever-docker-image-amd64
             - xml-retriever-docker-image-arm64
 
-
-
       - c/maven-trigger-pipeline-with-version:
           name: trigger-helm-deployment
-          project-name: astro-server-helm
+          project-name: funnel-helm
           filters:
             branches:
               only: master
