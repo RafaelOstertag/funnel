@@ -5,7 +5,7 @@
 
     <groupId>ch.guengel.funnel</groupId>
     <artifactId>funnel-main</artifactId>
-    <version>8.1.5</version>
+    <version>8.1.6-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Funnel</name>
@@ -21,7 +21,7 @@
         <kotlin-coroutines.version>1.6.0</kotlin-coroutines.version>
 
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>2.7.1.Final</quarkus.platform.version>
+        <quarkus.platform.version>2.8.1.Final</quarkus.platform.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
         <rome.version>1.17.0</rome.version>
 
@@ -31,7 +31,7 @@
         <easy-random.version>5.0.0</easy-random.version>
         <mockk.version>1.12.2</mockk.version>
 
-        <dependency-check-maven.version>6.5.3</dependency-check-maven.version>
+        <dependency-check-maven.version>7.0.4</dependency-check-maven.version>
         <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
