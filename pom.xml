@@ -31,7 +31,7 @@
         <easy-random.version>5.0.0</easy-random.version>
         <mockk.version>1.12.2</mockk.version>
 
-        <dependency-check-maven.version>7.0.4</dependency-check-maven.version>
+        <dependency-check-maven.version>7.1.0</dependency-check-maven.version>
         <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
