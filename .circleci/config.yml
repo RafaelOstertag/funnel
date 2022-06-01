@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  c: rafaelostertag/common-orb@1.14.0
+  c: rafaelostertag/common-orb@1.19.0
 
 workflows:
   build-any-branch:
@@ -122,7 +122,7 @@ workflows:
   daily-dependency-check:
     triggers:
       - schedule:
-          cron: "21 4 * * *"
+          cron: "21 4 * * 4"
           filters:
             branches:
               only:
