@@ -6,7 +6,7 @@
     <parent>
         <groupId>ch.guengel.funnel</groupId>
         <artifactId>funnel-quarkus-build</artifactId>
-        <version>8.1.8</version>
+        <version>8.1.9-SNAPSHOT</version>
         <relativePath>../quarkus-build</relativePath>
     </parent>
 
