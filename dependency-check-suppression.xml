@@ -357,4 +357,11 @@
         <packageUrl regex="true">^pkg:maven/io\.quarkus/quarkus\-container\-image\-docker@.*$</packageUrl>
         <cve>CVE-2022-25365</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: keycloak-core-17.0.1.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.keycloak/keycloak\-core@.*$</packageUrl>
+        <vulnerabilityName>CVE-2020-14359</vulnerabilityName>
+    </suppress>
 </suppressions>
