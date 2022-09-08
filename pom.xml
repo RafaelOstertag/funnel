@@ -21,7 +21,7 @@
         <kotlin-coroutines.version>1.6.0</kotlin-coroutines.version>
 
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>2.9.2.Final</quarkus.platform.version>
+        <quarkus.platform.version>2.12.1.Final</quarkus.platform.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
         <rome.version>1.17.0</rome.version>
 
@@ -33,10 +33,9 @@
 
         <dependency-check-maven.version>7.1.0</dependency-check-maven.version>
         <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
-        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
         <jandex-maven-plugin.version>1.1.0</jandex-maven-plugin.version>
-        <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <openapi-generator-maven-plugin.version>5.1.1</openapi-generator-maven-plugin.version>
 
         <!-- Sonar -->
@@ -201,7 +200,7 @@
 
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire-plugin.version}</version>
+                <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
@@ -335,7 +334,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>${surefire-plugin.version}</version>
+                        <version>${maven-failsafe-plugin.version}</version>
                         <executions>
                             <execution>
                                 <goals>

@@ -1,10 +1,25 @@
 version: 2.1
 
+version-tag-only: &version-tag-only
+  tags:
+    only: /^v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}$/
+  branches:
+    ignore: /.*/
+
+schedule-trigger: &schedule-trigger
+  equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
+
+not-schedule-trigger: &not-schedule-trigger
+  not:
+    *schedule-trigger
+
 orbs:
   c: rafaelostertag/common-orb@1.19.0
 
 workflows:
   build-any-branch:
+    when:
+      *not-schedule-trigger
     jobs:
       - c/maven-build-and-test:
           name: build-and-test
@@ -13,16 +28,28 @@ workflows:
           context:
             - sonar
             - repository-read
-      - c/maven-deploy-artifacts:
+
+  build-and-release:
+    when:
+      *not-schedule-trigger
+    jobs:
+      - c/maven-build-and-test:
+          name: build-and-test
+          sonar-project-key: "ch.guengel.funnel:funnel-main"
+          executor: c/java11-build-amd64-machine
+          context:
+            - sonar
+            - repository-read
           filters:
-            branches:
-              only:
-                - master
+            *version-tag-only
+      - c/maven-deploy-artifacts:
           name: deploy-maven-artifact
           requires:
             - build-and-test
           context:
             - maven-repository-write
+          filters:
+            *version-tag-only
       - c/maven-quarkus-docker-image:
           name: notifier-docker-image-amd64
           executor: c/java11-build-amd64
@@ -32,6 +59,8 @@ workflows:
             - docker-build
           requires:
             - deploy-maven-artifact
+          filters:
+            *version-tag-only
       - c/maven-quarkus-docker-image:
           name: notifier-docker-image-arm64
           executor: c/java11-build-arm64
@@ -42,6 +71,8 @@ workflows:
             - docker-build
           requires:
             - deploy-maven-artifact
+          filters:
+            *version-tag-only
       - c/maven-quarkus-docker-image:
           name: rest-docker-image-amd64
           executor: c/java11-build-amd64
@@ -51,6 +82,8 @@ workflows:
             - docker-build
           requires:
             - deploy-maven-artifact
+          filters:
+            *version-tag-only
       - c/maven-quarkus-docker-image:
           name: rest-docker-image-arm64
           executor: c/java11-build-arm64
@@ -61,6 +94,8 @@ workflows:
             - docker-build
           requires:
             - deploy-maven-artifact
+          filters:
+            *version-tag-only
       - c/maven-quarkus-docker-image:
           name: xml-retriever-docker-image-amd64
           executor: c/java11-build-amd64
@@ -70,6 +105,8 @@ workflows:
             - docker-build
           requires:
             - deploy-maven-artifact
+          filters:
+            *version-tag-only
       - c/maven-quarkus-docker-image:
           name: xml-retriever-docker-image-arm64
           executor: c/java11-build-arm64
@@ -80,7 +117,8 @@ workflows:
             - docker-build
           requires:
             - deploy-maven-artifact
-
+          filters:
+            *version-tag-only
       - c/maven-multi-arch-manifest:
           name: build-multi-arch-notifier-manifest
           image: "rafaelostertag/funnel-notifier"
@@ -89,6 +127,8 @@ workflows:
           requires:
             - notifier-docker-image-amd64
             - notifier-docker-image-arm64
+          filters:
+            *version-tag-only
       - c/maven-multi-arch-manifest:
           name: build-multi-arch-rest-manifest
           image: "rafaelostertag/funnel-rest"
@@ -97,6 +137,8 @@ workflows:
           requires:
             - rest-docker-image-amd64
             - rest-docker-image-arm64
+          filters:
+            *version-tag-only
       - c/maven-multi-arch-manifest:
           name: build-multi-arch-xml-retriever-manifest
           image: "rafaelostertag/funnel-xml-retriever"
@@ -105,29 +147,23 @@ workflows:
           requires:
             - xml-retriever-docker-image-amd64
             - xml-retriever-docker-image-arm64
-
+          filters:
+            *version-tag-only
       - c/maven-trigger-pipeline-with-version:
           name: trigger-helm-deployment
           project-name: funnel-helm
-          filters:
-            branches:
-              only: master
           context:
             - circle-ci
           requires:
             - build-multi-arch-notifier-manifest
             - build-multi-arch-rest-manifest
             - build-multi-arch-xml-retriever-manifest
+          filters:
+            *version-tag-only
 
   daily-dependency-check:
-    triggers:
-      - schedule:
-          cron: "21 4 * * 4"
-          filters:
-            branches:
-              only:
-                - master
-                - develop
+    when:
+      *schedule-trigger
     jobs:
       - c/maven-dependency-check:
           context:
